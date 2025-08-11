@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="vi" class="js csstransforms3d">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Hugo 0.147.9">
+    <meta name="description" content="">
+
+
+    <link rel="icon" href="/images/favicon.png" type="image/png">
+
+    <title>6. Thiết Lập Application Load Balancer :: Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</title>
+
+    
+    <link href="/css/nucleus.css?1754898927" rel="stylesheet">
+    <link href="/css/fontawesome-all.min.css?1754898927" rel="stylesheet">
+    <link href="/css/hybrid.css?1754898927" rel="stylesheet">
+    <link href="/css/featherlight.min.css?1754898927" rel="stylesheet">
+    <link href="/css/perfect-scrollbar.min.css?1754898927" rel="stylesheet">
+    <link href="/css/auto-complete.css?1754898927" rel="stylesheet">
+    <link href="/css/atom-one-dark-reasonable.css?1754898927" rel="stylesheet">
+    <link href="/css/theme.css?1754898927" rel="stylesheet">
+    <link href="/css/tabs.css?1754898927" rel="stylesheet">
+    <link href="/css/hugo-theme.css?1754898927" rel="stylesheet">
+    
+    
+
+    <script src="/js/jquery-3.3.1.min.js?1754898927"></script>
+
+    <style>
+      :root #header + #content > #left > #rlblock_left{
+          display:none !important;
+      }
+      
+    </style>
+    
+  </head>
+  <body class="" data-url="/vi/6-setup-loadbalancer/">
+    <nav id="sidebar" class="">
+
+
+
+  <div id="header-wrapper">
+    <div id="header">
+      <a
+  id="logo"
+  href='/workshop-caching'
+>
+  <svg
+    id="Layer_1"
+    data-name="Layer 1"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 60 30"
+    width="30%"
+  >
+    <defs>
+      <style>
+        .cls-1 {
+          fill: #fff;
+        }
+        .cls-2 {
+          fill: #f90;
+          fill-rule: evenodd;
+        }
+      </style>
+    </defs>
+    <title>AWS-Logo_White-Color</title>
+    <path
+      class="cls-1"
+      d="M14.09,10.85a4.7,4.7,0,0,0,.19,1.48,7.73,7.73,0,0,0,.54,1.19.77.77,0,0,1,.12.38.64.64,0,0,1-.32.49l-1,.7a.83.83,0,0,1-.44.15.69.69,0,0,1-.49-.23,3.8,3.8,0,0,1-.6-.77q-.25-.42-.51-1a6.14,6.14,0,0,1-4.89,2.3,4.54,4.54,0,0,1-3.32-1.19,4.27,4.27,0,0,1-1.22-3.2A4.28,4.28,0,0,1,3.61,7.75,6.06,6.06,0,0,1,7.69,6.46a12.47,12.47,0,0,1,1.76.13q.92.13,1.91.36V5.73a3.65,3.65,0,0,0-.79-2.66A3.81,3.81,0,0,0,7.86,2.3a7.71,7.71,0,0,0-1.79.22,12.78,12.78,0,0,0-1.79.57,4.55,4.55,0,0,1-.58.22l-.26,0q-.35,0-.35-.52V2a1.09,1.09,0,0,1,.12-.58,1.2,1.2,0,0,1,.47-.35A10.88,10.88,0,0,1,5.77.32,10.19,10.19,0,0,1,8.36,0a6,6,0,0,1,4.35,1.35,5.49,5.49,0,0,1,1.38,4.09ZM7.34,13.38a5.36,5.36,0,0,0,1.72-.31A3.63,3.63,0,0,0,10.63,12,2.62,2.62,0,0,0,11.19,11a5.63,5.63,0,0,0,.16-1.44v-.7a14.35,14.35,0,0,0-1.53-.28,12.37,12.37,0,0,0-1.56-.1,3.84,3.84,0,0,0-2.47.67A2.34,2.34,0,0,0,5,11a2.35,2.35,0,0,0,.61,1.76A2.4,2.4,0,0,0,7.34,13.38Zm13.35,1.8a1,1,0,0,1-.64-.16,1.3,1.3,0,0,1-.35-.65L15.81,1.51a3,3,0,0,1-.15-.67.36.36,0,0,1,.41-.41H17.7a1,1,0,0,1,.65.16,1.4,1.4,0,0,1,.33.65l2.79,11,2.59-11A1.17,1.17,0,0,1,24.39.6a1.1,1.1,0,0,1,.67-.16H26.4a1.1,1.1,0,0,1,.67.16,1.17,1.17,0,0,1,.32.65L30,12.39,32.88,1.25A1.39,1.39,0,0,1,33.22.6a1,1,0,0,1,.65-.16h1.54a.36.36,0,0,1,.41.41,1.36,1.36,0,0,1,0,.26,3.64,3.64,0,0,1-.12.41l-4,12.86a1.3,1.3,0,0,1-.35.65,1,1,0,0,1-.64.16H29.25a1,1,0,0,1-.67-.17,1.26,1.26,0,0,1-.32-.67L25.67,3.64,23.11,14.34a1.26,1.26,0,0,1-.32.67,1,1,0,0,1-.67.17Zm21.36.44a11.28,11.28,0,0,1-2.56-.29,7.44,7.44,0,0,1-1.92-.67,1,1,0,0,1-.61-.93v-.84q0-.52.38-.52a.9.9,0,0,1,.31.06l.42.17a8.77,8.77,0,0,0,1.83.58,9.78,9.78,0,0,0,2,.2,4.48,4.48,0,0,0,2.43-.55,1.76,1.76,0,0,0,.86-1.57,1.61,1.61,0,0,0-.45-1.16A4.29,4.29,0,0,0,43,9.22l-2.41-.76A5.15,5.15,0,0,1,38,6.78a3.94,3.94,0,0,1-.83-2.41,3.7,3.7,0,0,1,.45-1.85,4.47,4.47,0,0,1,1.19-1.37A5.27,5.27,0,0,1,40.51.29,7.4,7.4,0,0,1,42.6,0a8.87,8.87,0,0,1,1.12.07q.57.07,1.08.19t.95.26a4.27,4.27,0,0,1,.7.29,1.59,1.59,0,0,1,.49.41.94.94,0,0,1,.15.55v.79q0,.52-.38.52a1.76,1.76,0,0,1-.64-.2,7.74,7.74,0,0,0-3.2-.64,4.37,4.37,0,0,0-2.21.47,1.6,1.6,0,0,0-.79,1.48,1.58,1.58,0,0,0,.49,1.18,4.94,4.94,0,0,0,1.83.92L44.55,7a5.08,5.08,0,0,1,2.57,1.6A3.76,3.76,0,0,1,47.9,11a4.21,4.21,0,0,1-.44,1.93,4.4,4.4,0,0,1-1.21,1.47,5.43,5.43,0,0,1-1.85.93A8.25,8.25,0,0,1,42.05,15.62Z"
+    ></path>
+    <path
+      class="cls-2"
+      d="M45.19,23.81C39.72,27.85,31.78,30,25,30A36.64,36.64,0,0,1,.22,20.57c-.51-.46-.06-1.09.56-.74A49.78,49.78,0,0,0,25.53,26.4,49.23,49.23,0,0,0,44.4,22.53C45.32,22.14,46.1,23.14,45.19,23.81Z"
+    ></path>
+    <path
+      class="cls-2"
+      d="M47.47,21.21c-.7-.9-4.63-.42-6.39-.21-.53.06-.62-.4-.14-.74,3.13-2.2,8.27-1.57,8.86-.83s-.16,5.89-3.09,8.35c-.45.38-.88.18-.68-.32C46.69,25.8,48.17,22.11,47.47,21.21Z"
+    ></path>
+  </svg>
+</a>
+
+    </div>
+    
+        <div class="searchbox">
+    <label for="search-by"><i class="fas fa-search"></i></label>
+    <input data-search-input id="search-by" type="search" placeholder="Search...">
+    <span data-search-clear=""><i class="fas fa-times"></i></span>
+</div>
+
+<script type="text/javascript" src="/js/lunr.min.js?1754898927"></script>
+<script type="text/javascript" src="/js/auto-complete.js?1754898927"></script>
+<script type="text/javascript">
+    var baseurl = "\/\/vi";
+</script>
+<script type="text/javascript" src="/js/search.js?1754898927"></script>
+
+    
+  </div>
+
+
+    <div class="highlightable">
+    <ul class="topics">
+
+        
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/1-introduction/" title="1. Giới Thiệu" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/1-introduction/">
+          <b></b>1. Giới Thiệu
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/1-introduction/1.1-overview/" title="1.1 Tổng Quan Workshop" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/1-introduction/1.1-overview/">
+          <b></b>1.1 Tổng Quan Workshop
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/1-introduction/1.2-architecture/" title="1.2 Tổng Quan Kiến Trúc" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/1-introduction/1.2-architecture/">
+          <b></b>1.2 Tổng Quan Kiến Trúc
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/2-setup-vpc/" title="2. Thiết Lập VPC và Hạ Tầng Mạng" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/2-setup-vpc/">
+          <b></b>2. Thiết Lập VPC và Hạ Tầng Mạng
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/2-setup-vpc/2.1-create-vpc/" title="2.1 Tạo VPC" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/2-setup-vpc/2.1-create-vpc/">
+          <b></b>2.1 Tạo VPC
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/2-setup-vpc/2.2-security-groups/" title="2.2 Tạo Security Groups" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/2-setup-vpc/2.2-security-groups/">
+          <b></b>2.2 Tạo Security Groups
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/3-setup-dynamodb/" title="3. Thiết Lập DynamoDB và DAX" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/3-setup-dynamodb/">
+          <b></b>3. Thiết Lập DynamoDB và DAX
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/3-setup-dynamodb/3.1-create-table/" title="3.1 Tạo DynamoDB Table" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/3-setup-dynamodb/3.1-create-table/">
+          <b></b>3.1 Tạo DynamoDB Table
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/3-setup-dynamodb/3.2-setup-dax/" title="3.2 Thiết Lập DynamoDB DAX" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/3-setup-dynamodb/3.2-setup-dax/">
+          <b></b>3.2 Thiết Lập DynamoDB DAX
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/4-setup-elasticache/" title="4. Thiết Lập ElastiCache Redis" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/4-setup-elasticache/">
+          <b></b>4. Thiết Lập ElastiCache Redis
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/5-setup-application/" title="5. Thiết Lập Application" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/5-setup-application/">
+          <b></b>5. Thiết Lập Application
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/5-setup-application/5.1-launch-ec2/" title="5.1 Khởi Chạy EC2 Instance" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/5-setup-application/5.1-launch-ec2/">
+          <b></b>5.1 Khởi Chạy EC2 Instance
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/5-setup-application/5.2-deploy-app/" title="5.2 Triển Khai Application" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/5-setup-application/5.2-deploy-app/">
+          <b></b>5.2 Triển Khai Application
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/6-setup-loadbalancer/" title="6. Thiết Lập Application Load Balancer" class="dd-item
+        
+        active
+        
+        ">
+      <a href="/vi/6-setup-loadbalancer/">
+          <b></b>6. Thiết Lập Application Load Balancer
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/7-setup-cloudfront/" title="7. Thiết Lập CloudFront CDN" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/7-setup-cloudfront/">
+          <b></b>7. Thiết Lập CloudFront CDN
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/8-performance-testing/" title="8. Kiểm Tra Hiệu Suất" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/8-performance-testing/">
+          <b></b>8. Kiểm Tra Hiệu Suất
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/9-monitoring/" title="9. Giám Sát và Cảnh Báo" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/9-monitoring/">
+          <b></b>9. Giám Sát và Cảnh Báo
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/10-cleanup/" title="10. Hướng Dẫn Dọn Dẹp Tài Nguyên" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/10-cleanup/">
+          <b></b>10. Hướng Dẫn Dọn Dẹp Tài Nguyên
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+        
+    </ul>
+
+    
+    
+
+    
+    <section id="prefooter">
+      <hr/>
+      <ul>
+      
+        <li>
+          <a class="padding">
+            <i class="fas fa-language fa-fw"></i>
+          <div class="select-style">
+            <select id="select-language" onchange="location = this.value;">
+          
+          
+          
+              
+              
+                  
+                    
+                    
+                      <option id="en" value="/6-setup-loadbalancer/">English</option>
+                    
+                  
+              
+                  
+              
+          
+              
+              
+                  
+              
+                  
+                    
+                    
+                      <option id="vi" value="/vi/6-setup-loadbalancer/" selected>Tiếng Việt</option>
+                    
+                  
+              
+          
+        </select>
+        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+          width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
+          <g>
+            <g id="arrow-drop-down">
+              <polygon points="0,63.75 127.5,191.25 255,63.75 		" />
+            </g>
+          </g>
+        </svg>
+        </div>
+        </a>
+        </li>
+      
+
+      
+      </ul>
+    </section>
+    
+    <section id="footer">
+      <section id="shortcuts" style="font-weight: bold;">
+        <h3>More</h3>
+        <ul>
+          
+              <li> 
+                  <a class="padding" href="https://aws.amazon.com/blogs"><i class="fab fa-aws"></i> AWS Study Group - Blog</a>
+              </li>
+          
+              <li> 
+                  <a class="padding" href="https://www.facebook.com/groups/awsstudygroupfcj"><i class="fab fa-facebook"></i> AWS Study Group - FB Group</a>
+              </li>
+          
+        </ul>
+      </section>
+      <section id="prefooter">
+          <hr />
+          <ul>
+            <li>
+              <a class="padding">
+                <i class="fas fa-language fa-fw"></i>
+                <div class="select-style">
+                  <select id="select-language" onchange="changeLanguage()">
+                    
+                      <option value="en" >
+                        English
+                      </option>
+                    
+                      <option value="vi" selected>
+                        Tiếng Việt
+                      </option>
+                    
+                  </select>
+                  <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
+                    <g>
+                      <g id="arrow-drop-down">
+                        <polygon points="0,63.75 127.5,191.25 255,63.75" />
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="padding" href="#" data-clear-history-toggle=""><i class="fas fa-history fa-fw"></i> Clear History</a>
+            </li>
+          </ul>
+        </section>
+        <section id="footer">
+          <left>
+            <b>Workshop</b><br />
+            <img src="https://hitwebcounter.com/counter/counter.php?page=7831196&style=0038&nbdigits=9&type=page&initCount=0" title="Migrate" alt="web counter" border="0" /><br />
+            <b><a href="https://cloudjourney.awsstudygroup.com/">Cloud Journey</a></b><br />
+            <img src="https://hitwebcounter.com/counter/counter.php?page=7830807&style=0038&nbdigits=9&type=page&initCount=0" title="Total CLoud Journey" alt="web counter" border="0" />
+          </left>
+          <left>
+            <br /><br />
+            <b>Last Updated</b><br />
+            <i><font color="orange">27-7-2025</font></i>
+          </left>
+          <left>
+            <br /><br />
+            <b>Team</b><br />
+            <i><br /><a href="https://www.linkedin.com/in/jotaguy" style="color: orange">Gia Hưng</a><br /></i>
+          </left>
+          <script async defer src="https://buttons.github.io/buttons.js"></script>
+        </section>
+
+    </section>
+  </div>
+</nav>
+
+
+
+
+        <section id="body">
+        <div id="overlay"></div>
+        <div class="padding highlightable">
+              
+              <div>
+                <div id="top-bar">
+                
+                
+                <div id="breadcrumbs" itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb">
+                    <span id="sidebar-toggle-span">
+                        <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+                          <i class="fas fa-bars"></i>
+                        </a>
+                    </span>
+                  
+                  <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
+                  
+                  <span class="links">
+                 
+                 
+                    
+          
+          
+            
+            
+          
+          
+            <a href='/vi/'>Workshop Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</a> > 6. Thiết Lập Application Load Balancer
+          
+        
+          
+        
+                 
+                  </span>
+                </div>
+                
+                    <div class="progress">
+    <div class="wrapper">
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#bước-1-tạo-target-group">Bước 1: Tạo Target Group</a>
+      <ul>
+        <li><a href="#điều-hướng-đến-target-groups">Điều Hướng Đến Target Groups</a></li>
+        <li><a href="#cấu-hình-target-group">Cấu Hình Target Group</a></li>
+        <li><a href="#cấu-hình-health-checks">Cấu Hình Health Checks</a></li>
+        <li><a href="#register-targets">Register Targets</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-2-xác-minh-target-health">Bước 2: Xác Minh Target Health</a>
+      <ul>
+        <li><a href="#kiểm-tra-target-health">Kiểm Tra Target Health</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-3-tạo-application-load-balancer">Bước 3: Tạo Application Load Balancer</a>
+      <ul>
+        <li><a href="#điều-hướng-đến-load-balancers">Điều Hướng Đến Load Balancers</a></li>
+        <li><a href="#chọn-load-balancer-type">Chọn Load Balancer Type</a></li>
+        <li><a href="#cấu-hình-basic-settings">Cấu Hình Basic Settings</a></li>
+        <li><a href="#cấu-hình-network-mapping">Cấu Hình Network Mapping</a></li>
+        <li><a href="#cấu-hình-security-groups">Cấu Hình Security Groups</a></li>
+        <li><a href="#cấu-hình-listeners">Cấu Hình Listeners</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-4-review-và-create">Bước 4: Review và Create</a>
+      <ul>
+        <li><a href="#review-configuration">Review Configuration</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-5-xác-minh-load-balancer">Bước 5: Xác Minh Load Balancer</a>
+      <ul>
+        <li><a href="#kiểm-tra-load-balancer-status">Kiểm Tra Load Balancer Status</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-6-test-load-balancer">Bước 6: Test Load Balancer</a>
+      <ul>
+        <li><a href="#test-health-endpoint">Test Health Endpoint</a></li>
+        <li><a href="#test-application-endpoints">Test Application Endpoints</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-7-cấu-hình-additional-features">Bước 7: Cấu Hình Additional Features</a>
+      <ul>
+        <li><a href="#enable-access-logs-tùy-chọn">Enable Access Logs (Tùy chọn)</a></li>
+        <li><a href="#configure-sticky-sessions-tùy-chọn">Configure Sticky Sessions (Tùy chọn)</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-8-giám-sát-load-balancer">Bước 8: Giám Sát Load Balancer</a>
+      <ul>
+        <li><a href="#cloudwatch-metrics">CloudWatch Metrics</a></li>
+        <li><a href="#thiết-lập-cloudwatch-alarms">Thiết Lập CloudWatch Alarms</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-9-test-high-availability">Bước 9: Test High Availability</a>
+      <ul>
+        <li><a href="#simulate-instance-failure">Simulate Instance Failure</a></li>
+        <li><a href="#restore-service">Restore Service</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-10-ghi-lại-load-balancer-configuration">Bước 10: Ghi Lại Load Balancer Configuration</a>
+      <ul>
+        <li><a href="#load-balancer-information">Load Balancer Information</a></li>
+        <li><a href="#configuration-details">Configuration Details</a></li>
+      </ul>
+    </li>
+    <li><a href="#khắc-phục-các-vấn-đề-thường-gặp">Khắc Phục Các Vấn Đề Thường Gặp</a>
+      <ul>
+        <li><a href="#vấn-đề-targets-hiển-thị-unhealthy">Vấn Đề: Targets Hiển Thị Unhealthy</a></li>
+        <li><a href="#vấn-đề-502-bad-gateway-errors">Vấn Đề: 502 Bad Gateway Errors</a></li>
+        <li><a href="#vấn-đề-load-balancer-không-truy-cập-được">Vấn Đề: Load Balancer Không Truy Cập Được</a></li>
+      </ul>
+    </li>
+    <li><a href="#tối-ưu-hóa-hiệu-suất">Tối Ưu Hóa Hiệu Suất</a>
+      <ul>
+        <li><a href="#connection-draining">Connection Draining</a></li>
+        <li><a href="#health-check-tuning">Health Check Tuning</a></li>
+        <li><a href="#multiple-targets">Multiple Targets</a></li>
+      </ul>
+    </li>
+    <li><a href="#các-bước-tiếp-theo">Các Bước Tiếp Theo</a>
+      <ul>
+        <li><a href="#lợi-ích-load-balancer">Lợi Ích Load Balancer:</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+
+                
+              </div>
+            </div>
+            
+        <div id="head-tags">
+        
+        </div>
+        
+        <div id="body-inner">
+          
+            <h1>
+              
+              
+                6. Thiết Lập Application Load Balancer
+              
+            </h1>
+          
+
+        
+
+
+
+	<p>Trong bước này, chúng ta sẽ tạo một Application Load Balancer để phân phối lưu lượng đến ứng dụng caching của chúng ta và cung cấp tính khả dụng cao.</p>
+<h2 id="bước-1-tạo-target-group">Bước 1: Tạo Target Group</h2>
+<h3 id="điều-hướng-đến-target-groups">Điều Hướng Đến Target Groups</h3>
+<ol>
+<li>
+<p>Mở <strong>EC2 Console</strong></p>
+</li>
+<li>
+<p>Nhấp <strong>Target Groups</strong> ở navigation bên trái</p>
+</li>
+<li>
+<p>Nhấp <strong>Create target group</strong></p>
+</li>
+</ol>
+<p><img src="../../images/create-target-group.png" alt="Create Target Group"></p>
+<h3 id="cấu-hình-target-group">Cấu Hình Target Group</h3>
+<ol start="4">
+<li>
+<p>Cấu hình basic settings:</p>
+<ul>
+<li><strong>Target type</strong>: Instances</li>
+<li><strong>Target group name</strong>: <code>caching-app-tg</code></li>
+<li><strong>Protocol</strong>: HTTP</li>
+<li><strong>Port</strong>: 3000</li>
+<li><strong>VPC</strong>: Chọn <code>caching-workshop-vpc</code> của bạn</li>
+</ul>
+</li>
+</ol>
+<p><img src="../../images/target-group-config.png" alt="Target Group Configuration"></p>
+<h3 id="cấu-hình-health-checks">Cấu Hình Health Checks</h3>
+<ol start="5">
+<li>
+<p>Cấu hình health check settings:</p>
+<ul>
+<li><strong>Health check protocol</strong>: HTTP</li>
+<li><strong>Health check path</strong>: <code>/health</code></li>
+<li><strong>Health check port</strong>: Traffic port</li>
+<li><strong>Healthy threshold</strong>: 2</li>
+<li><strong>Unhealthy threshold</strong>: 2</li>
+<li><strong>Timeout</strong>: 5 seconds</li>
+<li><strong>Interval</strong>: 30 seconds</li>
+</ul>
+</li>
+</ol>
+<p><img src="../../images/health-check-config.png" alt="Health Check Configuration"></p>
+<ol start="6">
+<li>Nhấp <strong>Next</strong></li>
+</ol>
+<h3 id="register-targets">Register Targets</h3>
+<ol start="7">
+<li>
+<p>Chọn application instance của bạn:</p>
+<ul>
+<li>Tìm instance <code>caching-app-server</code> của bạn</li>
+<li>Chọn nó và nhấp <strong>Include as pending below</strong></li>
+</ul>
+</li>
+</ol>
+<p><img src="../../images/register-targets.png" alt="Register Targets"></p>
+<ol start="8">
+<li>Nhấp <strong>Create target group</strong></li>
+</ol>
+<p><img src="../../images/target-group-creation.png" alt="Target Group Creation"></p>
+<h2 id="bước-2-xác-minh-target-health">Bước 2: Xác Minh Target Health</h2>
+<h3 id="kiểm-tra-target-health">Kiểm Tra Target Health</h3>
+<ol>
+<li>Nhấp vào target group của bạn để xem chi tiết</li>
+</ol>
+<p><img src="../../images/target-group-details.png" alt="Target Group Details"></p>
+<ol start="2">
+<li>Đi đến tab <strong>Targets</strong> và xác minh health status</li>
+</ol>
+<p><img src="../../images/target-health-status.png" alt="Target Health Status"></p>
+
+<div class="notices info" ><p>Có thể mất 1-2 phút để target trở nên healthy. Health check gọi endpoint <code>/health</code> trên port 3000.</p>
+</div>
+
+<h2 id="bước-3-tạo-application-load-balancer">Bước 3: Tạo Application Load Balancer</h2>
+<h3 id="điều-hướng-đến-load-balancers">Điều Hướng Đến Load Balancers</h3>
+<ol>
+<li>Nhấp <strong>Load Balancers</strong> ở navigation bên trái</li>
+</ol>
+<p><img src="../../images/load-balancers-nav.png" alt="Load Balancers Navigation"></p>
+<ol start="2">
+<li>Nhấp <strong>Create load balancer</strong></li>
+</ol>
+<p><img src="../../images/create-load-balancer.png" alt="Create Load Balancer"></p>
+<h3 id="chọn-load-balancer-type">Chọn Load Balancer Type</h3>
+<ol start="3">
+<li>Chọn <strong>Application Load Balancer</strong></li>
+</ol>
+<p><img src="../../images/alb-selection.png" alt="ALB Selection"></p>
+<ol start="4">
+<li>Nhấp <strong>Create</strong></li>
+</ol>
+<h3 id="cấu-hình-basic-settings">Cấu Hình Basic Settings</h3>
+<ol start="5">
+<li>
+<p>Cấu hình load balancer settings:</p>
+<ul>
+<li><strong>Load balancer name</strong>: <code>caching-app-alb</code></li>
+<li><strong>Scheme</strong>: Internet-facing</li>
+<li><strong>IP address type</strong>: IPv4</li>
+</ul>
+</li>
+</ol>
+<p><img src="../../images/alb-basic-settings.png" alt="ALB Basic Settings"></p>
+<h3 id="cấu-hình-network-mapping">Cấu Hình Network Mapping</h3>
+<ol start="6">
+<li>
+<p>Cấu hình network settings:</p>
+<ul>
+<li><strong>VPC</strong>: Chọn <code>caching-workshop-vpc</code> của bạn</li>
+<li><strong>Mappings</strong>: Chọn cả hai public subnets từ các AZ khác nhau</li>
+</ul>
+</li>
+</ol>
+<p><img src="../../images/network-mapping.png" alt="Network Mapping"></p>
+<h3 id="cấu-hình-security-groups">Cấu Hình Security Groups</h3>
+<ol start="7">
+<li>
+<p>Cấu hình security groups:</p>
+<ul>
+<li><strong>Security groups</strong>: Chọn <code>alb-sg</code></li>
+<li>Xóa default security group</li>
+</ul>
+</li>
+</ol>
+<p><img src="../../images/alb-security-groups.png" alt="ALB Security Groups"></p>
+<h3 id="cấu-hình-listeners">Cấu Hình Listeners</h3>
+<ol start="8">
+<li>
+<p>Cấu hình listeners và routing:</p>
+<ul>
+<li><strong>Protocol</strong>: HTTP</li>
+<li><strong>Port</strong>: 80</li>
+<li><strong>Default action</strong>: Forward to <code>caching-app-tg</code></li>
+</ul>
+</li>
+</ol>
+<p><img src="../../images/listeners-config.png" alt="Listeners Configuration"></p>
+<h2 id="bước-4-review-và-create">Bước 4: Review và Create</h2>
+<h3 id="review-configuration">Review Configuration</h3>
+<ol>
+<li>Review tất cả settings</li>
+</ol>
+<p><img src="../../images/alb-review.png" alt="ALB Review"></p>
+<ol start="2">
+<li>Nhấp <strong>Create load balancer</strong></li>
+</ol>
+<p><img src="../../images/alb-creation.png" alt="ALB Creation"></p>
+
+<div class="notices info" ><p>Việc tạo load balancer mất 2-3 phút. Load balancer sẽ hiển thị trạng thái &ldquo;Provisioning&rdquo; ban đầu.</p>
+</div>
+
+<h2 id="bước-5-xác-minh-load-balancer">Bước 5: Xác Minh Load Balancer</h2>
+<h3 id="kiểm-tra-load-balancer-status">Kiểm Tra Load Balancer Status</h3>
+<ol>
+<li>Đợi load balancer trở thành &ldquo;Active&rdquo;</li>
+</ol>
+<p><img src="../../images/alb-active-status.png" alt="ALB Active Status"></p>
+<ol start="2">
+<li>Ghi lại <strong>DNS name</strong> để testing:</li>
+</ol>
+<pre tabindex="0"><code>caching-app-alb-xxxxxxxxx.us-east-1.elb.amazonaws.com
+</code></pre><p><img src="../../images/alb-dns-name.png" alt="ALB DNS Name"></p>
+<h2 id="bước-6-test-load-balancer">Bước 6: Test Load Balancer</h2>
+<h3 id="test-health-endpoint">Test Health Endpoint</h3>
+<ol>
+<li>Test load balancer sử dụng DNS name của nó:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test health endpoint through ALB</span>
+</span></span><span style="display:flex;"><span>curl http://caching-app-alb-xxxxxxxxx.us-east-1.elb.amazonaws.com/health
+</span></span></code></pre></div><p><img src="../../images/alb-health-test.png" alt="ALB Health Test"></p>
+<h3 id="test-application-endpoints">Test Application Endpoints</h3>
+<ol start="2">
+<li>Test tất cả application endpoints thông qua load balancer:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test product endpoint</span>
+</span></span><span style="display:flex;"><span>curl <span style="color:#e6db74">&#34;http://caching-app-alb-xxxxxxxxx.us-east-1.elb.amazonaws.com/product/PROD001?category=Electronics&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Test products list</span>
+</span></span><span style="display:flex;"><span>curl <span style="color:#e6db74">&#34;http://caching-app-alb-xxxxxxxxx.us-east-1.elb.amazonaws.com/products&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Test cache statistics</span>
+</span></span><span style="display:flex;"><span>curl http://caching-app-alb-xxxxxxxxx.us-east-1.elb.amazonaws.com/stats
+</span></span></code></pre></div><p><img src="../../images/alb-endpoint-tests.png" alt="ALB Endpoint Tests"></p>
+<h2 id="bước-7-cấu-hình-additional-features">Bước 7: Cấu Hình Additional Features</h2>
+<h3 id="enable-access-logs-tùy-chọn">Enable Access Logs (Tùy chọn)</h3>
+<ol>
+<li>Đi đến tab <strong>Attributes</strong> của load balancer</li>
+</ol>
+<p><img src="../../images/alb-attributes-tab.png" alt="ALB Attributes Tab"></p>
+<ol start="2">
+<li>
+<p>Nhấp <strong>Edit</strong> và enable access logs:</p>
+<ul>
+<li><strong>Access logs</strong>: Enabled</li>
+<li><strong>S3 location</strong>: Tạo hoặc chọn S3 bucket</li>
+</ul>
+</li>
+</ol>
+<p><img src="../../images/alb-access-logs.png" alt="ALB Access Logs"></p>
+<h3 id="configure-sticky-sessions-tùy-chọn">Configure Sticky Sessions (Tùy chọn)</h3>
+<ol start="3">
+<li>
+<p>Trong target group của bạn, đi đến tab <strong>Attributes</strong>:</p>
+<ul>
+<li><strong>Stickiness</strong>: Enabled</li>
+<li><strong>Stickiness type</strong>: Load balancer generated cookie</li>
+<li><strong>Stickiness duration</strong>: 1 day</li>
+</ul>
+</li>
+</ol>
+<p><img src="../../images/target-group-stickiness.png" alt="Target Group Stickiness"></p>
+<h2 id="bước-8-giám-sát-load-balancer">Bước 8: Giám Sát Load Balancer</h2>
+<h3 id="cloudwatch-metrics">CloudWatch Metrics</h3>
+<ol>
+<li>Đi đến tab <strong>Monitoring</strong> để xem metrics</li>
+</ol>
+<p><img src="../../images/alb-monitoring-tab.png" alt="ALB Monitoring Tab"></p>
+<p>Các metrics chính cần giám sát:</p>
+<ul>
+<li><strong>RequestCount</strong>: Số lượng requests</li>
+<li><strong>TargetResponseTime</strong>: Response time từ targets</li>
+<li><strong>HTTPCode_Target_2XX_Count</strong>: Successful responses</li>
+<li><strong>HTTPCode_Target_4XX_Count</strong>: Client errors</li>
+<li><strong>HTTPCode_Target_5XX_Count</strong>: Server errors</li>
+</ul>
+<p><img src="../../images/alb-cloudwatch-metrics.png" alt="ALB CloudWatch Metrics"></p>
+<h3 id="thiết-lập-cloudwatch-alarms">Thiết Lập CloudWatch Alarms</h3>
+<ol start="2">
+<li>Tạo alarms cho các metrics chính:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># High response time alarm</span>
+</span></span><span style="display:flex;"><span>aws cloudwatch put-metric-alarm <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --alarm-name <span style="color:#e6db74">&#34;ALB-High-Response-Time&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --alarm-description <span style="color:#e6db74">&#34;ALB response time is high&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --metric-name TargetResponseTime <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --namespace AWS/ApplicationELB <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --statistic Average <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --period <span style="color:#ae81ff">300</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --threshold 1.0 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --comparison-operator GreaterThanThreshold <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --evaluation-periods <span style="color:#ae81ff">2</span>
+</span></span></code></pre></div><h2 id="bước-9-test-high-availability">Bước 9: Test High Availability</h2>
+<h3 id="simulate-instance-failure">Simulate Instance Failure</h3>
+<ol>
+<li>Dừng EC2 instance của bạn để test failover:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Stop the instance (simulate failure)</span>
+</span></span><span style="display:flex;"><span>aws ec2 stop-instances --instance-ids i-xxxxxxxxxxxxxxxxx
+</span></span></code></pre></div><ol start="2">
+<li>Kiểm tra target group health</li>
+</ol>
+<p><img src="../../images/target-group-health-check.png" alt="Target Group Health Check"></p>
+<ol start="3">
+<li>Test load balancer response:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># This should return 503 Service Unavailable</span>
+</span></span><span style="display:flex;"><span>curl http://caching-app-alb-xxxxxxxxx.us-east-1.elb.amazonaws.com/health
+</span></span></code></pre></div><h3 id="restore-service">Restore Service</h3>
+<ol start="4">
+<li>Start instance lại:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Start the instance</span>
+</span></span><span style="display:flex;"><span>aws ec2 start-instances --instance-ids i-xxxxxxxxxxxxxxxxx
+</span></span></code></pre></div><ol start="5">
+<li>Đợi target trở nên healthy lại</li>
+</ol>
+<p><img src="../../images/target-health-recovery.png" alt="Target Health Recovery"></p>
+<h2 id="bước-10-ghi-lại-load-balancer-configuration">Bước 10: Ghi Lại Load Balancer Configuration</h2>
+<p>Ghi lại thông tin sau:</p>
+<h3 id="load-balancer-information">Load Balancer Information</h3>
+<ul>
+<li><strong>Load Balancer Name</strong>: <code>caching-app-alb</code></li>
+<li><strong>DNS Name</strong>: <code>caching-app-alb-xxxxxxxxx.us-east-1.elb.amazonaws.com</code></li>
+<li><strong>Scheme</strong>: Internet-facing</li>
+<li><strong>Security Group</strong>: <code>alb-sg</code></li>
+<li><strong>Target Group</strong>: <code>caching-app-tg</code></li>
+</ul>
+<h3 id="configuration-details">Configuration Details</h3>
+<ul>
+<li><strong>Listener</strong>: HTTP:80 → Forward to target group</li>
+<li><strong>Health Check</strong>: HTTP:3000/health</li>
+<li><strong>Health Check Interval</strong>: 30 seconds</li>
+<li><strong>Healthy Threshold</strong>: 2 consecutive checks</li>
+</ul>
+<p><img src="../../images/alb-documentation.png" alt="ALB Documentation"></p>
+<h2 id="khắc-phục-các-vấn-đề-thường-gặp">Khắc Phục Các Vấn Đề Thường Gặp</h2>
+<h3 id="vấn-đề-targets-hiển-thị-unhealthy">Vấn Đề: Targets Hiển Thị Unhealthy</h3>
+<p><strong>Nguyên Nhân Có Thể:</strong></p>
+<ul>
+<li>Application không phản hồi trên health check path</li>
+<li>Security group chặn traffic</li>
+<li>Instance không chạy</li>
+</ul>
+<p><strong>Giải Pháp:</strong></p>
+<ul>
+<li>Xác minh application đang chạy: <code>pm2 status</code></li>
+<li>Kiểm tra health endpoint trực tiếp: <code>curl localhost:3000/health</code></li>
+<li>Xác minh security groups cho phép traffic trên port 3000</li>
+</ul>
+<h3 id="vấn-đề-502-bad-gateway-errors">Vấn Đề: 502 Bad Gateway Errors</h3>
+<p><strong>Nguyên Nhân Có Thể:</strong></p>
+<ul>
+<li>Application crashed hoặc không phản hồi</li>
+<li>Target group trỏ đến port sai</li>
+<li>Vấn đề kết nối mạng</li>
+</ul>
+<p><strong>Giải Pháp:</strong></p>
+<ul>
+<li>Kiểm tra application logs: <code>pm2 logs caching-app</code></li>
+<li>Xác minh cấu hình port target group</li>
+<li>Test direct instance connectivity</li>
+</ul>
+<h3 id="vấn-đề-load-balancer-không-truy-cập-được">Vấn Đề: Load Balancer Không Truy Cập Được</h3>
+<p><strong>Nguyên Nhân Có Thể:</strong></p>
+<ul>
+<li>Security group không cho phép HTTP traffic</li>
+<li>Load balancer ở subnets sai</li>
+<li>DNS propagation delay</li>
+</ul>
+<p><strong>Giải Pháp:</strong></p>
+<ul>
+<li>Xác minh ALB security group cho phép HTTP (port 80)</li>
+<li>Đảm bảo load balancer ở public subnets</li>
+<li>Đợi DNS propagation (lên đến 5 phút)</li>
+</ul>
+<h2 id="tối-ưu-hóa-hiệu-suất">Tối Ưu Hóa Hiệu Suất</h2>
+<h3 id="connection-draining">Connection Draining</h3>
+<ul>
+<li><strong>Deregistration delay</strong>: 300 seconds (default)</li>
+<li>Cho phép in-flight requests hoàn thành trước khi xóa targets</li>
+</ul>
+<h3 id="health-check-tuning">Health Check Tuning</h3>
+<ul>
+<li><strong>Faster detection</strong>: Giảm interval và threshold cho failover nhanh hơn</li>
+<li><strong>Reduce false positives</strong>: Tăng threshold cho stable applications</li>
+</ul>
+<h3 id="multiple-targets">Multiple Targets</h3>
+<ul>
+<li><strong>Auto Scaling</strong>: Thêm nhiều instances cho tính khả dụng cao hơn</li>
+<li><strong>Cross-AZ</strong>: Phân phối targets qua availability zones</li>
+</ul>
+<h2 id="các-bước-tiếp-theo">Các Bước Tiếp Theo</h2>
+<p>Application Load Balancer của bạn giờ đã được cấu hình và test! Bạn có:</p>
+<p>✅ <strong>Application Load Balancer</strong> phân phối traffic<br>
+✅ <strong>Target Group</strong> với health checks được cấu hình<br>
+✅ <strong>High availability</strong> qua nhiều AZs<br>
+✅ <strong>Health monitoring</strong> với automatic failover<br>
+✅ <strong>CloudWatch metrics</strong> cho performance monitoring<br>
+✅ <strong>Security groups</strong> được cấu hình đúng</p>
+<h3 id="lợi-ích-load-balancer">Lợi Ích Load Balancer:</h3>
+<ul>
+<li><strong>High availability</strong>: Automatic failover khi instances fail</li>
+<li><strong>Scalability</strong>: Dễ dàng thêm nhiều instances phía sau load balancer</li>
+<li><strong>Health monitoring</strong>: Continuous health checks đảm bảo traffic đi đến healthy instances</li>
+<li><strong>SSL termination</strong>: Có thể xử lý SSL/TLS encryption (khi được cấu hình)</li>
+</ul>
+
+<div class="notices tip" ><p>DNS name của load balancer sẽ được CloudFront sử dụng trong bước tiếp theo làm origin cho CDN distribution của chúng ta.</p>
+</div>
+
+<p>Tiếp theo, chúng ta sẽ thiết lập CloudFront để cung cấp global content delivery và edge caching.</p>
+
+
+
+
+
+<footer class=" footline" >
+	
+</footer>
+
+        
+        </div>
+        
+
+      </div>
+
+    <div id="navigation">
+        
+        
+
+        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+
+        
+
+
+	 
+	 
+		
+			<a class="nav nav-prev" href="/vi/5-setup-application/5.2-deploy-app/" title="5.2 Triển Khai Application"> <i class="fa fa-chevron-left"></i></a>
+		
+		
+			<a class="nav nav-next" href="/vi/7-setup-cloudfront/" title="7. Thiết Lập CloudFront CDN" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
+		
+	
+    </div>
+
+    </section>
+
+    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
+      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
+    </div>
+    <script src="/js/clipboard.min.js?1754898927"></script>
+    <script src="/js/perfect-scrollbar.min.js?1754898927"></script>
+    <script src="/js/perfect-scrollbar.jquery.min.js?1754898927"></script>
+    <script src="/js/jquery.sticky.js?1754898927"></script>
+    <script src="/js/featherlight.min.js?1754898927"></script>
+    <script src="/js/highlight.pack.js?1754898927"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="/js/modernizr.custom-3.6.0.js?1754898927"></script>
+    <script src="/js/learn.js?1754898927"></script>
+    <script src="/js/hugo-learn.js?1754898927"></script>
+    <script src="/js/language-switcher.js?1754898927"></script>
+    <script src="/js/multilingual.js?1754898927"></script>
+    
+        
+            <script src="/mermaid/mermaid.js?1754898927"></script>
+        
+        <script>
+            mermaid.initialize({ startOnLoad: true });
+        </script>
+    
+    
+
+  </body>
+</html>

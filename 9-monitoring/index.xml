@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>9. Monitoring and Alerting on In-Memory Database Caching Architecture</title>
+    <link>/9-monitoring/</link>
+    <description>Recent content in 9. Monitoring and Alerting on In-Memory Database Caching Architecture</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate></lastBuildDate>
+    <atom:link href="/9-monitoring/index.xml" rel="self" type="application/rss+xml" />
+  </channel>
+</rss>
