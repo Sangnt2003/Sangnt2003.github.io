@@ -2,275 +2,275 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>//localhost:51205/vi/</loc>
+    <loc>//localhost:52901/vi/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/"
+                href="//localhost:52901/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/"
+                href="//localhost:52901/vi/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/1-introduction/</loc>
+    <loc>//localhost:52901/vi/1-introduction/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/1-introduction/"
+                href="//localhost:52901/1-introduction/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/1-introduction/"
+                href="//localhost:52901/vi/1-introduction/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/1-introduction/1.1-overview/</loc>
+    <loc>//localhost:52901/vi/1-introduction/1.1-overview/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/1-introduction/1.1-overview/"
+                href="//localhost:52901/1-introduction/1.1-overview/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/1-introduction/1.1-overview/"
+                href="//localhost:52901/vi/1-introduction/1.1-overview/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/1-introduction/1.2-architecture/</loc>
+    <loc>//localhost:52901/vi/1-introduction/1.2-architecture/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/1-introduction/1.2-architecture/"
+                href="//localhost:52901/1-introduction/1.2-architecture/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/1-introduction/1.2-architecture/"
+                href="//localhost:52901/vi/1-introduction/1.2-architecture/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/2-setup-vpc/</loc>
+    <loc>//localhost:52901/vi/2-setup-vpc/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/2-setup-vpc/"
+                href="//localhost:52901/2-setup-vpc/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/2-setup-vpc/"
+                href="//localhost:52901/vi/2-setup-vpc/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/2-setup-vpc/2.1-create-vpc/</loc>
+    <loc>//localhost:52901/vi/2-setup-vpc/2.1-create-vpc/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/2-setup-vpc/2.1-create-vpc/"
+                href="//localhost:52901/2-setup-vpc/2.1-create-vpc/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/2-setup-vpc/2.1-create-vpc/"
+                href="//localhost:52901/vi/2-setup-vpc/2.1-create-vpc/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/2-setup-vpc/2.2-security-groups/</loc>
+    <loc>//localhost:52901/vi/2-setup-vpc/2.2-security-groups/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/2-setup-vpc/2.2-security-groups/"
+                href="//localhost:52901/2-setup-vpc/2.2-security-groups/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/2-setup-vpc/2.2-security-groups/"
+                href="//localhost:52901/vi/2-setup-vpc/2.2-security-groups/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/3-setup-dynamodb/</loc>
+    <loc>//localhost:52901/vi/3-setup-dynamodb/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/3-setup-dynamodb/"
+                href="//localhost:52901/3-setup-dynamodb/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/3-setup-dynamodb/"
+                href="//localhost:52901/vi/3-setup-dynamodb/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/3-setup-dynamodb/3.1-create-table/</loc>
+    <loc>//localhost:52901/vi/3-setup-dynamodb/3.1-create-table/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/3-setup-dynamodb/3.1-create-table/"
+                href="//localhost:52901/3-setup-dynamodb/3.1-create-table/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/3-setup-dynamodb/3.1-create-table/"
+                href="//localhost:52901/vi/3-setup-dynamodb/3.1-create-table/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/3-setup-dynamodb/3.2-setup-dax/</loc>
+    <loc>//localhost:52901/vi/3-setup-dynamodb/3.2-setup-dax/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/3-setup-dynamodb/3.2-setup-dax/"
+                href="//localhost:52901/3-setup-dynamodb/3.2-setup-dax/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/3-setup-dynamodb/3.2-setup-dax/"
+                href="//localhost:52901/vi/3-setup-dynamodb/3.2-setup-dax/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/4-setup-elasticache/</loc>
+    <loc>//localhost:52901/vi/4-setup-elasticache/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/4-setup-elasticache/"
+                href="//localhost:52901/4-setup-elasticache/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/4-setup-elasticache/"
+                href="//localhost:52901/vi/4-setup-elasticache/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/5-setup-application/</loc>
+    <loc>//localhost:52901/vi/5-setup-application/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/5-setup-application/"
+                href="//localhost:52901/5-setup-application/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/5-setup-application/"
+                href="//localhost:52901/vi/5-setup-application/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/5-setup-application/5.1-launch-ec2/</loc>
+    <loc>//localhost:52901/vi/5-setup-application/5.1-launch-ec2/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/5-setup-application/5.1-launch-ec2/"
+                href="//localhost:52901/5-setup-application/5.1-launch-ec2/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/5-setup-application/5.1-launch-ec2/"
+                href="//localhost:52901/vi/5-setup-application/5.1-launch-ec2/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/5-setup-application/5.2-deploy-app/</loc>
+    <loc>//localhost:52901/vi/5-setup-application/5.2-deploy-app/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/5-setup-application/5.2-deploy-app/"
+                href="//localhost:52901/5-setup-application/5.2-deploy-app/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/5-setup-application/5.2-deploy-app/"
+                href="//localhost:52901/vi/5-setup-application/5.2-deploy-app/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/6-setup-loadbalancer/</loc>
+    <loc>//localhost:52901/vi/6-setup-loadbalancer/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/6-setup-loadbalancer/"
+                href="//localhost:52901/6-setup-loadbalancer/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/6-setup-loadbalancer/"
+                href="//localhost:52901/vi/6-setup-loadbalancer/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/7-setup-cloudfront/</loc>
+    <loc>//localhost:52901/vi/7-setup-cloudfront/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/7-setup-cloudfront/"
+                href="//localhost:52901/7-setup-cloudfront/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/7-setup-cloudfront/"
+                href="//localhost:52901/vi/7-setup-cloudfront/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/8-performance-testing/</loc>
+    <loc>//localhost:52901/vi/8-performance-testing/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/8-performance-testing/"
+                href="//localhost:52901/8-performance-testing/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/8-performance-testing/"
+                href="//localhost:52901/vi/8-performance-testing/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/9-monitoring/</loc>
+    <loc>//localhost:52901/vi/9-monitoring/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/9-monitoring/"
+                href="//localhost:52901/9-monitoring/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/9-monitoring/"
+                href="//localhost:52901/vi/9-monitoring/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/10-cleanup/</loc>
+    <loc>//localhost:52901/vi/10-cleanup/</loc>
     <lastmod>2024-01-15T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/10-cleanup/"
+                href="//localhost:52901/10-cleanup/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/10-cleanup/"
+                href="//localhost:52901/vi/10-cleanup/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/categories/</loc>
+    <loc>//localhost:52901/vi/categories/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/categories/"
+                href="//localhost:52901/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/categories/"
+                href="//localhost:52901/vi/categories/"
                 />
   </url><url>
-    <loc>//localhost:51205/vi/tags/</loc>
+    <loc>//localhost:52901/vi/tags/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-us"
-                href="//localhost:51205/tags/"
+                href="//localhost:52901/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="vi-vn"
-                href="//localhost:51205/vi/tags/"
+                href="//localhost:52901/vi/tags/"
                 />
   </url>
 </urlset>

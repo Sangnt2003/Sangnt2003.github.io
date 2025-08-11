@@ -2,11 +2,11 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>2.1 Tạo VPC on Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</title>
-    <link>//localhost:51205/vi/2-setup-vpc/2.1-create-vpc/</link>
+    <link>//localhost:52901/vi/2-setup-vpc/2.1-create-vpc/</link>
     <description>Recent content in 2.1 Tạo VPC on Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</description>
     <generator>Hugo</generator>
     <language>vi-vn</language>
     <lastBuildDate></lastBuildDate>
-    <atom:link href="//localhost:51205/vi/2-setup-vpc/2.1-create-vpc/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="//localhost:52901/vi/2-setup-vpc/2.1-create-vpc/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>
