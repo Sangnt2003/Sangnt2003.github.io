@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</title>
+    <link>http://localhost:63799/workshop-caching/vi/tags/</link>
+    <description>Recent content in Tags on Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</description>
+    <generator>Hugo</generator>
+    <language>vi-vn</language>
+    <atom:link href="http://localhost:63799/workshop-caching/vi/tags/index.xml" rel="self" type="application/rss+xml" />
+  </channel>
+</rss>

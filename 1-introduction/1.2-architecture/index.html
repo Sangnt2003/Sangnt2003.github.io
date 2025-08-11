@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en" class="js csstransforms3d">
+  <head><script src="/workshop-caching/livereload.js?mindelay=10&amp;v=2&amp;port=63799&amp;path=workshop-caching/livereload" data-no-instant defer></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Hugo 0.147.9">
+    <meta name="description" content="">
+
+
+    <link rel="icon" href="/workshop-caching/images/favicon.png" type="image/png">
+
+    <title>1.2 Architecture Overview :: In-Memory Database Caching Architecture</title>
+
+    
+    <link href="/workshop-caching/css/nucleus.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/fontawesome-all.min.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/hybrid.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/featherlight.min.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/perfect-scrollbar.min.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/auto-complete.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/atom-one-dark-reasonable.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/theme.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/tabs.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/hugo-theme.css?1754898188" rel="stylesheet">
+    
+    
+
+    <script src="/workshop-caching/js/jquery-3.3.1.min.js?1754898188"></script>
+
+    <style>
+      :root #header + #content > #left > #rlblock_left{
+          display:none !important;
+      }
+      
+    </style>
+    
+  </head>
+  <body class="" data-url="/workshop-caching/1-introduction/1.2-architecture/">
+    <nav id="sidebar" class="">
+
+
+
+  <div id="header-wrapper">
+    <div id="header">
+      <a
+  id="logo"
+  href='/workshop-caching'
+>
+  <svg
+    id="Layer_1"
+    data-name="Layer 1"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 60 30"
+    width="30%"
+  >
+    <defs>
+      <style>
+        .cls-1 {
+          fill: #fff;
+        }
+        .cls-2 {
+          fill: #f90;
+          fill-rule: evenodd;
+        }
+      </style>
+    </defs>
+    <title>AWS-Logo_White-Color</title>
+    <path
+      class="cls-1"
+      d="M14.09,10.85a4.7,4.7,0,0,0,.19,1.48,7.73,7.73,0,0,0,.54,1.19.77.77,0,0,1,.12.38.64.64,0,0,1-.32.49l-1,.7a.83.83,0,0,1-.44.15.69.69,0,0,1-.49-.23,3.8,3.8,0,0,1-.6-.77q-.25-.42-.51-1a6.14,6.14,0,0,1-4.89,2.3,4.54,4.54,0,0,1-3.32-1.19,4.27,4.27,0,0,1-1.22-3.2A4.28,4.28,0,0,1,3.61,7.75,6.06,6.06,0,0,1,7.69,6.46a12.47,12.47,0,0,1,1.76.13q.92.13,1.91.36V5.73a3.65,3.65,0,0,0-.79-2.66A3.81,3.81,0,0,0,7.86,2.3a7.71,7.71,0,0,0-1.79.22,12.78,12.78,0,0,0-1.79.57,4.55,4.55,0,0,1-.58.22l-.26,0q-.35,0-.35-.52V2a1.09,1.09,0,0,1,.12-.58,1.2,1.2,0,0,1,.47-.35A10.88,10.88,0,0,1,5.77.32,10.19,10.19,0,0,1,8.36,0a6,6,0,0,1,4.35,1.35,5.49,5.49,0,0,1,1.38,4.09ZM7.34,13.38a5.36,5.36,0,0,0,1.72-.31A3.63,3.63,0,0,0,10.63,12,2.62,2.62,0,0,0,11.19,11a5.63,5.63,0,0,0,.16-1.44v-.7a14.35,14.35,0,0,0-1.53-.28,12.37,12.37,0,0,0-1.56-.1,3.84,3.84,0,0,0-2.47.67A2.34,2.34,0,0,0,5,11a2.35,2.35,0,0,0,.61,1.76A2.4,2.4,0,0,0,7.34,13.38Zm13.35,1.8a1,1,0,0,1-.64-.16,1.3,1.3,0,0,1-.35-.65L15.81,1.51a3,3,0,0,1-.15-.67.36.36,0,0,1,.41-.41H17.7a1,1,0,0,1,.65.16,1.4,1.4,0,0,1,.33.65l2.79,11,2.59-11A1.17,1.17,0,0,1,24.39.6a1.1,1.1,0,0,1,.67-.16H26.4a1.1,1.1,0,0,1,.67.16,1.17,1.17,0,0,1,.32.65L30,12.39,32.88,1.25A1.39,1.39,0,0,1,33.22.6a1,1,0,0,1,.65-.16h1.54a.36.36,0,0,1,.41.41,1.36,1.36,0,0,1,0,.26,3.64,3.64,0,0,1-.12.41l-4,12.86a1.3,1.3,0,0,1-.35.65,1,1,0,0,1-.64.16H29.25a1,1,0,0,1-.67-.17,1.26,1.26,0,0,1-.32-.67L25.67,3.64,23.11,14.34a1.26,1.26,0,0,1-.32.67,1,1,0,0,1-.67.17Zm21.36.44a11.28,11.28,0,0,1-2.56-.29,7.44,7.44,0,0,1-1.92-.67,1,1,0,0,1-.61-.93v-.84q0-.52.38-.52a.9.9,0,0,1,.31.06l.42.17a8.77,8.77,0,0,0,1.83.58,9.78,9.78,0,0,0,2,.2,4.48,4.48,0,0,0,2.43-.55,1.76,1.76,0,0,0,.86-1.57,1.61,1.61,0,0,0-.45-1.16A4.29,4.29,0,0,0,43,9.22l-2.41-.76A5.15,5.15,0,0,1,38,6.78a3.94,3.94,0,0,1-.83-2.41,3.7,3.7,0,0,1,.45-1.85,4.47,4.47,0,0,1,1.19-1.37A5.27,5.27,0,0,1,40.51.29,7.4,7.4,0,0,1,42.6,0a8.87,8.87,0,0,1,1.12.07q.57.07,1.08.19t.95.26a4.27,4.27,0,0,1,.7.29,1.59,1.59,0,0,1,.49.41.94.94,0,0,1,.15.55v.79q0,.52-.38.52a1.76,1.76,0,0,1-.64-.2,7.74,7.74,0,0,0-3.2-.64,4.37,4.37,0,0,0-2.21.47,1.6,1.6,0,0,0-.79,1.48,1.58,1.58,0,0,0,.49,1.18,4.94,4.94,0,0,0,1.83.92L44.55,7a5.08,5.08,0,0,1,2.57,1.6A3.76,3.76,0,0,1,47.9,11a4.21,4.21,0,0,1-.44,1.93,4.4,4.4,0,0,1-1.21,1.47,5.43,5.43,0,0,1-1.85.93A8.25,8.25,0,0,1,42.05,15.62Z"
+    ></path>
+    <path
+      class="cls-2"
+      d="M45.19,23.81C39.72,27.85,31.78,30,25,30A36.64,36.64,0,0,1,.22,20.57c-.51-.46-.06-1.09.56-.74A49.78,49.78,0,0,0,25.53,26.4,49.23,49.23,0,0,0,44.4,22.53C45.32,22.14,46.1,23.14,45.19,23.81Z"
+    ></path>
+    <path
+      class="cls-2"
+      d="M47.47,21.21c-.7-.9-4.63-.42-6.39-.21-.53.06-.62-.4-.14-.74,3.13-2.2,8.27-1.57,8.86-.83s-.16,5.89-3.09,8.35c-.45.38-.88.18-.68-.32C46.69,25.8,48.17,22.11,47.47,21.21Z"
+    ></path>
+  </svg>
+</a>
+
+    </div>
+    
+        <div class="searchbox">
+    <label for="search-by"><i class="fas fa-search"></i></label>
+    <input data-search-input id="search-by" type="search" placeholder="Search...">
+    <span data-search-clear=""><i class="fas fa-times"></i></span>
+</div>
+
+<script type="text/javascript" src="/workshop-caching/js/lunr.min.js?1754898188"></script>
+<script type="text/javascript" src="/workshop-caching/js/auto-complete.js?1754898188"></script>
+<script type="text/javascript">
+    var baseurl = "http:\/\/localhost:63799\/workshop-caching\/";
+</script>
+<script type="text/javascript" src="/workshop-caching/js/search.js?1754898188"></script>
+
+    
+  </div>
+
+
+    <div class="highlightable">
+    <ul class="topics">
+
+        
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/1-introduction/" title="1. Introduction" class="dd-item
+        parent
+        
+        
+        ">
+      <a href="/workshop-caching/1-introduction/">
+          <b></b>1. Introduction
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/1-introduction/1.1-overview/" title="1.1 Workshop Overview" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/1-introduction/1.1-overview/">
+          <b></b>1.1 Workshop Overview
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/1-introduction/1.2-architecture/" title="1.2 Architecture Overview" class="dd-item
+        
+        active
+        
+        ">
+      <a href="/workshop-caching/1-introduction/1.2-architecture/">
+          <b></b>1.2 Architecture Overview
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/2-setup-vpc/" title="2. Setup VPC and Network Infrastructure" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/2-setup-vpc/">
+          <b></b>2. Setup VPC and Network Infrastructure
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/2-setup-vpc/2.1-create-vpc/" title="2.1 Create VPC" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/2-setup-vpc/2.1-create-vpc/">
+          <b></b>2.1 Create VPC
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/2-setup-vpc/2.2-security-groups/" title="2.2 Create Security Groups" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/2-setup-vpc/2.2-security-groups/">
+          <b></b>2.2 Create Security Groups
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/3-setup-dynamodb/" title="3. Setup DynamoDB and DAX" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/3-setup-dynamodb/">
+          <b></b>3. Setup DynamoDB and DAX
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/3-setup-dynamodb/3.1-create-table/" title="3.1 Create DynamoDB Table" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/3-setup-dynamodb/3.1-create-table/">
+          <b></b>3.1 Create DynamoDB Table
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/3-setup-dynamodb/3.2-setup-dax/" title="3.2 Setup DynamoDB DAX" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/3-setup-dynamodb/3.2-setup-dax/">
+          <b></b>3.2 Setup DynamoDB DAX
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/4-setup-elasticache/" title="4. Setup ElastiCache Redis" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/4-setup-elasticache/">
+          <b></b>4. Setup ElastiCache Redis
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/5-setup-application/" title="5. Setup Application" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/5-setup-application/">
+          <b></b>5. Setup Application
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/5-setup-application/5.1-launch-ec2/" title="5.1 Launch EC2 Instance" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/5-setup-application/5.1-launch-ec2/">
+          <b></b>5.1 Launch EC2 Instance
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/5-setup-application/5.2-deploy-app/" title="5.2 Deploy Application" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/5-setup-application/5.2-deploy-app/">
+          <b></b>5.2 Deploy Application
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/6-setup-loadbalancer/" title="6. Setup Application Load Balancer" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/6-setup-loadbalancer/">
+          <b></b>6. Setup Application Load Balancer
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/7-setup-cloudfront/" title="7. Setup CloudFront CDN" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/7-setup-cloudfront/">
+          <b></b>7. Setup CloudFront CDN
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/8-performance-testing/" title="8. Performance Testing" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/8-performance-testing/">
+          <b></b>8. Performance Testing
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/9-monitoring/" title="9. Monitoring and Alerting" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/9-monitoring/">
+          <b></b>9. Monitoring and Alerting
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/10-cleanup/" title="10. Resource Cleanup Guide" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/10-cleanup/">
+          <b></b>10. Resource Cleanup Guide
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+        
+    </ul>
+
+    
+    
+
+    
+    <section id="prefooter">
+      <hr/>
+      <ul>
+      
+        <li>
+          <a class="padding">
+            <i class="fas fa-language fa-fw"></i>
+          <div class="select-style">
+            <select id="select-language" onchange="location = this.value;">
+          
+          
+          
+              
+              
+                  
+                    
+                    
+                      <option id="en" value="http://localhost:63799/workshop-caching/1-introduction/1.2-architecture/" selected>English</option>
+                    
+                  
+              
+                  
+              
+          
+              
+              
+                  
+              
+                  
+                    
+                    
+                      <option id="vi" value="http://localhost:63799/workshop-caching/vi/1-introduction/1.2-architecture/">Tiếng Việt</option>
+                    
+                  
+              
+          
+        </select>
+        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+          width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
+          <g>
+            <g id="arrow-drop-down">
+              <polygon points="0,63.75 127.5,191.25 255,63.75 		" />
+            </g>
+          </g>
+        </svg>
+        </div>
+        </a>
+        </li>
+      
+
+      
+      </ul>
+    </section>
+    
+    <section id="footer">
+      <section id="shortcuts" style="font-weight: bold;">
+        <h3>More</h3>
+        <ul>
+          
+              <li> 
+                  <a class="padding" href="https://aws.amazon.com/blogs"><i class="fab fa-aws"></i> AWS Study Group - Blog</a>
+              </li>
+          
+              <li> 
+                  <a class="padding" href="https://www.facebook.com/groups/awsstudygroupfcj"><i class="fab fa-facebook"></i> AWS Study Group - FB Group</a>
+              </li>
+          
+        </ul>
+      </section>
+      <section id="prefooter">
+          <hr />
+          <ul>
+            <li>
+              <a class="padding">
+                <i class="fas fa-language fa-fw"></i>
+                <div class="select-style">
+                  <select id="select-language" onchange="changeLanguage()">
+                    
+                      <option value="en" selected>
+                        English
+                      </option>
+                    
+                      <option value="vi" >
+                        Tiếng Việt
+                      </option>
+                    
+                  </select>
+                  <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
+                    <g>
+                      <g id="arrow-drop-down">
+                        <polygon points="0,63.75 127.5,191.25 255,63.75" />
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="padding" href="#" data-clear-history-toggle=""><i class="fas fa-history fa-fw"></i> Clear History</a>
+            </li>
+          </ul>
+        </section>
+        <section id="footer">
+          <left>
+            <b>Workshop</b><br />
+            <img src="https://hitwebcounter.com/counter/counter.php?page=7831196&style=0038&nbdigits=9&type=page&initCount=0" title="Migrate" alt="web counter" border="0" /><br />
+            <b><a href="https://cloudjourney.awsstudygroup.com/">Cloud Journey</a></b><br />
+            <img src="https://hitwebcounter.com/counter/counter.php?page=7830807&style=0038&nbdigits=9&type=page&initCount=0" title="Total CLoud Journey" alt="web counter" border="0" />
+          </left>
+          <left>
+            <br /><br />
+            <b>Last Updated</b><br />
+            <i><font color="orange">27-7-2025</font></i>
+          </left>
+          <left>
+            <br /><br />
+            <b>Team</b><br />
+            <i><br /><a href="https://www.linkedin.com/in/jotaguy" style="color: orange">Gia Hưng</a><br /></i>
+          </left>
+          <script async defer src="https://buttons.github.io/buttons.js"></script>
+        </section>
+
+    </section>
+  </div>
+</nav>
+
+
+
+
+        <section id="body">
+        <div id="overlay"></div>
+        <div class="padding highlightable">
+              
+              <div>
+                <div id="top-bar">
+                
+                
+                <div id="breadcrumbs" itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb">
+                    <span id="sidebar-toggle-span">
+                        <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+                          <i class="fas fa-bars"></i>
+                        </a>
+                    </span>
+                  
+                  <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
+                  
+                  <span class="links">
+                 
+                 
+                    
+          
+          
+            
+            
+          
+          
+            
+            
+          
+          
+            <a href='/workshop-caching/'>In-Memory Database Caching Architecture Workshop</a> > <a href='/workshop-caching/1-introduction/'>1. Introduction</a> > 1.2 Architecture Overview
+          
+        
+          
+        
+          
+        
+                 
+                  </span>
+                </div>
+                
+                    <div class="progress">
+    <div class="wrapper">
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#complete-architecture-diagram">Complete Architecture Diagram</a></li>
+    <li><a href="#layer-0-cloudfront-global-edge-cache">Layer 0: CloudFront (Global Edge Cache)</a>
+      <ul>
+        <li><a href="#purpose">Purpose</a></li>
+        <li><a href="#characteristics">Characteristics</a></li>
+        <li><a href="#benefits">Benefits</a></li>
+      </ul>
+    </li>
+    <li><a href="#layer-1-elasticache-redis-application-cache">Layer 1: ElastiCache Redis (Application Cache)</a>
+      <ul>
+        <li><a href="#purpose-1">Purpose</a></li>
+        <li><a href="#characteristics-1">Characteristics</a></li>
+        <li><a href="#benefits-1">Benefits</a></li>
+      </ul>
+    </li>
+    <li><a href="#layer-2-dynamodb-dax-database-cache">Layer 2: DynamoDB DAX (Database Cache)</a>
+      <ul>
+        <li><a href="#purpose-2">Purpose</a></li>
+        <li><a href="#characteristics-2">Characteristics</a></li>
+        <li><a href="#benefits-2">Benefits</a></li>
+        <li><a href="#cache-population-strategy">Cache Population Strategy</a></li>
+      </ul>
+    </li>
+    <li><a href="#network-architecture">Network Architecture</a>
+      <ul>
+        <li><a href="#vpc-design">VPC Design</a></li>
+        <li><a href="#security-considerations">Security Considerations</a></li>
+      </ul>
+    </li>
+    <li><a href="#performance-characteristics">Performance Characteristics</a>
+      <ul>
+        <li><a href="#expected-performance-metrics">Expected Performance Metrics</a></li>
+        <li><a href="#cache-hit-ratio-optimization">Cache Hit Ratio Optimization</a></li>
+      </ul>
+    </li>
+    <li><a href="#monitoring-and-observability">Monitoring and Observability</a>
+      <ul>
+        <li><a href="#key-metrics-to-monitor">Key Metrics to Monitor</a></li>
+        <li><a href="#alerting-strategy">Alerting Strategy</a></li>
+      </ul>
+    </li>
+    <li><a href="#scalability-considerations">Scalability Considerations</a>
+      <ul>
+        <li><a href="#horizontal-scaling">Horizontal Scaling</a></li>
+        <li><a href="#vertical-scaling">Vertical Scaling</a></li>
+      </ul>
+    </li>
+    <li><a href="#disaster-recovery">Disaster Recovery</a>
+      <ul>
+        <li><a href="#multi-az-deployment">Multi-AZ Deployment</a></li>
+        <li><a href="#backup-strategy">Backup Strategy</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+
+                
+              </div>
+            </div>
+            
+        <div id="head-tags">
+        
+        </div>
+        
+        <div id="body-inner">
+          
+            <h1>
+              
+              
+                Architecture Overview
+              
+            </h1>
+          
+
+        
+
+
+
+	<h2 id="complete-architecture-diagram">Complete Architecture Diagram</h2>
+<p><img src="../../images/architecture-overview.png" alt="Complete Architecture"></p>
+<p>Our multi-layer caching architecture consists of three main caching layers, each serving a specific purpose in the performance optimization strategy.</p>
+<h2 id="layer-0-cloudfront-global-edge-cache">Layer 0: CloudFront (Global Edge Cache)</h2>
+<h3 id="purpose">Purpose</h3>
+<p>CloudFront serves as the global content delivery network (CDN) that caches content at edge locations worldwide.</p>
+<h3 id="characteristics">Characteristics</h3>
+<ul>
+<li><strong>Latency</strong>: 10-50ms (depending on edge location)</li>
+<li><strong>TTL</strong>: 5 minutes to 24 hours</li>
+<li><strong>Scope</strong>: Global distribution</li>
+<li><strong>Best for</strong>: Static content, API responses, images</li>
+</ul>
+<h3 id="benefits">Benefits</h3>
+<ul>
+<li>Reduces origin server load</li>
+<li>Improves global performance</li>
+<li>Handles traffic spikes</li>
+<li>DDoS protection</li>
+</ul>
+<h2 id="layer-1-elasticache-redis-application-cache">Layer 1: ElastiCache Redis (Application Cache)</h2>
+<h3 id="purpose-1">Purpose</h3>
+<p>Redis provides fast, in-memory caching for frequently accessed application data.</p>
+<h3 id="characteristics-1">Characteristics</h3>
+<ul>
+<li><strong>Latency</strong>: Sub-millisecond</li>
+<li><strong>TTL</strong>: 5 minutes to 1 hour</li>
+<li><strong>Scope</strong>: Regional</li>
+<li><strong>Best for</strong>: Session data, computed results, hot data</li>
+</ul>
+<h3 id="benefits-1">Benefits</h3>
+<ul>
+<li>Extremely fast data access</li>
+<li>Supports complex data structures</li>
+<li>Built-in replication and failover</li>
+<li>Pub/sub messaging capabilities</li>
+</ul>
+<h2 id="layer-2-dynamodb-dax-database-cache">Layer 2: DynamoDB DAX (Database Cache)</h2>
+<h3 id="purpose-2">Purpose</h3>
+<p>DAX provides microsecond-latency caching specifically for DynamoDB operations.</p>
+<h3 id="characteristics-2">Characteristics</h3>
+<ul>
+<li><strong>Latency</strong>: Microseconds</li>
+<li><strong>TTL</strong>: Automatic (write-through)</li>
+<li><strong>Scope</strong>: Regional</li>
+<li><strong>Best for</strong>: DynamoDB queries, hot partitions</li>
+</ul>
+<h3 id="benefits-2">Benefits</h3>
+<ul>
+<li>Seamless DynamoDB integration</li>
+<li>No application code changes required</li>
+<li>Automatic cache management</li>
+<li>Multi-AZ availability</li>
+</ul>
+<h3 id="cache-population-strategy">Cache Population Strategy</h3>
+<ol>
+<li><strong>Cache-Aside Pattern</strong>: Application manages cache population</li>
+<li><strong>Write-Through</strong>: DAX automatically caches writes</li>
+<li><strong>Lazy Loading</strong>: Populate cache on first miss</li>
+<li><strong>Cache Warming</strong>: Pre-populate frequently accessed data</li>
+</ol>
+<h2 id="network-architecture">Network Architecture</h2>
+<h3 id="vpc-design">VPC Design</h3>
+<ul>
+<li><strong>Public Subnets</strong>: Load Balancer, NAT Gateways</li>
+<li><strong>Private Subnets</strong>: Application servers, ElastiCache, DAX</li>
+<li><strong>Multi-AZ</strong>: High availability across availability zones</li>
+<li><strong>Security Groups</strong>: Least-privilege network access</li>
+</ul>
+<h3 id="security-considerations">Security Considerations</h3>
+<ul>
+<li><strong>Encryption</strong>: At rest and in transit</li>
+<li><strong>Network Isolation</strong>: Private subnets for backend services</li>
+<li><strong>IAM Roles</strong>: Service-specific permissions</li>
+<li><strong>Security Groups</strong>: Port-specific access control</li>
+</ul>
+<h2 id="performance-characteristics">Performance Characteristics</h2>
+<h3 id="expected-performance-metrics">Expected Performance Metrics</h3>
+<table>
+  <thead>
+      <tr>
+          <th>Layer</th>
+          <th>Latency</th>
+          <th>Throughput</th>
+          <th>Hit Ratio Target</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>CloudFront</td>
+          <td>10-50ms</td>
+          <td>100K+ RPS</td>
+          <td>80%+</td>
+      </tr>
+      <tr>
+          <td>Redis</td>
+          <td>&lt;1ms</td>
+          <td>100K+ OPS</td>
+          <td>90%+</td>
+      </tr>
+      <tr>
+          <td>DAX</td>
+          <td>&lt;1ms</td>
+          <td>1M+ OPS</td>
+          <td>95%+</td>
+      </tr>
+      <tr>
+          <td>DynamoDB</td>
+          <td>1-10ms</td>
+          <td>Variable</td>
+          <td>N/A</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="cache-hit-ratio-optimization">Cache Hit Ratio Optimization</h3>
+<ul>
+<li><strong>Target Overall Hit Ratio</strong>: 90%+</li>
+<li><strong>Redis Hit Ratio</strong>: 85%+</li>
+<li><strong>DAX Hit Ratio</strong>: 95%+</li>
+<li><strong>CloudFront Hit Ratio</strong>: 80%+</li>
+</ul>
+<h2 id="monitoring-and-observability">Monitoring and Observability</h2>
+<h3 id="key-metrics-to-monitor">Key Metrics to Monitor</h3>
+<ol>
+<li>
+<p><strong>Cache Hit Ratios</strong></p>
+<ul>
+<li>CloudFront cache hit rate</li>
+<li>Redis cache hit/miss ratio</li>
+<li>DAX cache effectiveness</li>
+</ul>
+</li>
+<li>
+<p><strong>Performance Metrics</strong></p>
+<ul>
+<li>Response times per layer</li>
+<li>Throughput per service</li>
+<li>Error rates and timeouts</li>
+</ul>
+</li>
+<li>
+<p><strong>Cost Metrics</strong></p>
+<ul>
+<li>Data transfer costs</li>
+<li>Compute costs per layer</li>
+<li>Storage costs</li>
+</ul>
+</li>
+</ol>
+<h3 id="alerting-strategy">Alerting Strategy</h3>
+<ul>
+<li><strong>Low Cache Hit Rate</strong>: &lt; 80% overall</li>
+<li><strong>High Latency</strong>: &gt; 100ms response time</li>
+<li><strong>Error Rate</strong>: &gt; 1% error rate</li>
+<li><strong>Cost Anomalies</strong>: Unexpected cost increases</li>
+</ul>
+<h2 id="scalability-considerations">Scalability Considerations</h2>
+<h3 id="horizontal-scaling">Horizontal Scaling</h3>
+<ul>
+<li><strong>Application Tier</strong>: Auto Scaling Groups</li>
+<li><strong>Cache Tier</strong>: Redis cluster mode</li>
+<li><strong>Database Tier</strong>: DynamoDB auto-scaling</li>
+</ul>
+<h3 id="vertical-scaling">Vertical Scaling</h3>
+<ul>
+<li><strong>Instance Types</strong>: Upgrade based on memory/CPU needs</li>
+<li><strong>Cache Size</strong>: Increase memory allocation</li>
+<li><strong>Network</strong>: Enhanced networking for high throughput</li>
+</ul>
+<h2 id="disaster-recovery">Disaster Recovery</h2>
+<h3 id="multi-az-deployment">Multi-AZ Deployment</h3>
+<ul>
+<li><strong>ElastiCache</strong>: Cross-AZ replication</li>
+<li><strong>DAX</strong>: Multi-AZ cluster nodes</li>
+<li><strong>DynamoDB</strong>: Global tables (optional)</li>
+<li><strong>Application</strong>: Multi-AZ deployment</li>
+</ul>
+<h3 id="backup-strategy">Backup Strategy</h3>
+<ul>
+<li><strong>DynamoDB</strong>: Point-in-time recovery</li>
+<li><strong>ElastiCache</strong>: Automated backups</li>
+<li><strong>Application</strong>: AMI snapshots</li>
+<li><strong>Configuration</strong>: Infrastructure as Code</li>
+</ul>
+
+<div class="notices tip" ><p>This architecture is designed for high availability, performance, and cost optimization. Each layer serves a specific purpose in the overall caching strategy.</p>
+</div>
+
+<p>Now that you understand the architecture, let&rsquo;s start building it step by step!</p>
+
+
+
+
+
+<footer class=" footline" >
+	
+</footer>
+
+        
+        </div>
+        
+
+      </div>
+
+    <div id="navigation">
+        
+        
+
+        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+
+        
+
+
+	 
+	 
+		
+			<a class="nav nav-prev" href="/workshop-caching/1-introduction/1.1-overview/" title="1.1 Workshop Overview"> <i class="fa fa-chevron-left"></i></a>
+		
+		
+			<a class="nav nav-next" href="/workshop-caching/2-setup-vpc/" title="2. Setup VPC and Network Infrastructure" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
+		
+	
+    </div>
+
+    </section>
+
+    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
+      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
+    </div>
+    <script src="/workshop-caching/js/clipboard.min.js?1754898188"></script>
+    <script src="/workshop-caching/js/perfect-scrollbar.min.js?1754898188"></script>
+    <script src="/workshop-caching/js/perfect-scrollbar.jquery.min.js?1754898188"></script>
+    <script src="/workshop-caching/js/jquery.sticky.js?1754898188"></script>
+    <script src="/workshop-caching/js/featherlight.min.js?1754898188"></script>
+    <script src="/workshop-caching/js/highlight.pack.js?1754898188"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="/workshop-caching/js/modernizr.custom-3.6.0.js?1754898188"></script>
+    <script src="/workshop-caching/js/learn.js?1754898188"></script>
+    <script src="/workshop-caching/js/hugo-learn.js?1754898188"></script>
+    <script src="/workshop-caching/js/language-switcher.js?1754898188"></script>
+    <script src="/workshop-caching/js/multilingual.js?1754898188"></script>
+    
+        
+            <script src="/workshop-caching/mermaid/mermaid.js?1754898188"></script>
+        
+        <script>
+            mermaid.initialize({ startOnLoad: true });
+        </script>
+    
+    
+
+  </body>
+</html>

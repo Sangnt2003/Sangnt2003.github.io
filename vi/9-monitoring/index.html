@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="vi" class="js csstransforms3d">
+  <head><script src="/workshop-caching/livereload.js?mindelay=10&amp;v=2&amp;port=63799&amp;path=workshop-caching/livereload" data-no-instant defer></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Hugo 0.147.9">
+    <meta name="description" content="">
+
+
+    <link rel="icon" href="/workshop-caching/images/favicon.png" type="image/png">
+
+    <title>9. Giám Sát và Cảnh Báo :: Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</title>
+
+    
+    <link href="/workshop-caching/css/nucleus.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/fontawesome-all.min.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/hybrid.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/featherlight.min.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/perfect-scrollbar.min.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/auto-complete.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/atom-one-dark-reasonable.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/theme.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/tabs.css?1754898188" rel="stylesheet">
+    <link href="/workshop-caching/css/hugo-theme.css?1754898188" rel="stylesheet">
+    
+    
+
+    <script src="/workshop-caching/js/jquery-3.3.1.min.js?1754898188"></script>
+
+    <style>
+      :root #header + #content > #left > #rlblock_left{
+          display:none !important;
+      }
+      
+    </style>
+    
+  </head>
+  <body class="" data-url="/workshop-caching/vi/9-monitoring/">
+    <nav id="sidebar" class="">
+
+
+
+  <div id="header-wrapper">
+    <div id="header">
+      <a
+  id="logo"
+  href='/workshop-caching'
+>
+  <svg
+    id="Layer_1"
+    data-name="Layer 1"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 60 30"
+    width="30%"
+  >
+    <defs>
+      <style>
+        .cls-1 {
+          fill: #fff;
+        }
+        .cls-2 {
+          fill: #f90;
+          fill-rule: evenodd;
+        }
+      </style>
+    </defs>
+    <title>AWS-Logo_White-Color</title>
+    <path
+      class="cls-1"
+      d="M14.09,10.85a4.7,4.7,0,0,0,.19,1.48,7.73,7.73,0,0,0,.54,1.19.77.77,0,0,1,.12.38.64.64,0,0,1-.32.49l-1,.7a.83.83,0,0,1-.44.15.69.69,0,0,1-.49-.23,3.8,3.8,0,0,1-.6-.77q-.25-.42-.51-1a6.14,6.14,0,0,1-4.89,2.3,4.54,4.54,0,0,1-3.32-1.19,4.27,4.27,0,0,1-1.22-3.2A4.28,4.28,0,0,1,3.61,7.75,6.06,6.06,0,0,1,7.69,6.46a12.47,12.47,0,0,1,1.76.13q.92.13,1.91.36V5.73a3.65,3.65,0,0,0-.79-2.66A3.81,3.81,0,0,0,7.86,2.3a7.71,7.71,0,0,0-1.79.22,12.78,12.78,0,0,0-1.79.57,4.55,4.55,0,0,1-.58.22l-.26,0q-.35,0-.35-.52V2a1.09,1.09,0,0,1,.12-.58,1.2,1.2,0,0,1,.47-.35A10.88,10.88,0,0,1,5.77.32,10.19,10.19,0,0,1,8.36,0a6,6,0,0,1,4.35,1.35,5.49,5.49,0,0,1,1.38,4.09ZM7.34,13.38a5.36,5.36,0,0,0,1.72-.31A3.63,3.63,0,0,0,10.63,12,2.62,2.62,0,0,0,11.19,11a5.63,5.63,0,0,0,.16-1.44v-.7a14.35,14.35,0,0,0-1.53-.28,12.37,12.37,0,0,0-1.56-.1,3.84,3.84,0,0,0-2.47.67A2.34,2.34,0,0,0,5,11a2.35,2.35,0,0,0,.61,1.76A2.4,2.4,0,0,0,7.34,13.38Zm13.35,1.8a1,1,0,0,1-.64-.16,1.3,1.3,0,0,1-.35-.65L15.81,1.51a3,3,0,0,1-.15-.67.36.36,0,0,1,.41-.41H17.7a1,1,0,0,1,.65.16,1.4,1.4,0,0,1,.33.65l2.79,11,2.59-11A1.17,1.17,0,0,1,24.39.6a1.1,1.1,0,0,1,.67-.16H26.4a1.1,1.1,0,0,1,.67.16,1.17,1.17,0,0,1,.32.65L30,12.39,32.88,1.25A1.39,1.39,0,0,1,33.22.6a1,1,0,0,1,.65-.16h1.54a.36.36,0,0,1,.41.41,1.36,1.36,0,0,1,0,.26,3.64,3.64,0,0,1-.12.41l-4,12.86a1.3,1.3,0,0,1-.35.65,1,1,0,0,1-.64.16H29.25a1,1,0,0,1-.67-.17,1.26,1.26,0,0,1-.32-.67L25.67,3.64,23.11,14.34a1.26,1.26,0,0,1-.32.67,1,1,0,0,1-.67.17Zm21.36.44a11.28,11.28,0,0,1-2.56-.29,7.44,7.44,0,0,1-1.92-.67,1,1,0,0,1-.61-.93v-.84q0-.52.38-.52a.9.9,0,0,1,.31.06l.42.17a8.77,8.77,0,0,0,1.83.58,9.78,9.78,0,0,0,2,.2,4.48,4.48,0,0,0,2.43-.55,1.76,1.76,0,0,0,.86-1.57,1.61,1.61,0,0,0-.45-1.16A4.29,4.29,0,0,0,43,9.22l-2.41-.76A5.15,5.15,0,0,1,38,6.78a3.94,3.94,0,0,1-.83-2.41,3.7,3.7,0,0,1,.45-1.85,4.47,4.47,0,0,1,1.19-1.37A5.27,5.27,0,0,1,40.51.29,7.4,7.4,0,0,1,42.6,0a8.87,8.87,0,0,1,1.12.07q.57.07,1.08.19t.95.26a4.27,4.27,0,0,1,.7.29,1.59,1.59,0,0,1,.49.41.94.94,0,0,1,.15.55v.79q0,.52-.38.52a1.76,1.76,0,0,1-.64-.2,7.74,7.74,0,0,0-3.2-.64,4.37,4.37,0,0,0-2.21.47,1.6,1.6,0,0,0-.79,1.48,1.58,1.58,0,0,0,.49,1.18,4.94,4.94,0,0,0,1.83.92L44.55,7a5.08,5.08,0,0,1,2.57,1.6A3.76,3.76,0,0,1,47.9,11a4.21,4.21,0,0,1-.44,1.93,4.4,4.4,0,0,1-1.21,1.47,5.43,5.43,0,0,1-1.85.93A8.25,8.25,0,0,1,42.05,15.62Z"
+    ></path>
+    <path
+      class="cls-2"
+      d="M45.19,23.81C39.72,27.85,31.78,30,25,30A36.64,36.64,0,0,1,.22,20.57c-.51-.46-.06-1.09.56-.74A49.78,49.78,0,0,0,25.53,26.4,49.23,49.23,0,0,0,44.4,22.53C45.32,22.14,46.1,23.14,45.19,23.81Z"
+    ></path>
+    <path
+      class="cls-2"
+      d="M47.47,21.21c-.7-.9-4.63-.42-6.39-.21-.53.06-.62-.4-.14-.74,3.13-2.2,8.27-1.57,8.86-.83s-.16,5.89-3.09,8.35c-.45.38-.88.18-.68-.32C46.69,25.8,48.17,22.11,47.47,21.21Z"
+    ></path>
+  </svg>
+</a>
+
+    </div>
+    
+        <div class="searchbox">
+    <label for="search-by"><i class="fas fa-search"></i></label>
+    <input data-search-input id="search-by" type="search" placeholder="Search...">
+    <span data-search-clear=""><i class="fas fa-times"></i></span>
+</div>
+
+<script type="text/javascript" src="/workshop-caching/js/lunr.min.js?1754898188"></script>
+<script type="text/javascript" src="/workshop-caching/js/auto-complete.js?1754898188"></script>
+<script type="text/javascript">
+    var baseurl = "http:\/\/localhost:63799\/workshop-caching\/\/vi";
+</script>
+<script type="text/javascript" src="/workshop-caching/js/search.js?1754898188"></script>
+
+    
+  </div>
+
+
+    <div class="highlightable">
+    <ul class="topics">
+
+        
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/1-introduction/" title="1. Giới Thiệu" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/vi/1-introduction/">
+          <b></b>1. Giới Thiệu
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/1-introduction/1.1-overview/" title="1.1 Tổng Quan Workshop" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/vi/1-introduction/1.1-overview/">
+          <b></b>1.1 Tổng Quan Workshop
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/1-introduction/1.2-architecture/" title="1.2 Tổng Quan Kiến Trúc" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/vi/1-introduction/1.2-architecture/">
+          <b></b>1.2 Tổng Quan Kiến Trúc
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/2-setup-vpc/" title="2. Thiết Lập VPC và Hạ Tầng Mạng" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/vi/2-setup-vpc/">
+          <b></b>2. Thiết Lập VPC và Hạ Tầng Mạng
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/2-setup-vpc/2.1-create-vpc/" title="2.1 Tạo VPC" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/vi/2-setup-vpc/2.1-create-vpc/">
+          <b></b>2.1 Tạo VPC
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/2-setup-vpc/2.2-security-groups/" title="2.2 Tạo Security Groups" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/vi/2-setup-vpc/2.2-security-groups/">
+          <b></b>2.2 Tạo Security Groups
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/3-setup-dynamodb/" title="3. Thiết Lập DynamoDB và DAX" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/vi/3-setup-dynamodb/">
+          <b></b>3. Thiết Lập DynamoDB và DAX
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/3-setup-dynamodb/3.1-create-table/" title="3.1 Tạo DynamoDB Table" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/vi/3-setup-dynamodb/3.1-create-table/">
+          <b></b>3.1 Tạo DynamoDB Table
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/3-setup-dynamodb/3.2-setup-dax/" title="3.2 Thiết Lập DynamoDB DAX" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/vi/3-setup-dynamodb/3.2-setup-dax/">
+          <b></b>3.2 Thiết Lập DynamoDB DAX
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/4-setup-elasticache/" title="4. Thiết Lập ElastiCache Redis" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/vi/4-setup-elasticache/">
+          <b></b>4. Thiết Lập ElastiCache Redis
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/5-setup-application/" title="5. Thiết Lập Application" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/vi/5-setup-application/">
+          <b></b>5. Thiết Lập Application
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/5-setup-application/5.1-launch-ec2/" title="5.1 Khởi Chạy EC2 Instance" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/vi/5-setup-application/5.1-launch-ec2/">
+          <b></b>5.1 Khởi Chạy EC2 Instance
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/5-setup-application/5.2-deploy-app/" title="5.2 Triển Khai Application" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/vi/5-setup-application/5.2-deploy-app/">
+          <b></b>5.2 Triển Khai Application
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/6-setup-loadbalancer/" title="6. Thiết Lập Application Load Balancer" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/vi/6-setup-loadbalancer/">
+          <b></b>6. Thiết Lập Application Load Balancer
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/7-setup-cloudfront/" title="7. Thiết Lập CloudFront CDN" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/vi/7-setup-cloudfront/">
+          <b></b>7. Thiết Lập CloudFront CDN
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/8-performance-testing/" title="8. Kiểm Tra Hiệu Suất" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/vi/8-performance-testing/">
+          <b></b>8. Kiểm Tra Hiệu Suất
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/9-monitoring/" title="9. Giám Sát và Cảnh Báo" class="dd-item
+        
+        active
+        
+        ">
+      <a href="/workshop-caching/vi/9-monitoring/">
+          <b></b>9. Giám Sát và Cảnh Báo
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/workshop-caching/vi/10-cleanup/" title="10. Hướng Dẫn Dọn Dẹp Tài Nguyên" class="dd-item
+        
+        
+        
+        ">
+      <a href="/workshop-caching/vi/10-cleanup/">
+          <b></b>10. Hướng Dẫn Dọn Dẹp Tài Nguyên
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+        
+    </ul>
+
+    
+    
+
+    
+    <section id="prefooter">
+      <hr/>
+      <ul>
+      
+        <li>
+          <a class="padding">
+            <i class="fas fa-language fa-fw"></i>
+          <div class="select-style">
+            <select id="select-language" onchange="location = this.value;">
+          
+          
+          
+              
+              
+                  
+                    
+                    
+                      <option id="en" value="http://localhost:63799/workshop-caching/9-monitoring/">English</option>
+                    
+                  
+              
+                  
+              
+          
+              
+              
+                  
+              
+                  
+                    
+                    
+                      <option id="vi" value="http://localhost:63799/workshop-caching/vi/9-monitoring/" selected>Tiếng Việt</option>
+                    
+                  
+              
+          
+        </select>
+        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+          width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
+          <g>
+            <g id="arrow-drop-down">
+              <polygon points="0,63.75 127.5,191.25 255,63.75 		" />
+            </g>
+          </g>
+        </svg>
+        </div>
+        </a>
+        </li>
+      
+
+      
+      </ul>
+    </section>
+    
+    <section id="footer">
+      <section id="shortcuts" style="font-weight: bold;">
+        <h3>More</h3>
+        <ul>
+          
+              <li> 
+                  <a class="padding" href="https://aws.amazon.com/blogs"><i class="fab fa-aws"></i> AWS Study Group - Blog</a>
+              </li>
+          
+              <li> 
+                  <a class="padding" href="https://www.facebook.com/groups/awsstudygroupfcj"><i class="fab fa-facebook"></i> AWS Study Group - FB Group</a>
+              </li>
+          
+        </ul>
+      </section>
+      <section id="prefooter">
+          <hr />
+          <ul>
+            <li>
+              <a class="padding">
+                <i class="fas fa-language fa-fw"></i>
+                <div class="select-style">
+                  <select id="select-language" onchange="changeLanguage()">
+                    
+                      <option value="en" >
+                        English
+                      </option>
+                    
+                      <option value="vi" selected>
+                        Tiếng Việt
+                      </option>
+                    
+                  </select>
+                  <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
+                    <g>
+                      <g id="arrow-drop-down">
+                        <polygon points="0,63.75 127.5,191.25 255,63.75" />
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="padding" href="#" data-clear-history-toggle=""><i class="fas fa-history fa-fw"></i> Clear History</a>
+            </li>
+          </ul>
+        </section>
+        <section id="footer">
+          <left>
+            <b>Workshop</b><br />
+            <img src="https://hitwebcounter.com/counter/counter.php?page=7831196&style=0038&nbdigits=9&type=page&initCount=0" title="Migrate" alt="web counter" border="0" /><br />
+            <b><a href="https://cloudjourney.awsstudygroup.com/">Cloud Journey</a></b><br />
+            <img src="https://hitwebcounter.com/counter/counter.php?page=7830807&style=0038&nbdigits=9&type=page&initCount=0" title="Total CLoud Journey" alt="web counter" border="0" />
+          </left>
+          <left>
+            <br /><br />
+            <b>Last Updated</b><br />
+            <i><font color="orange">27-7-2025</font></i>
+          </left>
+          <left>
+            <br /><br />
+            <b>Team</b><br />
+            <i><br /><a href="https://www.linkedin.com/in/jotaguy" style="color: orange">Gia Hưng</a><br /></i>
+          </left>
+          <script async defer src="https://buttons.github.io/buttons.js"></script>
+        </section>
+
+    </section>
+  </div>
+</nav>
+
+
+
+
+        <section id="body">
+        <div id="overlay"></div>
+        <div class="padding highlightable">
+              
+              <div>
+                <div id="top-bar">
+                
+                
+                <div id="breadcrumbs" itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb">
+                    <span id="sidebar-toggle-span">
+                        <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+                          <i class="fas fa-bars"></i>
+                        </a>
+                    </span>
+                  
+                  <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
+                  
+                  <span class="links">
+                 
+                 
+                    
+          
+          
+            
+            
+          
+          
+            <a href='/workshop-caching/vi/'>Workshop Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</a> > 9. Giám Sát và Cảnh Báo
+          
+        
+          
+        
+                 
+                  </span>
+                </div>
+                
+                    <div class="progress">
+    <div class="wrapper">
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#bước-1-tạo-cloudwatch-dashboard">Bước 1: Tạo CloudWatch Dashboard</a>
+      <ul>
+        <li><a href="#điều-hướng-đến-cloudwatch-console">Điều Hướng Đến CloudWatch Console</a></li>
+        <li><a href="#cấu-hình-dashboard">Cấu Hình Dashboard</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-2-thêm-application-load-balancer-metrics">Bước 2: Thêm Application Load Balancer Metrics</a>
+      <ul>
+        <li><a href="#thêm-alb-widget">Thêm ALB Widget</a></li>
+        <li><a href="#thêm-alb-error-rate-widget">Thêm ALB Error Rate Widget</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-3-thêm-elasticache-redis-metrics">Bước 3: Thêm ElastiCache Redis Metrics</a>
+      <ul>
+        <li><a href="#thêm-redis-performance-widget">Thêm Redis Performance Widget</a></li>
+        <li><a href="#thêm-redis-cache-effectiveness-widget">Thêm Redis Cache Effectiveness Widget</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-4-thêm-dynamodb-và-dax-metrics">Bước 4: Thêm DynamoDB và DAX Metrics</a>
+      <ul>
+        <li><a href="#thêm-dynamodb-widget">Thêm DynamoDB Widget</a></li>
+        <li><a href="#thêm-dax-widget">Thêm DAX Widget</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-5-thêm-cloudfront-metrics">Bước 5: Thêm CloudFront Metrics</a>
+      <ul>
+        <li><a href="#thêm-cloudfront-performance-widget">Thêm CloudFront Performance Widget</a></li>
+        <li><a href="#thêm-cloudfront-error-widget">Thêm CloudFront Error Widget</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-6-thêm-custom-application-metrics">Bước 6: Thêm Custom Application Metrics</a>
+      <ul>
+        <li><a href="#tạo-custom-metrics-script">Tạo Custom Metrics Script</a></li>
+        <li><a href="#thiết-lập-cron-job">Thiết Lập Cron Job</a></li>
+        <li><a href="#thêm-custom-metrics-widget">Thêm Custom Metrics Widget</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-7-tạo-cloudwatch-alarms">Bước 7: Tạo CloudWatch Alarms</a>
+      <ul>
+        <li><a href="#tạo-high-response-time-alarm">Tạo High Response Time Alarm</a></li>
+        <li><a href="#tạo-low-cache-hit-rate-alarm">Tạo Low Cache Hit Rate Alarm</a></li>
+        <li><a href="#tạo-high-error-rate-alarm">Tạo High Error Rate Alarm</a></li>
+        <li><a href="#tạo-redis-high-cpu-alarm">Tạo Redis High CPU Alarm</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-8-cấu-hình-log-insights">Bước 8: Cấu Hình Log Insights</a>
+      <ul>
+        <li><a href="#thiết-lập-log-groups">Thiết Lập Log Groups</a></li>
+        <li><a href="#cấu-hình-cloudwatch-agent">Cấu Hình CloudWatch Agent</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-9-tạo-log-insights-queries">Bước 9: Tạo Log Insights Queries</a>
+      <ul>
+        <li><a href="#tạo-performance-query">Tạo Performance Query</a></li>
+        <li><a href="#tạo-error-analysis-query">Tạo Error Analysis Query</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-10-finalize-dashboard">Bước 10: Finalize Dashboard</a>
+      <ul>
+        <li><a href="#sắp-xếp-dashboard-widgets">Sắp Xếp Dashboard Widgets</a></li>
+        <li><a href="#lưu-dashboard">Lưu Dashboard</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-11-test-monitoring-setup">Bước 11: Test Monitoring Setup</a>
+      <ul>
+        <li><a href="#tạo-test-traffic">Tạo Test Traffic</a></li>
+        <li><a href="#xác-minh-metrics">Xác Minh Metrics</a></li>
+        <li><a href="#test-alarms">Test Alarms</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-12-ghi-lại-monitoring-setup">Bước 12: Ghi Lại Monitoring Setup</a>
+      <ul>
+        <li><a href="#monitoring-configuration-summary">Monitoring Configuration Summary</a></li>
+        <li><a href="#dashboard-information">Dashboard Information</a></li>
+        <li><a href="#alarms-configured">Alarms Configured</a></li>
+        <li><a href="#custom-metrics">Custom Metrics</a></li>
+        <li><a href="#log-configuration">Log Configuration</a></li>
+      </ul>
+    </li>
+    <li><a href="#khắc-phục-monitoring-issues">Khắc Phục Monitoring Issues</a>
+      <ul>
+        <li><a href="#vấn-đề-metrics-không-xuất-hiện">Vấn Đề: Metrics Không Xuất Hiện</a></li>
+        <li><a href="#vấn-đề-alarms-không-trigger">Vấn Đề: Alarms Không Trigger</a></li>
+        <li><a href="#vấn-đề-custom-metrics-missing">Vấn Đề: Custom Metrics Missing</a></li>
+      </ul>
+    </li>
+    <li><a href="#best-practices-cho-production">Best Practices cho Production</a>
+      <ul>
+        <li><a href="#monitoring-strategy">Monitoring Strategy</a></li>
+        <li><a href="#alert-management">Alert Management</a></li>
+      </ul>
+    </li>
+    <li><a href="#các-bước-tiếp-theo">Các Bước Tiếp Theo</a>
+      <ul>
+        <li><a href="#monitoring-benefits-achieved">Monitoring Benefits Achieved:</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+
+                
+              </div>
+            </div>
+            
+        <div id="head-tags">
+        
+        </div>
+        
+        <div id="body-inner">
+          
+            <h1>
+              
+              
+                Giám Sát và Cảnh Báo
+              
+            </h1>
+          
+
+        
+
+
+
+	<p>Trong bước này, chúng ta sẽ tạo một CloudWatch dashboard toàn diện để giám sát kiến trúc multi-layer caching của chúng ta và thiết lập automated alerts cho proactive issue detection.</p>
+<h2 id="bước-1-tạo-cloudwatch-dashboard">Bước 1: Tạo CloudWatch Dashboard</h2>
+<h3 id="điều-hướng-đến-cloudwatch-console">Điều Hướng Đến CloudWatch Console</h3>
+<ol>
+<li>
+<p>Mở <strong>AWS Management Console</strong></p>
+</li>
+<li>
+<p>Điều hướng đến <strong>CloudWatch service</strong></p>
+</li>
+<li>
+<p>Nhấp <strong>Dashboards</strong> ở navigation bên trái</p>
+</li>
+<li>
+<p>Nhấp <strong>Create dashboard</strong></p>
+</li>
+</ol>
+<h3 id="cấu-hình-dashboard">Cấu Hình Dashboard</h3>
+<ol start="5">
+<li>
+<p>Cấu hình dashboard settings:</p>
+<ul>
+<li><strong>Dashboard name</strong>: <code>MultiLayerCachingDashboard</code></li>
+<li><strong>Description</strong>: <code>Monitoring dashboard for multi-layer caching workshop</code></li>
+</ul>
+</li>
+<li>
+<p>Nhấp <strong>Create dashboard</strong></p>
+</li>
+</ol>
+<h2 id="bước-2-thêm-application-load-balancer-metrics">Bước 2: Thêm Application Load Balancer Metrics</h2>
+<h3 id="thêm-alb-widget">Thêm ALB Widget</h3>
+<ol>
+<li>
+<p>Nhấp <strong>Add widget</strong></p>
+</li>
+<li>
+<p>Chọn <strong>Line</strong> chart type</p>
+</li>
+<li>
+<p>Cấu hình ALB metrics:</p>
+<ul>
+<li><strong>Metrics</strong>: AWS/ApplicationELB</li>
+<li><strong>Metric name</strong>: RequestCount, TargetResponseTime</li>
+<li><strong>LoadBalancer</strong>: Chọn <code>caching-app-alb</code> của bạn</li>
+</ul>
+</li>
+<li>
+<p>Cấu hình widget settings:</p>
+<ul>
+<li><strong>Widget title</strong>: <code>Application Load Balancer Performance</code></li>
+<li><strong>Y-axis</strong>: Left axis cho RequestCount, Right axis cho ResponseTime</li>
+<li><strong>Period</strong>: 5 minutes</li>
+</ul>
+</li>
+<li>
+<p>Nhấp <strong>Create widget</strong></p>
+</li>
+</ol>
+<h3 id="thêm-alb-error-rate-widget">Thêm ALB Error Rate Widget</h3>
+<ol start="6">
+<li>
+<p>Thêm widget khác cho error rates:</p>
+<ul>
+<li><strong>Widget type</strong>: Line</li>
+<li><strong>Metrics</strong>: HTTPCode_Target_4XX_Count, HTTPCode_Target_5XX_Count</li>
+<li><strong>Title</strong>: <code>Application Error Rates</code></li>
+</ul>
+</li>
+</ol>
+<h2 id="bước-3-thêm-elasticache-redis-metrics">Bước 3: Thêm ElastiCache Redis Metrics</h2>
+<h3 id="thêm-redis-performance-widget">Thêm Redis Performance Widget</h3>
+<ol>
+<li>
+<p>Thêm widget mới cho Redis metrics:</p>
+<ul>
+<li><strong>Widget type</strong>: Line</li>
+<li><strong>Metrics</strong>: AWS/ElastiCache</li>
+<li><strong>Metric names</strong>:
+<ul>
+<li>CPUUtilization</li>
+<li>DatabaseMemoryUsagePercentage</li>
+<li>NetworkBytesIn</li>
+<li>NetworkBytesOut</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Filter theo Redis cluster của bạn:</p>
+<ul>
+<li><strong>CacheClusterId</strong>: <code>product-cache-001</code></li>
+</ul>
+</li>
+<li>
+<p>Cấu hình widget:</p>
+<ul>
+<li><strong>Title</strong>: <code>Redis Performance Metrics</code></li>
+<li><strong>Period</strong>: 5 minutes</li>
+</ul>
+</li>
+</ol>
+<h3 id="thêm-redis-cache-effectiveness-widget">Thêm Redis Cache Effectiveness Widget</h3>
+<ol start="4">
+<li>
+<p>Thêm cache hit/miss metrics:</p>
+<ul>
+<li><strong>Widget type</strong>: Line</li>
+<li><strong>Metrics</strong>: CacheHits, CacheMisses, Evictions</li>
+<li><strong>Title</strong>: <code>Redis Cache Effectiveness</code></li>
+</ul>
+</li>
+</ol>
+<h2 id="bước-4-thêm-dynamodb-và-dax-metrics">Bước 4: Thêm DynamoDB và DAX Metrics</h2>
+<h3 id="thêm-dynamodb-widget">Thêm DynamoDB Widget</h3>
+<ol>
+<li>
+<p>Thêm DynamoDB performance metrics:</p>
+<ul>
+<li><strong>Widget type</strong>: Line</li>
+<li><strong>Metrics</strong>: AWS/DynamoDB</li>
+<li><strong>Metric names</strong>:
+<ul>
+<li>ConsumedReadCapacityUnits</li>
+<li>ConsumedWriteCapacityUnits</li>
+<li>ThrottledRequests</li>
+</ul>
+</li>
+<li><strong>TableName</strong>: ProductCatalog</li>
+</ul>
+</li>
+</ol>
+<h3 id="thêm-dax-widget">Thêm DAX Widget</h3>
+<ol start="2">
+<li>
+<p>Thêm DAX performance metrics:</p>
+<ul>
+<li><strong>Widget type</strong>: Line</li>
+<li><strong>Metrics</strong>: AWS/DAX</li>
+<li><strong>Metric names</strong>:
+<ul>
+<li>CPUUtilization</li>
+<li>NetworkPacketsIn</li>
+<li>NetworkPacketsOut</li>
+</ul>
+</li>
+<li><strong>ClusterName</strong>: product-dax-cluster</li>
+</ul>
+</li>
+</ol>
+<h2 id="bước-5-thêm-cloudfront-metrics">Bước 5: Thêm CloudFront Metrics</h2>
+<h3 id="thêm-cloudfront-performance-widget">Thêm CloudFront Performance Widget</h3>
+<ol>
+<li>
+<p>Thêm CloudFront metrics:</p>
+<ul>
+<li><strong>Widget type</strong>: Line</li>
+<li><strong>Metrics</strong>: AWS/CloudFront</li>
+<li><strong>Metric names</strong>:
+<ul>
+<li>Requests</li>
+<li>BytesDownloaded</li>
+<li>CacheHitRate</li>
+<li>OriginLatency</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Filter theo distribution của bạn:</p>
+<ul>
+<li><strong>DistributionId</strong>: CloudFront distribution ID của bạn</li>
+</ul>
+</li>
+</ol>
+<h3 id="thêm-cloudfront-error-widget">Thêm CloudFront Error Widget</h3>
+<ol start="3">
+<li>
+<p>Thêm CloudFront error metrics:</p>
+<ul>
+<li><strong>Widget type</strong>: Line</li>
+<li><strong>Metrics</strong>: 4xxErrorRate, 5xxErrorRate</li>
+<li><strong>Title</strong>: <code>CloudFront Error Rates</code></li>
+</ul>
+</li>
+</ol>
+<h2 id="bước-6-thêm-custom-application-metrics">Bước 6: Thêm Custom Application Metrics</h2>
+<h3 id="tạo-custom-metrics-script">Tạo Custom Metrics Script</h3>
+<ol>
+<li>SSH vào EC2 instance của bạn và tạo custom metrics script:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>nano send-custom-metrics.sh
+</span></span></code></pre></div><ol start="2">
+<li>Thêm custom metrics script:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Get application statistics</span>
+</span></span><span style="display:flex;"><span>STATS<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>curl -s http://localhost:3000/stats<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Extract metrics using jq</span>
+</span></span><span style="display:flex;"><span>TOTAL_REQUESTS<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo $STATS | jq -r <span style="color:#e6db74">&#39;.total_requests // 0&#39;</span><span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>REDIS_HITS<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo $STATS | jq -r <span style="color:#e6db74">&#39;.redis_hits // 0&#39;</span><span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>DAX_HITS<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo $STATS | jq -r <span style="color:#e6db74">&#39;.dax_hits // 0&#39;</span><span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>DYNAMODB_HITS<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo $STATS | jq -r <span style="color:#e6db74">&#39;.dynamodb_hits // 0&#39;</span><span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>ERRORS<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo $STATS | jq -r <span style="color:#e6db74">&#39;.errors // 0&#39;</span><span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Calculate hit rates</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> $TOTAL_REQUESTS -gt <span style="color:#ae81ff">0</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>    CACHE_HIT_RATE<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;scale=2; (</span>$REDIS_HITS<span style="color:#e6db74"> + </span>$DAX_HITS<span style="color:#e6db74">) * 100 / </span>$TOTAL_REQUESTS<span style="color:#e6db74">&#34;</span> | bc<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>    REDIS_HIT_RATE<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;scale=2; </span>$REDIS_HITS<span style="color:#e6db74"> * 100 / </span>$TOTAL_REQUESTS<span style="color:#e6db74">&#34;</span> | bc<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>    CACHE_HIT_RATE<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>    REDIS_HIT_RATE<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fi</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Send metrics to CloudWatch</span>
+</span></span><span style="display:flex;"><span>aws cloudwatch put-metric-data <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --namespace <span style="color:#e6db74">&#34;CachingApp/Performance&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --metric-data <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    MetricName<span style="color:#f92672">=</span>TotalRequests,Value<span style="color:#f92672">=</span>$TOTAL_REQUESTS,Unit<span style="color:#f92672">=</span>Count <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    MetricName<span style="color:#f92672">=</span>RedisHits,Value<span style="color:#f92672">=</span>$REDIS_HITS,Unit<span style="color:#f92672">=</span>Count <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    MetricName<span style="color:#f92672">=</span>DAXHits,Value<span style="color:#f92672">=</span>$DAX_HITS,Unit<span style="color:#f92672">=</span>Count <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    MetricName<span style="color:#f92672">=</span>DynamoDBHits,Value<span style="color:#f92672">=</span>$DYNAMODB_HITS,Unit<span style="color:#f92672">=</span>Count <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    MetricName<span style="color:#f92672">=</span>Errors,Value<span style="color:#f92672">=</span>$ERRORS,Unit<span style="color:#f92672">=</span>Count <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    MetricName<span style="color:#f92672">=</span>CacheHitRate,Value<span style="color:#f92672">=</span>$CACHE_HIT_RATE,Unit<span style="color:#f92672">=</span>Percent <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    MetricName<span style="color:#f92672">=</span>RedisHitRate,Value<span style="color:#f92672">=</span>$REDIS_HIT_RATE,Unit<span style="color:#f92672">=</span>Percent
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;Custom metrics sent to CloudWatch&#34;</span>
+</span></span></code></pre></div><ol start="3">
+<li>Làm script executable:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>chmod +x send-custom-metrics.sh
+</span></span></code></pre></div><h3 id="thiết-lập-cron-job">Thiết Lập Cron Job</h3>
+<ol start="4">
+<li>Thiết lập cron job để gửi metrics mỗi phút:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Edit crontab</span>
+</span></span><span style="display:flex;"><span>crontab -e
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Add this line to run every minute</span>
+</span></span><span style="display:flex;"><span>* * * * * /home/ec2-user/caching-app/send-custom-metrics.sh
+</span></span></code></pre></div><h3 id="thêm-custom-metrics-widget">Thêm Custom Metrics Widget</h3>
+<ol start="5">
+<li>
+<p>Thêm custom metrics vào dashboard:</p>
+<ul>
+<li><strong>Widget type</strong>: Line</li>
+<li><strong>Metrics</strong>: CachingApp/Performance</li>
+<li><strong>Metric names</strong>: CacheHitRate, RedisHitRate</li>
+<li><strong>Title</strong>: <code>Application Cache Performance</code></li>
+</ul>
+</li>
+</ol>
+<h2 id="bước-7-tạo-cloudwatch-alarms">Bước 7: Tạo CloudWatch Alarms</h2>
+<h3 id="tạo-high-response-time-alarm">Tạo High Response Time Alarm</h3>
+<ol>
+<li>
+<p>Điều hướng đến <strong>Alarms</strong> trong CloudWatch</p>
+</li>
+<li>
+<p>Nhấp <strong>Create alarm</strong></p>
+</li>
+<li>
+<p>Cấu hình ALB response time alarm:</p>
+<ul>
+<li><strong>Metric</strong>: AWS/ApplicationELB &gt; TargetResponseTime</li>
+<li><strong>LoadBalancer</strong>: caching-app-alb</li>
+<li><strong>Statistic</strong>: Average</li>
+<li><strong>Period</strong>: 5 minutes</li>
+</ul>
+</li>
+<li>
+<p>Set alarm conditions:</p>
+<ul>
+<li><strong>Threshold type</strong>: Static</li>
+<li><strong>Condition</strong>: Greater than 500 (milliseconds)</li>
+<li><strong>Datapoints to alarm</strong>: 2 out of 3</li>
+</ul>
+</li>
+<li>
+<p>Cấu hình alarm actions:</p>
+<ul>
+<li><strong>Alarm state trigger</strong>: In alarm</li>
+<li><strong>SNS topic</strong>: Tạo topic mới <code>caching-alerts</code></li>
+<li><strong>Email</strong>: Địa chỉ email của bạn</li>
+</ul>
+</li>
+<li>
+<p>Đặt tên alarm:</p>
+<ul>
+<li><strong>Alarm name</strong>: <code>High-Response-Time-ALB</code></li>
+<li><strong>Description</strong>: <code>ALB response time is above 500ms</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="tạo-low-cache-hit-rate-alarm">Tạo Low Cache Hit Rate Alarm</h3>
+<ol start="7">
+<li>
+<p>Tạo alarm cho low cache hit rate:</p>
+<ul>
+<li><strong>Metric</strong>: CachingApp/Performance &gt; CacheHitRate</li>
+<li><strong>Condition</strong>: Less than 80 (percent)</li>
+<li><strong>Name</strong>: <code>Low-Cache-Hit-Rate</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="tạo-high-error-rate-alarm">Tạo High Error Rate Alarm</h3>
+<ol start="8">
+<li>
+<p>Tạo alarm cho high error rate:</p>
+<ul>
+<li><strong>Metric</strong>: AWS/ApplicationELB &gt; HTTPCode_Target_5XX_Count</li>
+<li><strong>Condition</strong>: Greater than 10 (count)</li>
+<li><strong>Name</strong>: <code>High-Error-Rate-ALB</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="tạo-redis-high-cpu-alarm">Tạo Redis High CPU Alarm</h3>
+<ol start="9">
+<li>
+<p>Tạo alarm cho Redis high CPU:</p>
+<ul>
+<li><strong>Metric</strong>: AWS/ElastiCache &gt; CPUUtilization</li>
+<li><strong>CacheClusterId</strong>: product-cache-001</li>
+<li><strong>Condition</strong>: Greater than 80 (percent)</li>
+<li><strong>Name</strong>: <code>Redis-High-CPU</code></li>
+</ul>
+</li>
+</ol>
+<h2 id="bước-8-cấu-hình-log-insights">Bước 8: Cấu Hình Log Insights</h2>
+<h3 id="thiết-lập-log-groups">Thiết Lập Log Groups</h3>
+<ol>
+<li>
+<p>Điều hướng đến <strong>Log groups</strong> trong CloudWatch</p>
+</li>
+<li>
+<p>Tạo log group cho application logs:</p>
+<ul>
+<li><strong>Log group name</strong>: <code>/aws/ec2/caching-app</code></li>
+<li><strong>Retention</strong>: 7 days</li>
+</ul>
+</li>
+</ol>
+<h3 id="cấu-hình-cloudwatch-agent">Cấu Hình CloudWatch Agent</h3>
+<ol start="3">
+<li>Cài đặt và cấu hình CloudWatch agent trên EC2:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Create CloudWatch agent configuration</span>
+</span></span><span style="display:flex;"><span>sudo nano /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+</span></span></code></pre></div><ol start="4">
+<li>Thêm agent configuration:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;logs&#34;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;logs_collected&#34;</span>: {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;files&#34;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;collect_list&#34;</span>: [
+</span></span><span style="display:flex;"><span>                    {
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;file_path&#34;</span>: <span style="color:#e6db74">&#34;/var/log/caching-app/app.log&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;log_group_name&#34;</span>: <span style="color:#e6db74">&#34;/aws/ec2/caching-app&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;log_stream_name&#34;</span>: <span style="color:#e6db74">&#34;{instance_id}-app.log&#34;</span>
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                ]
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;metrics&#34;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;namespace&#34;</span>: <span style="color:#e6db74">&#34;CWAgent&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;metrics_collected&#34;</span>: {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;cpu&#34;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;measurement&#34;</span>: [
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#34;cpu_usage_idle&#34;</span>,
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#34;cpu_usage_iowait&#34;</span>,
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#34;cpu_usage_user&#34;</span>,
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#34;cpu_usage_system&#34;</span>
+</span></span><span style="display:flex;"><span>                ],
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;metrics_collection_interval&#34;</span>: <span style="color:#ae81ff">60</span>
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;disk&#34;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;measurement&#34;</span>: [
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#34;used_percent&#34;</span>
+</span></span><span style="display:flex;"><span>                ],
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;metrics_collection_interval&#34;</span>: <span style="color:#ae81ff">60</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;resources&#34;</span>: [
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#34;*&#34;</span>
+</span></span><span style="display:flex;"><span>                ]
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;mem&#34;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;measurement&#34;</span>: [
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#34;mem_used_percent&#34;</span>
+</span></span><span style="display:flex;"><span>                ],
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;metrics_collection_interval&#34;</span>: <span style="color:#ae81ff">60</span>
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><ol start="5">
+<li>Start CloudWatch agent:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Start the agent</span>
+</span></span><span style="display:flex;"><span>sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    -a fetch-config <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    -m ec2 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    -s
+</span></span></code></pre></div><h2 id="bước-9-tạo-log-insights-queries">Bước 9: Tạo Log Insights Queries</h2>
+<h3 id="tạo-performance-query">Tạo Performance Query</h3>
+<ol>
+<li>
+<p>Điều hướng đến <strong>Log Insights</strong> trong CloudWatch</p>
+</li>
+<li>
+<p>Tạo query cho performance analysis:</p>
+</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span>fields <span style="color:#f92672">@</span><span style="color:#66d9ef">timestamp</span>, <span style="color:#f92672">@</span>message
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span> filter <span style="color:#f92672">@</span>message <span style="color:#66d9ef">like</span> <span style="color:#f92672">/</span><span style="color:#66d9ef">Cache</span> HIT<span style="color:#f92672">|</span><span style="color:#66d9ef">Cache</span> MISS<span style="color:#f92672">/</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span> stats <span style="color:#66d9ef">count</span>() <span style="color:#66d9ef">by</span> bin(<span style="color:#ae81ff">5</span>m)
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span> sort <span style="color:#f92672">@</span><span style="color:#66d9ef">timestamp</span> <span style="color:#66d9ef">desc</span>
+</span></span></code></pre></div><h3 id="tạo-error-analysis-query">Tạo Error Analysis Query</h3>
+<ol start="3">
+<li>Tạo query cho error analysis:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span>fields <span style="color:#f92672">@</span><span style="color:#66d9ef">timestamp</span>, <span style="color:#f92672">@</span>message
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span> filter <span style="color:#f92672">@</span>message <span style="color:#66d9ef">like</span> <span style="color:#f92672">/</span>ERROR<span style="color:#f92672">|</span>error<span style="color:#f92672">/</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span> stats <span style="color:#66d9ef">count</span>() <span style="color:#66d9ef">by</span> bin(<span style="color:#ae81ff">1</span>h)
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span> sort <span style="color:#f92672">@</span><span style="color:#66d9ef">timestamp</span> <span style="color:#66d9ef">desc</span>
+</span></span></code></pre></div><h2 id="bước-10-finalize-dashboard">Bước 10: Finalize Dashboard</h2>
+<h3 id="sắp-xếp-dashboard-widgets">Sắp Xếp Dashboard Widgets</h3>
+<ol>
+<li>
+<p>Sắp xếp widgets theo thứ tự logic:</p>
+<ul>
+<li><strong>Top row</strong>: Overall performance (ALB, CloudFront)</li>
+<li><strong>Middle row</strong>: Cache performance (Redis, DAX)</li>
+<li><strong>Bottom row</strong>: Database và custom metrics</li>
+</ul>
+</li>
+</ol>
+<h3 id="lưu-dashboard">Lưu Dashboard</h3>
+<ol start="2">
+<li>
+<p>Lưu dashboard:</p>
+<ul>
+<li>Nhấp <strong>Save dashboard</strong></li>
+<li>Xác minh tất cả widgets đang hiển thị data</li>
+</ul>
+</li>
+</ol>
+<h2 id="bước-11-test-monitoring-setup">Bước 11: Test Monitoring Setup</h2>
+<h3 id="tạo-test-traffic">Tạo Test Traffic</h3>
+<ol>
+<li>Tạo traffic để populate metrics:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Run load test to generate metrics</span>
+</span></span><span style="display:flex;"><span>ab -n <span style="color:#ae81ff">200</span> -c <span style="color:#ae81ff">20</span> <span style="color:#e6db74">&#34;https://d1234567890123.cloudfront.net/product/PROD001?category=Electronics&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Wait for metrics to appear (5-10 minutes)</span>
+</span></span></code></pre></div><h3 id="xác-minh-metrics">Xác Minh Metrics</h3>
+<ol start="2">
+<li>Kiểm tra tất cả metrics đang xuất hiện trong dashboard:</li>
+</ol>
+<h3 id="test-alarms">Test Alarms</h3>
+<ol start="3">
+<li>Trigger test alarm bằng cách dừng application:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Stop application to trigger alarms</span>
+</span></span><span style="display:flex;"><span>pm2 stop caching-app
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Wait for alarm to trigger (5-10 minutes)</span>
+</span></span></code></pre></div><ol start="4">
+<li>Restart application:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Restart application</span>
+</span></span><span style="display:flex;"><span>pm2 start caching-app
+</span></span></code></pre></div><h2 id="bước-12-ghi-lại-monitoring-setup">Bước 12: Ghi Lại Monitoring Setup</h2>
+<h3 id="monitoring-configuration-summary">Monitoring Configuration Summary</h3>
+<p>Ghi lại thông tin sau:</p>
+<h3 id="dashboard-information">Dashboard Information</h3>
+<ul>
+<li><strong>Dashboard Name</strong>: <code>MultiLayerCachingDashboard</code></li>
+<li><strong>Widgets</strong>: 8 widgets covering tất cả services</li>
+<li><strong>Refresh Rate</strong>: Auto-refresh mỗi 5 phút</li>
+</ul>
+<h3 id="alarms-configured">Alarms Configured</h3>
+<ul>
+<li><strong>High Response Time</strong>: &gt;500ms cho 2/3 datapoints</li>
+<li><strong>Low Cache Hit Rate</strong>: &lt;80% cache hit rate</li>
+<li><strong>High Error Rate</strong>: &gt;10 5xx errors</li>
+<li><strong>Redis High CPU</strong>: &gt;80% CPU utilization</li>
+</ul>
+<h3 id="custom-metrics">Custom Metrics</h3>
+<ul>
+<li><strong>Namespace</strong>: CachingApp/Performance</li>
+<li><strong>Metrics</strong>: TotalRequests, CacheHitRate, RedisHitRate</li>
+<li><strong>Frequency</strong>: Mỗi phút qua cron job</li>
+</ul>
+<h3 id="log-configuration">Log Configuration</h3>
+<ul>
+<li><strong>Log Group</strong>: /aws/ec2/caching-app</li>
+<li><strong>Retention</strong>: 7 days</li>
+<li><strong>Agent</strong>: CloudWatch agent configured</li>
+</ul>
+<h2 id="khắc-phục-monitoring-issues">Khắc Phục Monitoring Issues</h2>
+<h3 id="vấn-đề-metrics-không-xuất-hiện">Vấn Đề: Metrics Không Xuất Hiện</h3>
+<p><strong>Nguyên Nhân Có Thể:</strong></p>
+<ul>
+<li>IAM permissions không đủ</li>
+<li>CloudWatch agent không chạy</li>
+<li>Incorrect metric namespace</li>
+</ul>
+<p><strong>Giải Pháp:</strong></p>
+<ul>
+<li>Xác minh IAM role có CloudWatch permissions</li>
+<li>Kiểm tra agent status: <code>sudo systemctl status amazon-cloudwatch-agent</code></li>
+<li>Xác minh metric names và namespaces</li>
+</ul>
+<h3 id="vấn-đề-alarms-không-trigger">Vấn Đề: Alarms Không Trigger</h3>
+<p><strong>Nguyên Nhân Có Thể:</strong></p>
+<ul>
+<li>Incorrect threshold values</li>
+<li>Insufficient datapoints</li>
+<li>SNS topic không được cấu hình</li>
+</ul>
+<p><strong>Giải Pháp:</strong></p>
+<ul>
+<li>Review alarm configuration và thresholds</li>
+<li>Kiểm tra alarm history cho evaluation details</li>
+<li>Xác minh SNS topic và email subscription</li>
+</ul>
+<h3 id="vấn-đề-custom-metrics-missing">Vấn Đề: Custom Metrics Missing</h3>
+<p><strong>Nguyên Nhân Có Thể:</strong></p>
+<ul>
+<li>Script execution errors</li>
+<li>Cron job không chạy</li>
+<li>Application endpoint unavailable</li>
+</ul>
+<p><strong>Giải Pháp:</strong></p>
+<ul>
+<li>Test script manually: <code>./send-custom-metrics.sh</code></li>
+<li>Kiểm tra cron job: <code>crontab -l</code></li>
+<li>Xác minh application đang responding</li>
+</ul>
+<h2 id="best-practices-cho-production">Best Practices cho Production</h2>
+<h3 id="monitoring-strategy">Monitoring Strategy</h3>
+<ul>
+<li><strong>Proactive alerting</strong>: Set thresholds trước khi issues xảy ra</li>
+<li><strong>Comprehensive coverage</strong>: Giám sát tất cả layers của stack</li>
+<li><strong>Regular review</strong>: Điều chỉnh thresholds dựa trên actual performance</li>
+</ul>
+<h3 id="alert-management">Alert Management</h3>
+<ul>
+<li><strong>Escalation procedures</strong>: Định nghĩa ai được thông báo khi nào</li>
+<li><strong>Alert fatigue prevention</strong>: Tránh quá nhiều false positives</li>
+<li><strong>Documentation</strong>: Duy trì runbooks cho common issues</li>
+</ul>
+<h2 id="các-bước-tiếp-theo">Các Bước Tiếp Theo</h2>
+<p>Monitoring và alerting setup của bạn đã hoàn thành! Bạn có:</p>
+<p>✅ <strong>Comprehensive dashboard</strong> giám sát tất cả services<br>
+✅ <strong>Automated alerts</strong> cho proactive issue detection<br>
+✅ <strong>Custom metrics</strong> cho application-specific monitoring<br>
+✅ <strong>Log aggregation</strong> cho troubleshooting<br>
+✅ <strong>Performance baselines</strong> established<br>
+✅ <strong>Alert testing</strong> verified và working</p>
+<h3 id="monitoring-benefits-achieved">Monitoring Benefits Achieved:</h3>
+<ul>
+<li><strong>Proactive issue detection</strong> trước khi users bị ảnh hưởng</li>
+<li><strong>Performance visibility</strong> qua tất cả cache layers</li>
+<li><strong>Automated alerting</strong> cho critical thresholds</li>
+<li><strong>Historical data</strong> cho capacity planning và optimization</li>
+</ul>
+
+<div class="notices tip" ><p>Thường xuyên review monitoring setup của bạn và điều chỉnh thresholds dựa trên actual performance patterns. Cân nhắc thiết lập additional alerts cho business-specific metrics.</p>
+</div>
+
+<p>Tiếp theo, chúng ta sẽ dọn dẹp tất cả resources được tạo trong workshop này để tránh ongoing charges.</p>
+
+
+
+
+
+<footer class=" footline" >
+	
+</footer>
+
+        
+        </div>
+        
+
+      </div>
+
+    <div id="navigation">
+        
+        
+
+        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+
+        
+
+
+	 
+	 
+		
+			<a class="nav nav-prev" href="/workshop-caching/vi/8-performance-testing/" title="8. Kiểm Tra Hiệu Suất"> <i class="fa fa-chevron-left"></i></a>
+		
+		
+			<a class="nav nav-next" href="/workshop-caching/vi/10-cleanup/" title="10. Hướng Dẫn Dọn Dẹp Tài Nguyên" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
+		
+	
+    </div>
+
+    </section>
+
+    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
+      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
+    </div>
+    <script src="/workshop-caching/js/clipboard.min.js?1754898188"></script>
+    <script src="/workshop-caching/js/perfect-scrollbar.min.js?1754898188"></script>
+    <script src="/workshop-caching/js/perfect-scrollbar.jquery.min.js?1754898188"></script>
+    <script src="/workshop-caching/js/jquery.sticky.js?1754898188"></script>
+    <script src="/workshop-caching/js/featherlight.min.js?1754898188"></script>
+    <script src="/workshop-caching/js/highlight.pack.js?1754898188"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="/workshop-caching/js/modernizr.custom-3.6.0.js?1754898188"></script>
+    <script src="/workshop-caching/js/learn.js?1754898188"></script>
+    <script src="/workshop-caching/js/hugo-learn.js?1754898188"></script>
+    <script src="/workshop-caching/js/language-switcher.js?1754898188"></script>
+    <script src="/workshop-caching/js/multilingual.js?1754898188"></script>
+    
+        
+            <script src="/workshop-caching/mermaid/mermaid.js?1754898188"></script>
+        
+        <script>
+            mermaid.initialize({ startOnLoad: true });
+        </script>
+    
+    
+
+  </body>
+</html>

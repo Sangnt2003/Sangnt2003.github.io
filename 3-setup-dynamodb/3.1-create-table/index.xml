@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>3.1 Create DynamoDB Table on In-Memory Database Caching Architecture</title>
+    <link>http://localhost:63799/workshop-caching/3-setup-dynamodb/3.1-create-table/</link>
+    <description>Recent content in 3.1 Create DynamoDB Table on In-Memory Database Caching Architecture</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate></lastBuildDate>
+    <atom:link href="http://localhost:63799/workshop-caching/3-setup-dynamodb/3.1-create-table/index.xml" rel="self" type="application/rss+xml" />
+  </channel>
+</rss>
