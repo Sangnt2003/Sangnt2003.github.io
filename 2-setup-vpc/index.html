@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="js csstransforms3d">
-  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=50292&amp;path=livereload" data-no-instant defer></script>
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=51205&amp;path=livereload" data-no-instant defer></script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="Hugo 0.147.9">
@@ -12,20 +12,20 @@
     <title>2. Setup VPC and Network Infrastructure :: In-Memory Database Caching Architecture</title>
 
     
-    <link href="/css/nucleus.css?1754900054" rel="stylesheet">
-    <link href="/css/fontawesome-all.min.css?1754900054" rel="stylesheet">
-    <link href="/css/hybrid.css?1754900054" rel="stylesheet">
-    <link href="/css/featherlight.min.css?1754900054" rel="stylesheet">
-    <link href="/css/perfect-scrollbar.min.css?1754900054" rel="stylesheet">
-    <link href="/css/auto-complete.css?1754900054" rel="stylesheet">
-    <link href="/css/atom-one-dark-reasonable.css?1754900054" rel="stylesheet">
-    <link href="/css/theme.css?1754900054" rel="stylesheet">
-    <link href="/css/tabs.css?1754900054" rel="stylesheet">
-    <link href="/css/hugo-theme.css?1754900054" rel="stylesheet">
+    <link href="/css/nucleus.css?1754900557" rel="stylesheet">
+    <link href="/css/fontawesome-all.min.css?1754900557" rel="stylesheet">
+    <link href="/css/hybrid.css?1754900557" rel="stylesheet">
+    <link href="/css/featherlight.min.css?1754900557" rel="stylesheet">
+    <link href="/css/perfect-scrollbar.min.css?1754900557" rel="stylesheet">
+    <link href="/css/auto-complete.css?1754900557" rel="stylesheet">
+    <link href="/css/atom-one-dark-reasonable.css?1754900557" rel="stylesheet">
+    <link href="/css/theme.css?1754900557" rel="stylesheet">
+    <link href="/css/tabs.css?1754900557" rel="stylesheet">
+    <link href="/css/hugo-theme.css?1754900557" rel="stylesheet">
     
     
 
-    <script src="/js/jquery-3.3.1.min.js?1754900054"></script>
+    <script src="/js/jquery-3.3.1.min.js?1754900557"></script>
 
     <style>
       :root #header + #content > #left > #rlblock_left{
@@ -36,13 +36,13 @@
     
   </head>
   <body class="" data-url="/2-setup-vpc/">
-    <nav id="sidebar" class="">
-
-
-
+    <nav
+  id="sidebar"
+  class=""
+>
+   
   <div id="header-wrapper">
-    <div id="header">
-      <a
+    <div id="header"><a
   id="logo"
   href='/'
 >
@@ -79,657 +79,427 @@
     ></path>
   </svg>
 </a>
-
-    </div>
-    
-        <div class="searchbox">
+</div>
+     <div class="searchbox">
     <label for="search-by"><i class="fas fa-search"></i></label>
     <input data-search-input id="search-by" type="search" placeholder="Search...">
     <span data-search-clear=""><i class="fas fa-times"></i></span>
 </div>
 
-<script type="text/javascript" src="/js/lunr.min.js?1754900054"></script>
-<script type="text/javascript" src="/js/auto-complete.js?1754900054"></script>
+<script type="text/javascript" src="/js/lunr.min.js?1754900557"></script>
+<script type="text/javascript" src="/js/auto-complete.js?1754900557"></script>
 <script type="text/javascript">
-    var baseurl = "\/\/localhost:50292\/";
+    var baseurl = "\/\/localhost:51205\/";
 </script>
-<script type="text/javascript" src="/js/search.js?1754900054"></script>
-
-    
+<script type="text/javascript" src="/js/search.js?1754900557"></script>
+ 
   </div>
 
-
-    <div class="highlightable">
+  <div class="highlightable">
     <ul class="topics">
-
+               
+<li
+  data-nav-id="/1-introduction/"
+  title="1. Introduction"
+  class="dd-item
         
+        
+        
+        "
+>
+  <a href="/1-introduction/">
+    <b></b>1. Introduction 
+  </a>
+   
+  <ul>
           
-          
-
-
-
-
- 
-  
+            
+<li
+  data-nav-id="/1-introduction/1.1-overview/"
+  title="1.1 Workshop Overview"
+  class="dd-item
+        
+        
+        
+        "
+>
+  <a href="/1-introduction/1.1-overview/">
+    <b></b>1.1 Workshop Overview 
+  </a>
+   
+</li>
     
-    <li data-nav-id="/1-introduction/" title="1. Introduction" class="dd-item
-        
-        
-        
-        ">
-      <a href="/1-introduction/">
-          <b></b>1. Introduction
-          
-      </a>
-      
-      
-        <ul>
-          
-          
             
-          
-          
-
+<li
+  data-nav-id="/1-introduction/1.2-architecture/"
+  title="1.2 Architecture Overview"
+  class="dd-item
         
-          
-            
-            
-
-
-
-
- 
+        
+        
+        "
+>
+  <a href="/1-introduction/1.2-architecture/">
+    <b></b>1.2 Architecture Overview 
+  </a>
+   
+</li>
+     
+  </ul>
   
-    
-    <li data-nav-id="/1-introduction/1.1-overview/" title="1.1 Workshop Overview" class="dd-item
-        
-        
-        
-        ">
-      <a href="/1-introduction/1.1-overview/">
-          <b></b>1.1 Workshop Overview
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/1-introduction/1.2-architecture/" title="1.2 Architecture Overview" class="dd-item
-        
-        
-        
-        ">
-      <a href="/1-introduction/1.2-architecture/">
-          <b></b>1.2 Architecture Overview
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-        
-        </ul>
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/2-setup-vpc/" title="2. Setup VPC and Network Infrastructure" class="dd-item
+</li>
+           
+<li
+  data-nav-id="/2-setup-vpc/"
+  title="2. Setup VPC and Network Infrastructure"
+  class="dd-item
         
         active
         
-        ">
-      <a href="/2-setup-vpc/">
-          <b></b>2. Setup VPC and Network Infrastructure
-          
-      </a>
-      
-      
-        <ul>
-          
+        "
+>
+  <a href="/2-setup-vpc/">
+    <b></b>2. Setup VPC and Network Infrastructure 
+  </a>
+   
+  <ul>
           
             
-          
-          
-
+<li
+  data-nav-id="/2-setup-vpc/2.1-create-vpc/"
+  title="2.1 Create VPC"
+  class="dd-item
         
-          
-            
-            
-
-
-
-
- 
-  
+        
+        
+        "
+>
+  <a href="/2-setup-vpc/2.1-create-vpc/">
+    <b></b>2.1 Create VPC 
+  </a>
+   
+</li>
     
-    <li data-nav-id="/2-setup-vpc/2.1-create-vpc/" title="2.1 Create VPC" class="dd-item
+            
+<li
+  data-nav-id="/2-setup-vpc/2.2-security-groups/"
+  title="2.2 Create Security Groups"
+  class="dd-item
         
         
         
-        ">
-      <a href="/2-setup-vpc/2.1-create-vpc/">
-          <b></b>2.1 Create VPC
-          
-      </a>
-      
-      
-    </li>
+        "
+>
+  <a href="/2-setup-vpc/2.2-security-groups/">
+    <b></b>2.2 Create Security Groups 
+  </a>
+   
+</li>
+     
+  </ul>
   
- 
-
-            
+</li>
+           
+<li
+  data-nav-id="/3-setup-dynamodb/"
+  title="3. Setup DynamoDB and DAX"
+  class="dd-item
+        
+        
+        
+        "
+>
+  <a href="/3-setup-dynamodb/">
+    <b></b>3. Setup DynamoDB and DAX 
+  </a>
+   
+  <ul>
           
             
-            
-
-
-
-
- 
-  
+<li
+  data-nav-id="/3-setup-dynamodb/3.1-create-table/"
+  title="3.1 Create DynamoDB Table"
+  class="dd-item
+        
+        
+        
+        "
+>
+  <a href="/3-setup-dynamodb/3.1-create-table/">
+    <b></b>3.1 Create DynamoDB Table 
+  </a>
+   
+</li>
     
-    <li data-nav-id="/2-setup-vpc/2.2-security-groups/" title="2.2 Create Security Groups" class="dd-item
-        
-        
-        
-        ">
-      <a href="/2-setup-vpc/2.2-security-groups/">
-          <b></b>2.2 Create Security Groups
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
             
-          
+<li
+  data-nav-id="/3-setup-dynamodb/3.2-setup-dax/"
+  title="3.2 Setup DynamoDB DAX"
+  class="dd-item
         
-        </ul>
-      
-    </li>
+        
+        
+        "
+>
+  <a href="/3-setup-dynamodb/3.2-setup-dax/">
+    <b></b>3.2 Setup DynamoDB DAX 
+  </a>
+   
+</li>
+     
+  </ul>
   
- 
-
+</li>
+           
+<li
+  data-nav-id="/4-setup-elasticache/"
+  title="4. Setup ElastiCache Redis"
+  class="dd-item
+        
+        
+        
+        "
+>
+  <a href="/4-setup-elasticache/">
+    <b></b>4. Setup ElastiCache Redis 
+  </a>
+   
+</li>
+           
+<li
+  data-nav-id="/5-setup-application/"
+  title="5. Setup Application"
+  class="dd-item
+        
+        
+        
+        "
+>
+  <a href="/5-setup-application/">
+    <b></b>5. Setup Application 
+  </a>
+   
+  <ul>
           
-          
-
-
-
-
- 
-  
+            
+<li
+  data-nav-id="/5-setup-application/5.1-launch-ec2/"
+  title="5.1 Launch EC2 Instance"
+  class="dd-item
+        
+        
+        
+        "
+>
+  <a href="/5-setup-application/5.1-launch-ec2/">
+    <b></b>5.1 Launch EC2 Instance 
+  </a>
+   
+</li>
     
-    <li data-nav-id="/3-setup-dynamodb/" title="3. Setup DynamoDB and DAX" class="dd-item
-        
-        
-        
-        ">
-      <a href="/3-setup-dynamodb/">
-          <b></b>3. Setup DynamoDB and DAX
-          
-      </a>
-      
-      
-        <ul>
-          
-          
             
-          
-          
-
+<li
+  data-nav-id="/5-setup-application/5.2-deploy-app/"
+  title="5.2 Deploy Application"
+  class="dd-item
         
-          
-            
-            
-
-
-
-
- 
+        
+        
+        "
+>
+  <a href="/5-setup-application/5.2-deploy-app/">
+    <b></b>5.2 Deploy Application 
+  </a>
+   
+</li>
+     
+  </ul>
   
+</li>
+           
+<li
+  data-nav-id="/6-setup-loadbalancer/"
+  title="6. Setup Application Load Balancer"
+  class="dd-item
+        
+        
+        
+        "
+>
+  <a href="/6-setup-loadbalancer/">
+    <b></b>6. Setup Application Load Balancer 
+  </a>
+   
+</li>
+           
+<li
+  data-nav-id="/7-setup-cloudfront/"
+  title="7. Setup CloudFront CDN"
+  class="dd-item
+        
+        
+        
+        "
+>
+  <a href="/7-setup-cloudfront/">
+    <b></b>7. Setup CloudFront CDN 
+  </a>
+   
+</li>
+           
+<li
+  data-nav-id="/8-performance-testing/"
+  title="8. Performance Testing"
+  class="dd-item
+        
+        
+        
+        "
+>
+  <a href="/8-performance-testing/">
+    <b></b>8. Performance Testing 
+  </a>
+   
+</li>
+           
+<li
+  data-nav-id="/9-monitoring/"
+  title="9. Monitoring and Alerting"
+  class="dd-item
+        
+        
+        
+        "
+>
+  <a href="/9-monitoring/">
+    <b></b>9. Monitoring and Alerting 
+  </a>
+   
+</li>
+           
+<li
+  data-nav-id="/10-cleanup/"
+  title="10. Resource Cleanup Guide"
+  class="dd-item
+        
+        
+        
+        "
+>
+  <a href="/10-cleanup/">
+    <b></b>10. Resource Cleanup Guide 
+  </a>
+   
+</li>
     
-    <li data-nav-id="/3-setup-dynamodb/3.1-create-table/" title="3.1 Create DynamoDB Table" class="dd-item
-        
-        
-        
-        ">
-      <a href="/3-setup-dynamodb/3.1-create-table/">
-          <b></b>3.1 Create DynamoDB Table
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/3-setup-dynamodb/3.2-setup-dax/" title="3.2 Setup DynamoDB DAX" class="dd-item
-        
-        
-        
-        ">
-      <a href="/3-setup-dynamodb/3.2-setup-dax/">
-          <b></b>3.2 Setup DynamoDB DAX
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-        
-        </ul>
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/4-setup-elasticache/" title="4. Setup ElastiCache Redis" class="dd-item
-        
-        
-        
-        ">
-      <a href="/4-setup-elasticache/">
-          <b></b>4. Setup ElastiCache Redis
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/5-setup-application/" title="5. Setup Application" class="dd-item
-        
-        
-        
-        ">
-      <a href="/5-setup-application/">
-          <b></b>5. Setup Application
-          
-      </a>
-      
-      
-        <ul>
-          
-          
-            
-          
-          
-
-        
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/5-setup-application/5.1-launch-ec2/" title="5.1 Launch EC2 Instance" class="dd-item
-        
-        
-        
-        ">
-      <a href="/5-setup-application/5.1-launch-ec2/">
-          <b></b>5.1 Launch EC2 Instance
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/5-setup-application/5.2-deploy-app/" title="5.2 Deploy Application" class="dd-item
-        
-        
-        
-        ">
-      <a href="/5-setup-application/5.2-deploy-app/">
-          <b></b>5.2 Deploy Application
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-        
-        </ul>
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/6-setup-loadbalancer/" title="6. Setup Application Load Balancer" class="dd-item
-        
-        
-        
-        ">
-      <a href="/6-setup-loadbalancer/">
-          <b></b>6. Setup Application Load Balancer
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/7-setup-cloudfront/" title="7. Setup CloudFront CDN" class="dd-item
-        
-        
-        
-        ">
-      <a href="/7-setup-cloudfront/">
-          <b></b>7. Setup CloudFront CDN
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/8-performance-testing/" title="8. Performance Testing" class="dd-item
-        
-        
-        
-        ">
-      <a href="/8-performance-testing/">
-          <b></b>8. Performance Testing
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/9-monitoring/" title="9. Monitoring and Alerting" class="dd-item
-        
-        
-        
-        ">
-      <a href="/9-monitoring/">
-          <b></b>9. Monitoring and Alerting
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/10-cleanup/" title="10. Resource Cleanup Guide" class="dd-item
-        
-        
-        
-        ">
-      <a href="/10-cleanup/">
-          <b></b>10. Resource Cleanup Guide
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-        
     </ul>
 
-    
-    
+     
 
-    
-    <section id="prefooter">
-      <hr/>
-      <ul>
-      
-        <li>
-          <a class="padding">
-            <i class="fas fa-language fa-fw"></i>
-          <div class="select-style">
-            <select id="select-language" onchange="location = this.value;">
-          
-          
-          
+    <section id="footer"><section id="shortcuts" style="font-weight: bold">
+  <h3>More</h3>
+  <ul>
+    <li>
+      <a class="padding" href="https://aws.amazon.com/blogs"
+        ><i class="fab fa-aws"></i> AWS Study Group - Blog</a
+      >
+    </li>
+
+    <li>
+      <a class="padding" href="https://www.facebook.com/groups/awsstudygroupfcj"
+        ><i class="fab fa-facebook"></i> AWS Study Group - FB Group</a
+      >
+    </li>
+  </ul>
+</section>
+<section id="prefooter">
+  <hr />
+  <ul>
+    <li>
+      <a class="padding">
+        <i class="fas fa-language fa-fw"></i>
+        <div class="select-style">
+          <select id="select-language" onchange="changeLanguage()">
+            
+            <option
+              value="en"
+              selected
+            >
+              English
+            </option>
+            
+            <option
+              value="vi"
               
-              
-                  
-                    
-                    
-                      <option id="en" value="//localhost:50292/2-setup-vpc/" selected>English</option>
-                    
-                  
-              
-                  
-              
-          
-              
-              
-                  
-              
-                  
-                    
-                    
-                      <option id="vi" value="//localhost:50292/vi/2-setup-vpc/">Tiếng Việt</option>
-                    
-                  
-              
-          
-        </select>
-        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-          width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
-          <g>
-            <g id="arrow-drop-down">
-              <polygon points="0,63.75 127.5,191.25 255,63.75 		" />
+            >
+              Tiếng Việt
+            </option>
+            
+          </select>
+          <svg
+            version="1.1"
+            id="Capa_1"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            x="0px"
+            y="0px"
+            width="255px"
+            height="255px"
+            viewBox="0 0 255 255"
+            style="enable-background: new 0 0 255 255"
+            xml:space="preserve"
+          >
+            <g>
+              <g id="arrow-drop-down">
+                <polygon points="0,63.75 127.5,191.25 255,63.75" />
+              </g>
             </g>
-          </g>
-        </svg>
+          </svg>
         </div>
-        </a>
-        </li>
-      
-
-      
-      </ul>
-    </section>
-    
-    <section id="footer">
-      <section id="shortcuts" style="font-weight: bold;">
-        <h3>More</h3>
-        <ul>
-          
-              <li> 
-                  <a class="padding" href="https://aws.amazon.com/blogs"><i class="fab fa-aws"></i> AWS Study Group - Blog</a>
-              </li>
-          
-              <li> 
-                  <a class="padding" href="https://www.facebook.com/groups/awsstudygroupfcj"><i class="fab fa-facebook"></i> AWS Study Group - FB Group</a>
-              </li>
-          
-        </ul>
-      </section>
-      <section id="prefooter">
-          <hr />
-          <ul>
-            <li>
-              <a class="padding">
-                <i class="fas fa-language fa-fw"></i>
-                <div class="select-style">
-                  <select id="select-language" onchange="changeLanguage()">
-                    
-                      <option value="en" selected>
-                        English
-                      </option>
-                    
-                      <option value="vi" >
-                        Tiếng Việt
-                      </option>
-                    
-                  </select>
-                  <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
-                    <g>
-                      <g id="arrow-drop-down">
-                        <polygon points="0,63.75 127.5,191.25 255,63.75" />
-                      </g>
-                    </g>
-                  </svg>
-                </div>
-              </a>
-            </li>
-            <li>
-              <a class="padding" href="#" data-clear-history-toggle=""><i class="fas fa-history fa-fw"></i> Clear History</a>
-            </li>
-          </ul>
-        </section>
-        <section id="footer">
-          <left>
-            <b>Workshop</b><br />
-            <img src="https://hitwebcounter.com/counter/counter.php?page=7831196&style=0038&nbdigits=9&type=page&initCount=0" title="Migrate" alt="web counter" border="0" /><br />
-            <b><a href="https://cloudjourney.awsstudygroup.com/">Cloud Journey</a></b><br />
-            <img src="https://hitwebcounter.com/counter/counter.php?page=7830807&style=0038&nbdigits=9&type=page&initCount=0" title="Total CLoud Journey" alt="web counter" border="0" />
-          </left>
-          <left>
-            <br /><br />
-            <b>Last Updated</b><br />
-            <i><font color="orange">27-7-2025</font></i>
-          </left>
-          <left>
-            <br /><br />
-            <b>Team</b><br />
-            <i><br /><a href="https://www.linkedin.com/in/jotaguy" style="color: orange">Gia Hưng</a><br /></i>
-          </left>
-          <script async defer src="https://buttons.github.io/buttons.js"></script>
-        </section>
-
-    </section>
+      </a>
+    </li>
+    <li>
+      <a class="padding" href="#" data-clear-history-toggle=""
+        ><i class="fas fa-history fa-fw"></i> Clear History</a
+      >
+    </li>
+  </ul>
+</section>
+<section id="footer">
+  <left>
+    <b>Workshop</b><br />
+    <img
+      src="https://hitwebcounter.com/counter/counter.php?page=7831196&style=0038&nbdigits=9&type=page&initCount=0"
+      title="Migrate"
+      alt="web counter"
+      border="0"
+    /><br />
+    <b><a href="https://cloudjourney.awsstudygroup.com/">Cloud Journey</a></b
+    ><br />
+    <img
+      src="https://hitwebcounter.com/counter/counter.php?page=7830807&style=0038&nbdigits=9&type=page&initCount=0"
+      title="Total CLoud Journey"
+      alt="web counter"
+      border="0"
+    />
+  </left>
+  <left>
+    <br /><br />
+    <b>Last Updated</b><br />
+    <i><font color="orange">27-7-2025</font></i>
+  </left>
+  <left>
+    <br /><br />
+    <b>Team</b><br />
+    <i
+      ><br /><a href="https://www.linkedin.com/in/jotaguy" style="color: orange"
+        >Gia Hưng</a
+      ><br
+    /></i>
+  </left>
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+</section>
+</section>
   </div>
 </nav>
 
@@ -1193,21 +963,21 @@
     <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
       <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
     </div>
-    <script src="/js/clipboard.min.js?1754900054"></script>
-    <script src="/js/perfect-scrollbar.min.js?1754900054"></script>
-    <script src="/js/perfect-scrollbar.jquery.min.js?1754900054"></script>
-    <script src="/js/jquery.sticky.js?1754900054"></script>
-    <script src="/js/featherlight.min.js?1754900054"></script>
-    <script src="/js/highlight.pack.js?1754900054"></script>
+    <script src="/js/clipboard.min.js?1754900557"></script>
+    <script src="/js/perfect-scrollbar.min.js?1754900557"></script>
+    <script src="/js/perfect-scrollbar.jquery.min.js?1754900557"></script>
+    <script src="/js/jquery.sticky.js?1754900557"></script>
+    <script src="/js/featherlight.min.js?1754900557"></script>
+    <script src="/js/highlight.pack.js?1754900557"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <script src="/js/modernizr.custom-3.6.0.js?1754900054"></script>
-    <script src="/js/learn.js?1754900054"></script>
-    <script src="/js/hugo-learn.js?1754900054"></script>
-    <script src="/js/language-switcher.js?1754900054"></script>
-    <script src="/js/multilingual.js?1754900054"></script>
+    <script src="/js/modernizr.custom-3.6.0.js?1754900557"></script>
+    <script src="/js/learn.js?1754900557"></script>
+    <script src="/js/hugo-learn.js?1754900557"></script>
+    <script src="/js/language-switcher.js?1754900557"></script>
+    <script src="/js/multilingual.js?1754900557"></script>
     
         
-            <script src="/mermaid/mermaid.js?1754900054"></script>
+            <script src="/mermaid/mermaid.js?1754900557"></script>
         
         <script>
             mermaid.initialize({ startOnLoad: true });
