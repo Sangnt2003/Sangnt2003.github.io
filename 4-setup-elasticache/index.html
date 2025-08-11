@@ -1,1122 +1,1154 @@
 <!DOCTYPE html>
 <html lang="en" class="js csstransforms3d">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="generator" content="Hugo 0.147.9" />
-    <meta name="description" content="" />
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=50292&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Hugo 0.147.9">
+    <meta name="description" content="">
 
-    <link rel="icon" href="/images/favicon.png" type="image/png" />
 
-    <title>
-      4. Setup ElastiCache Redis :: In-Memory Database Caching Architecture
-    </title>
+    <link rel="icon" href="/images/favicon.png" type="image/png">
 
-    <link href="/css/nucleus.css?1754898926" rel="stylesheet" />
-    <link href="/css/fontawesome-all.min.css?1754898926" rel="stylesheet" />
-    <link href="/css/hybrid.css?1754898926" rel="stylesheet" />
-    <link href="/css/featherlight.min.css?1754898926" rel="stylesheet" />
-    <link href="/css/perfect-scrollbar.min.css?1754898926" rel="stylesheet" />
-    <link href="/css/auto-complete.css?1754898926" rel="stylesheet" />
-    <link
-      href="/css/atom-one-dark-reasonable.css?1754898926"
-      rel="stylesheet"
-    />
-    <link href="/css/theme.css?1754898926" rel="stylesheet" />
-    <link href="/css/tabs.css?1754898926" rel="stylesheet" />
-    <link href="/css/hugo-theme.css?1754898926" rel="stylesheet" />
+    <title>4. Setup ElastiCache Redis :: In-Memory Database Caching Architecture</title>
 
-    <script src="/js/jquery-3.3.1.min.js?1754898926"></script>
+    
+    <link href="/css/nucleus.css?1754900054" rel="stylesheet">
+    <link href="/css/fontawesome-all.min.css?1754900054" rel="stylesheet">
+    <link href="/css/hybrid.css?1754900054" rel="stylesheet">
+    <link href="/css/featherlight.min.css?1754900054" rel="stylesheet">
+    <link href="/css/perfect-scrollbar.min.css?1754900054" rel="stylesheet">
+    <link href="/css/auto-complete.css?1754900054" rel="stylesheet">
+    <link href="/css/atom-one-dark-reasonable.css?1754900054" rel="stylesheet">
+    <link href="/css/theme.css?1754900054" rel="stylesheet">
+    <link href="/css/tabs.css?1754900054" rel="stylesheet">
+    <link href="/css/hugo-theme.css?1754900054" rel="stylesheet">
+    
+    
+
+    <script src="/js/jquery-3.3.1.min.js?1754900054"></script>
 
     <style>
-      :root #header + #content > #left > #rlblock_left {
-        display: none !important;
+      :root #header + #content > #left > #rlblock_left{
+          display:none !important;
       }
+      
     </style>
+    
   </head>
   <body class="" data-url="/4-setup-elasticache/">
     <nav id="sidebar" class="">
-      <div id="header-wrapper">
-        <div id="header">
-          <a id="logo" href="/">
-            <svg
-              id="Layer_1"
-              data-name="Layer 1"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 60 30"
-              width="30%"
-            >
-              <defs>
-                <style>
-                  .cls-1 {
-                    fill: #fff;
-                  }
-                  .cls-2 {
-                    fill: #f90;
-                    fill-rule: evenodd;
-                  }
-                </style>
-              </defs>
-              <title>AWS-Logo_White-Color</title>
-              <path
-                class="cls-1"
-                d="M14.09,10.85a4.7,4.7,0,0,0,.19,1.48,7.73,7.73,0,0,0,.54,1.19.77.77,0,0,1,.12.38.64.64,0,0,1-.32.49l-1,.7a.83.83,0,0,1-.44.15.69.69,0,0,1-.49-.23,3.8,3.8,0,0,1-.6-.77q-.25-.42-.51-1a6.14,6.14,0,0,1-4.89,2.3,4.54,4.54,0,0,1-3.32-1.19,4.27,4.27,0,0,1-1.22-3.2A4.28,4.28,0,0,1,3.61,7.75,6.06,6.06,0,0,1,7.69,6.46a12.47,12.47,0,0,1,1.76.13q.92.13,1.91.36V5.73a3.65,3.65,0,0,0-.79-2.66A3.81,3.81,0,0,0,7.86,2.3a7.71,7.71,0,0,0-1.79.22,12.78,12.78,0,0,0-1.79.57,4.55,4.55,0,0,1-.58.22l-.26,0q-.35,0-.35-.52V2a1.09,1.09,0,0,1,.12-.58,1.2,1.2,0,0,1,.47-.35A10.88,10.88,0,0,1,5.77.32,10.19,10.19,0,0,1,8.36,0a6,6,0,0,1,4.35,1.35,5.49,5.49,0,0,1,1.38,4.09ZM7.34,13.38a5.36,5.36,0,0,0,1.72-.31A3.63,3.63,0,0,0,10.63,12,2.62,2.62,0,0,0,11.19,11a5.63,5.63,0,0,0,.16-1.44v-.7a14.35,14.35,0,0,0-1.53-.28,12.37,12.37,0,0,0-1.56-.1,3.84,3.84,0,0,0-2.47.67A2.34,2.34,0,0,0,5,11a2.35,2.35,0,0,0,.61,1.76A2.4,2.4,0,0,0,7.34,13.38Zm13.35,1.8a1,1,0,0,1-.64-.16,1.3,1.3,0,0,1-.35-.65L15.81,1.51a3,3,0,0,1-.15-.67.36.36,0,0,1,.41-.41H17.7a1,1,0,0,1,.65.16,1.4,1.4,0,0,1,.33.65l2.79,11,2.59-11A1.17,1.17,0,0,1,24.39.6a1.1,1.1,0,0,1,.67-.16H26.4a1.1,1.1,0,0,1,.67.16,1.17,1.17,0,0,1,.32.65L30,12.39,32.88,1.25A1.39,1.39,0,0,1,33.22.6a1,1,0,0,1,.65-.16h1.54a.36.36,0,0,1,.41.41,1.36,1.36,0,0,1,0,.26,3.64,3.64,0,0,1-.12.41l-4,12.86a1.3,1.3,0,0,1-.35.65,1,1,0,0,1-.64.16H29.25a1,1,0,0,1-.67-.17,1.26,1.26,0,0,1-.32-.67L25.67,3.64,23.11,14.34a1.26,1.26,0,0,1-.32.67,1,1,0,0,1-.67.17Zm21.36.44a11.28,11.28,0,0,1-2.56-.29,7.44,7.44,0,0,1-1.92-.67,1,1,0,0,1-.61-.93v-.84q0-.52.38-.52a.9.9,0,0,1,.31.06l.42.17a8.77,8.77,0,0,0,1.83.58,9.78,9.78,0,0,0,2,.2,4.48,4.48,0,0,0,2.43-.55,1.76,1.76,0,0,0,.86-1.57,1.61,1.61,0,0,0-.45-1.16A4.29,4.29,0,0,0,43,9.22l-2.41-.76A5.15,5.15,0,0,1,38,6.78a3.94,3.94,0,0,1-.83-2.41,3.7,3.7,0,0,1,.45-1.85,4.47,4.47,0,0,1,1.19-1.37A5.27,5.27,0,0,1,40.51.29,7.4,7.4,0,0,1,42.6,0a8.87,8.87,0,0,1,1.12.07q.57.07,1.08.19t.95.26a4.27,4.27,0,0,1,.7.29,1.59,1.59,0,0,1,.49.41.94.94,0,0,1,.15.55v.79q0,.52-.38.52a1.76,1.76,0,0,1-.64-.2,7.74,7.74,0,0,0-3.2-.64,4.37,4.37,0,0,0-2.21.47,1.6,1.6,0,0,0-.79,1.48,1.58,1.58,0,0,0,.49,1.18,4.94,4.94,0,0,0,1.83.92L44.55,7a5.08,5.08,0,0,1,2.57,1.6A3.76,3.76,0,0,1,47.9,11a4.21,4.21,0,0,1-.44,1.93,4.4,4.4,0,0,1-1.21,1.47,5.43,5.43,0,0,1-1.85.93A8.25,8.25,0,0,1,42.05,15.62Z"
-              ></path>
-              <path
-                class="cls-2"
-                d="M45.19,23.81C39.72,27.85,31.78,30,25,30A36.64,36.64,0,0,1,.22,20.57c-.51-.46-.06-1.09.56-.74A49.78,49.78,0,0,0,25.53,26.4,49.23,49.23,0,0,0,44.4,22.53C45.32,22.14,46.1,23.14,45.19,23.81Z"
-              ></path>
-              <path
-                class="cls-2"
-                d="M47.47,21.21c-.7-.9-4.63-.42-6.39-.21-.53.06-.62-.4-.14-.74,3.13-2.2,8.27-1.57,8.86-.83s-.16,5.89-3.09,8.35c-.45.38-.88.18-.68-.32C46.69,25.8,48.17,22.11,47.47,21.21Z"
-              ></path>
-            </svg>
-          </a>
-        </div>
 
+
+
+  <div id="header-wrapper">
+    <div id="header">
+      <a
+  id="logo"
+  href='/'
+>
+  <svg
+    id="Layer_1"
+    data-name="Layer 1"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 60 30"
+    width="30%"
+  >
+    <defs>
+      <style>
+        .cls-1 {
+          fill: #fff;
+        }
+        .cls-2 {
+          fill: #f90;
+          fill-rule: evenodd;
+        }
+      </style>
+    </defs>
+    <title>AWS-Logo_White-Color</title>
+    <path
+      class="cls-1"
+      d="M14.09,10.85a4.7,4.7,0,0,0,.19,1.48,7.73,7.73,0,0,0,.54,1.19.77.77,0,0,1,.12.38.64.64,0,0,1-.32.49l-1,.7a.83.83,0,0,1-.44.15.69.69,0,0,1-.49-.23,3.8,3.8,0,0,1-.6-.77q-.25-.42-.51-1a6.14,6.14,0,0,1-4.89,2.3,4.54,4.54,0,0,1-3.32-1.19,4.27,4.27,0,0,1-1.22-3.2A4.28,4.28,0,0,1,3.61,7.75,6.06,6.06,0,0,1,7.69,6.46a12.47,12.47,0,0,1,1.76.13q.92.13,1.91.36V5.73a3.65,3.65,0,0,0-.79-2.66A3.81,3.81,0,0,0,7.86,2.3a7.71,7.71,0,0,0-1.79.22,12.78,12.78,0,0,0-1.79.57,4.55,4.55,0,0,1-.58.22l-.26,0q-.35,0-.35-.52V2a1.09,1.09,0,0,1,.12-.58,1.2,1.2,0,0,1,.47-.35A10.88,10.88,0,0,1,5.77.32,10.19,10.19,0,0,1,8.36,0a6,6,0,0,1,4.35,1.35,5.49,5.49,0,0,1,1.38,4.09ZM7.34,13.38a5.36,5.36,0,0,0,1.72-.31A3.63,3.63,0,0,0,10.63,12,2.62,2.62,0,0,0,11.19,11a5.63,5.63,0,0,0,.16-1.44v-.7a14.35,14.35,0,0,0-1.53-.28,12.37,12.37,0,0,0-1.56-.1,3.84,3.84,0,0,0-2.47.67A2.34,2.34,0,0,0,5,11a2.35,2.35,0,0,0,.61,1.76A2.4,2.4,0,0,0,7.34,13.38Zm13.35,1.8a1,1,0,0,1-.64-.16,1.3,1.3,0,0,1-.35-.65L15.81,1.51a3,3,0,0,1-.15-.67.36.36,0,0,1,.41-.41H17.7a1,1,0,0,1,.65.16,1.4,1.4,0,0,1,.33.65l2.79,11,2.59-11A1.17,1.17,0,0,1,24.39.6a1.1,1.1,0,0,1,.67-.16H26.4a1.1,1.1,0,0,1,.67.16,1.17,1.17,0,0,1,.32.65L30,12.39,32.88,1.25A1.39,1.39,0,0,1,33.22.6a1,1,0,0,1,.65-.16h1.54a.36.36,0,0,1,.41.41,1.36,1.36,0,0,1,0,.26,3.64,3.64,0,0,1-.12.41l-4,12.86a1.3,1.3,0,0,1-.35.65,1,1,0,0,1-.64.16H29.25a1,1,0,0,1-.67-.17,1.26,1.26,0,0,1-.32-.67L25.67,3.64,23.11,14.34a1.26,1.26,0,0,1-.32.67,1,1,0,0,1-.67.17Zm21.36.44a11.28,11.28,0,0,1-2.56-.29,7.44,7.44,0,0,1-1.92-.67,1,1,0,0,1-.61-.93v-.84q0-.52.38-.52a.9.9,0,0,1,.31.06l.42.17a8.77,8.77,0,0,0,1.83.58,9.78,9.78,0,0,0,2,.2,4.48,4.48,0,0,0,2.43-.55,1.76,1.76,0,0,0,.86-1.57,1.61,1.61,0,0,0-.45-1.16A4.29,4.29,0,0,0,43,9.22l-2.41-.76A5.15,5.15,0,0,1,38,6.78a3.94,3.94,0,0,1-.83-2.41,3.7,3.7,0,0,1,.45-1.85,4.47,4.47,0,0,1,1.19-1.37A5.27,5.27,0,0,1,40.51.29,7.4,7.4,0,0,1,42.6,0a8.87,8.87,0,0,1,1.12.07q.57.07,1.08.19t.95.26a4.27,4.27,0,0,1,.7.29,1.59,1.59,0,0,1,.49.41.94.94,0,0,1,.15.55v.79q0,.52-.38.52a1.76,1.76,0,0,1-.64-.2,7.74,7.74,0,0,0-3.2-.64,4.37,4.37,0,0,0-2.21.47,1.6,1.6,0,0,0-.79,1.48,1.58,1.58,0,0,0,.49,1.18,4.94,4.94,0,0,0,1.83.92L44.55,7a5.08,5.08,0,0,1,2.57,1.6A3.76,3.76,0,0,1,47.9,11a4.21,4.21,0,0,1-.44,1.93,4.4,4.4,0,0,1-1.21,1.47,5.43,5.43,0,0,1-1.85.93A8.25,8.25,0,0,1,42.05,15.62Z"
+    ></path>
+    <path
+      class="cls-2"
+      d="M45.19,23.81C39.72,27.85,31.78,30,25,30A36.64,36.64,0,0,1,.22,20.57c-.51-.46-.06-1.09.56-.74A49.78,49.78,0,0,0,25.53,26.4,49.23,49.23,0,0,0,44.4,22.53C45.32,22.14,46.1,23.14,45.19,23.81Z"
+    ></path>
+    <path
+      class="cls-2"
+      d="M47.47,21.21c-.7-.9-4.63-.42-6.39-.21-.53.06-.62-.4-.14-.74,3.13-2.2,8.27-1.57,8.86-.83s-.16,5.89-3.09,8.35c-.45.38-.88.18-.68-.32C46.69,25.8,48.17,22.11,47.47,21.21Z"
+    ></path>
+  </svg>
+</a>
+
+    </div>
+    
         <div class="searchbox">
-          <label for="search-by"><i class="fas fa-search"></i></label>
-          <input
-            data-search-input
-            id="search-by"
-            type="search"
-            placeholder="Search..."
-          />
-          <span data-search-clear=""><i class="fas fa-times"></i></span>
-        </div>
+    <label for="search-by"><i class="fas fa-search"></i></label>
+    <input data-search-input id="search-by" type="search" placeholder="Search...">
+    <span data-search-clear=""><i class="fas fa-times"></i></span>
+</div>
 
-        <script
-          type="text/javascript"
-          src="/js/lunr.min.js?1754898926"
-        ></script>
-        <script
-          type="text/javascript"
-          src="/js/auto-complete.js?1754898926"
-        ></script>
-        <script type="text/javascript">
-          var baseurl = "\/";
-        </script>
-        <script type="text/javascript" src="/js/search.js?1754898926"></script>
-      </div>
+<script type="text/javascript" src="/js/lunr.min.js?1754900054"></script>
+<script type="text/javascript" src="/js/auto-complete.js?1754900054"></script>
+<script type="text/javascript">
+    var baseurl = "\/\/localhost:50292\/";
+</script>
+<script type="text/javascript" src="/js/search.js?1754900054"></script>
 
-      <div class="highlightable">
-        <ul class="topics">
-          <li
-            data-nav-id="/1-introduction/"
-            title="1. Introduction"
-            class="dd-item"
-          >
-            <a href="/1-introduction/"> <b></b>1. Introduction </a>
+    
+  </div>
 
-            <ul>
-              <li
-                data-nav-id="/1-introduction/1.1-overview/"
-                title="1.1 Workshop Overview"
-                class="dd-item"
-              >
-                <a href="/1-introduction/1.1-overview/">
-                  <b></b>1.1 Workshop Overview
-                </a>
-              </li>
 
-              <li
-                data-nav-id="/1-introduction/1.2-architecture/"
-                title="1.2 Architecture Overview"
-                class="dd-item"
-              >
-                <a href="/1-introduction/1.2-architecture/">
-                  <b></b>1.2 Architecture Overview
-                </a>
-              </li>
-            </ul>
-          </li>
+    <div class="highlightable">
+    <ul class="topics">
 
-          <li
-            data-nav-id="/2-setup-vpc/"
-            title="2. Setup VPC and Network Infrastructure"
-            class="dd-item"
-          >
-            <a href="/2-setup-vpc/">
-              <b></b>2. Setup VPC and Network Infrastructure
-            </a>
+        
+          
+          
 
-            <ul>
-              <li
-                data-nav-id="/2-setup-vpc/2.1-create-vpc/"
-                title="2.1 Create VPC"
-                class="dd-item"
-              >
-                <a href="/2-setup-vpc/2.1-create-vpc/">
-                  <b></b>2.1 Create VPC
-                </a>
-              </li>
 
-              <li
-                data-nav-id="/2-setup-vpc/2.2-security-groups/"
-                title="2.2 Create Security Groups"
-                class="dd-item"
-              >
-                <a href="/2-setup-vpc/2.2-security-groups/">
-                  <b></b>2.2 Create Security Groups
-                </a>
-              </li>
-            </ul>
-          </li>
 
-          <li
-            data-nav-id="/3-setup-dynamodb/"
-            title="3. Setup DynamoDB and DAX"
-            class="dd-item"
-          >
-            <a href="/3-setup-dynamodb/"> <b></b>3. Setup DynamoDB and DAX </a>
 
-            <ul>
-              <li
-                data-nav-id="/3-setup-dynamodb/3.1-create-table/"
-                title="3.1 Create DynamoDB Table"
-                class="dd-item"
-              >
-                <a href="/3-setup-dynamodb/3.1-create-table/">
-                  <b></b>3.1 Create DynamoDB Table
-                </a>
-              </li>
+ 
+  
+    
+    <li data-nav-id="/1-introduction/" title="1. Introduction" class="dd-item
+        
+        
+        
+        ">
+      <a href="/1-introduction/">
+          <b></b>1. Introduction
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
 
-              <li
-                data-nav-id="/3-setup-dynamodb/3.2-setup-dax/"
-                title="3.2 Setup DynamoDB DAX"
-                class="dd-item"
-              >
-                <a href="/3-setup-dynamodb/3.2-setup-dax/">
-                  <b></b>3.2 Setup DynamoDB DAX
-                </a>
-              </li>
-            </ul>
-          </li>
+        
+          
+            
+            
 
-          <li
-            data-nav-id="/4-setup-elasticache/"
-            title="4. Setup ElastiCache Redis"
-            class="dd-item active"
-          >
-            <a href="/4-setup-elasticache/">
-              <b></b>4. Setup ElastiCache Redis
-            </a>
-          </li>
 
-          <li
-            data-nav-id="/5-setup-application/"
-            title="5. Setup Application"
-            class="dd-item"
-          >
-            <a href="/5-setup-application/"> <b></b>5. Setup Application </a>
 
-            <ul>
-              <li
-                data-nav-id="/5-setup-application/5.1-launch-ec2/"
-                title="5.1 Launch EC2 Instance"
-                class="dd-item"
-              >
-                <a href="/5-setup-application/5.1-launch-ec2/">
-                  <b></b>5.1 Launch EC2 Instance
-                </a>
-              </li>
 
-              <li
-                data-nav-id="/5-setup-application/5.2-deploy-app/"
-                title="5.2 Deploy Application"
-                class="dd-item"
-              >
-                <a href="/5-setup-application/5.2-deploy-app/">
-                  <b></b>5.2 Deploy Application
-                </a>
-              </li>
-            </ul>
-          </li>
+ 
+  
+    
+    <li data-nav-id="/1-introduction/1.1-overview/" title="1.1 Workshop Overview" class="dd-item
+        
+        
+        
+        ">
+      <a href="/1-introduction/1.1-overview/">
+          <b></b>1.1 Workshop Overview
+          
+      </a>
+      
+      
+    </li>
+  
+ 
 
-          <li
-            data-nav-id="/6-setup-loadbalancer/"
-            title="6. Setup Application Load Balancer"
-            class="dd-item"
-          >
-            <a href="/6-setup-loadbalancer/">
-              <b></b>6. Setup Application Load Balancer
-            </a>
-          </li>
+            
+          
+            
+            
 
-          <li
-            data-nav-id="/7-setup-cloudfront/"
-            title="7. Setup CloudFront CDN"
-            class="dd-item"
-          >
-            <a href="/7-setup-cloudfront/"> <b></b>7. Setup CloudFront CDN </a>
-          </li>
 
-          <li
-            data-nav-id="/8-performance-testing/"
-            title="8. Performance Testing"
-            class="dd-item"
-          >
-            <a href="/8-performance-testing/">
-              <b></b>8. Performance Testing
-            </a>
-          </li>
 
-          <li
-            data-nav-id="/9-monitoring/"
-            title="9. Monitoring and Alerting"
-            class="dd-item"
-          >
-            <a href="/9-monitoring/"> <b></b>9. Monitoring and Alerting </a>
-          </li>
 
-          <li
-            data-nav-id="/10-cleanup/"
-            title="10. Resource Cleanup Guide"
-            class="dd-item"
-          >
-            <a href="/10-cleanup/"> <b></b>10. Resource Cleanup Guide </a>
-          </li>
+ 
+  
+    
+    <li data-nav-id="/1-introduction/1.2-architecture/" title="1.2 Architecture Overview" class="dd-item
+        
+        
+        
+        ">
+      <a href="/1-introduction/1.2-architecture/">
+          <b></b>1.2 Architecture Overview
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
         </ul>
+      
+    </li>
+  
+ 
 
-        <section id="prefooter">
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/2-setup-vpc/" title="2. Setup VPC and Network Infrastructure" class="dd-item
+        
+        
+        
+        ">
+      <a href="/2-setup-vpc/">
+          <b></b>2. Setup VPC and Network Infrastructure
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/2-setup-vpc/2.1-create-vpc/" title="2.1 Create VPC" class="dd-item
+        
+        
+        
+        ">
+      <a href="/2-setup-vpc/2.1-create-vpc/">
+          <b></b>2.1 Create VPC
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/2-setup-vpc/2.2-security-groups/" title="2.2 Create Security Groups" class="dd-item
+        
+        
+        
+        ">
+      <a href="/2-setup-vpc/2.2-security-groups/">
+          <b></b>2.2 Create Security Groups
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/3-setup-dynamodb/" title="3. Setup DynamoDB and DAX" class="dd-item
+        
+        
+        
+        ">
+      <a href="/3-setup-dynamodb/">
+          <b></b>3. Setup DynamoDB and DAX
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/3-setup-dynamodb/3.1-create-table/" title="3.1 Create DynamoDB Table" class="dd-item
+        
+        
+        
+        ">
+      <a href="/3-setup-dynamodb/3.1-create-table/">
+          <b></b>3.1 Create DynamoDB Table
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/3-setup-dynamodb/3.2-setup-dax/" title="3.2 Setup DynamoDB DAX" class="dd-item
+        
+        
+        
+        ">
+      <a href="/3-setup-dynamodb/3.2-setup-dax/">
+          <b></b>3.2 Setup DynamoDB DAX
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/4-setup-elasticache/" title="4. Setup ElastiCache Redis" class="dd-item
+        
+        active
+        
+        ">
+      <a href="/4-setup-elasticache/">
+          <b></b>4. Setup ElastiCache Redis
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/5-setup-application/" title="5. Setup Application" class="dd-item
+        
+        
+        
+        ">
+      <a href="/5-setup-application/">
+          <b></b>5. Setup Application
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/5-setup-application/5.1-launch-ec2/" title="5.1 Launch EC2 Instance" class="dd-item
+        
+        
+        
+        ">
+      <a href="/5-setup-application/5.1-launch-ec2/">
+          <b></b>5.1 Launch EC2 Instance
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/5-setup-application/5.2-deploy-app/" title="5.2 Deploy Application" class="dd-item
+        
+        
+        
+        ">
+      <a href="/5-setup-application/5.2-deploy-app/">
+          <b></b>5.2 Deploy Application
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/6-setup-loadbalancer/" title="6. Setup Application Load Balancer" class="dd-item
+        
+        
+        
+        ">
+      <a href="/6-setup-loadbalancer/">
+          <b></b>6. Setup Application Load Balancer
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/7-setup-cloudfront/" title="7. Setup CloudFront CDN" class="dd-item
+        
+        
+        
+        ">
+      <a href="/7-setup-cloudfront/">
+          <b></b>7. Setup CloudFront CDN
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/8-performance-testing/" title="8. Performance Testing" class="dd-item
+        
+        
+        
+        ">
+      <a href="/8-performance-testing/">
+          <b></b>8. Performance Testing
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/9-monitoring/" title="9. Monitoring and Alerting" class="dd-item
+        
+        
+        
+        ">
+      <a href="/9-monitoring/">
+          <b></b>9. Monitoring and Alerting
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/10-cleanup/" title="10. Resource Cleanup Guide" class="dd-item
+        
+        
+        
+        ">
+      <a href="/10-cleanup/">
+          <b></b>10. Resource Cleanup Guide
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+        
+    </ul>
+
+    
+    
+
+    
+    <section id="prefooter">
+      <hr/>
+      <ul>
+      
+        <li>
+          <a class="padding">
+            <i class="fas fa-language fa-fw"></i>
+          <div class="select-style">
+            <select id="select-language" onchange="location = this.value;">
+          
+          
+          
+              
+              
+                  
+                    
+                    
+                      <option id="en" value="//localhost:50292/4-setup-elasticache/" selected>English</option>
+                    
+                  
+              
+                  
+              
+          
+              
+              
+                  
+              
+                  
+                    
+                    
+                      <option id="vi" value="//localhost:50292/vi/4-setup-elasticache/">Tiếng Việt</option>
+                    
+                  
+              
+          
+        </select>
+        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+          width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
+          <g>
+            <g id="arrow-drop-down">
+              <polygon points="0,63.75 127.5,191.25 255,63.75 		" />
+            </g>
+          </g>
+        </svg>
+        </div>
+        </a>
+        </li>
+      
+
+      
+      </ul>
+    </section>
+    
+    <section id="footer">
+      <section id="shortcuts" style="font-weight: bold;">
+        <h3>More</h3>
+        <ul>
+          
+              <li> 
+                  <a class="padding" href="https://aws.amazon.com/blogs"><i class="fab fa-aws"></i> AWS Study Group - Blog</a>
+              </li>
+          
+              <li> 
+                  <a class="padding" href="https://www.facebook.com/groups/awsstudygroupfcj"><i class="fab fa-facebook"></i> AWS Study Group - FB Group</a>
+              </li>
+          
+        </ul>
+      </section>
+      <section id="prefooter">
           <hr />
           <ul>
             <li>
               <a class="padding">
                 <i class="fas fa-language fa-fw"></i>
                 <div class="select-style">
-                  <select
-                    id="select-language"
-                    onchange="location = this.value;"
-                  >
-                    <option id="en" value="/4-setup-elasticache/" selected>
-                      English
-                    </option>
-
-                    <option id="vi" value="/vi/4-setup-elasticache/">
-                      Tiếng Việt
-                    </option>
+                  <select id="select-language" onchange="changeLanguage()">
+                    
+                      <option value="en" selected>
+                        English
+                      </option>
+                    
+                      <option value="vi" >
+                        Tiếng Việt
+                      </option>
+                    
                   </select>
-                  <svg
-                    version="1.1"
-                    id="Capa_1"
-                    xmlns="http://www.w3.org/2000/svg"
-                    xmlns:xlink="http://www.w3.org/1999/xlink"
-                    x="0px"
-                    y="0px"
-                    width="255px"
-                    height="255px"
-                    viewBox="0 0 255 255"
-                    style="enable-background: new 0 0 255 255"
-                    xml:space="preserve"
-                  >
+                  <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
                     <g>
                       <g id="arrow-drop-down">
-                        <polygon points="0,63.75 127.5,191.25 255,63.75 		" />
+                        <polygon points="0,63.75 127.5,191.25 255,63.75" />
                       </g>
                     </g>
                   </svg>
                 </div>
               </a>
             </li>
+            <li>
+              <a class="padding" href="#" data-clear-history-toggle=""><i class="fas fa-history fa-fw"></i> Clear History</a>
+            </li>
           </ul>
         </section>
-
         <section id="footer">
-          <section id="shortcuts" style="font-weight: bold">
-            <h3>More</h3>
-            <ul>
-              <li>
-                <a class="padding" href="https://aws.amazon.com/blogs"
-                  ><i class="fab fa-aws"></i> AWS Study Group - Blog</a
-                >
-              </li>
-
-              <li>
-                <a
-                  class="padding"
-                  href="https://www.facebook.com/groups/awsstudygroupfcj"
-                  ><i class="fab fa-facebook"></i> AWS Study Group - FB Group</a
-                >
-              </li>
-            </ul>
-          </section>
-          <section id="prefooter">
-            <hr />
-            <ul>
-              <li>
-                <a class="padding">
-                  <i class="fas fa-language fa-fw"></i>
-                  <div class="select-style">
-                    <select id="select-language" onchange="changeLanguage()">
-                      <option value="en" selected>English</option>
-
-                      <option value="vi">Tiếng Việt</option>
-                    </select>
-                    <svg
-                      version="1.1"
-                      id="Capa_1"
-                      xmlns="http://www.w3.org/2000/svg"
-                      xmlns:xlink="http://www.w3.org/1999/xlink"
-                      x="0px"
-                      y="0px"
-                      width="255px"
-                      height="255px"
-                      viewBox="0 0 255 255"
-                      style="enable-background: new 0 0 255 255"
-                      xml:space="preserve"
-                    >
-                      <g>
-                        <g id="arrow-drop-down">
-                          <polygon points="0,63.75 127.5,191.25 255,63.75" />
-                        </g>
-                      </g>
-                    </svg>
-                  </div>
-                </a>
-              </li>
-              <li>
-                <a class="padding" href="#" data-clear-history-toggle=""
-                  ><i class="fas fa-history fa-fw"></i> Clear History</a
-                >
-              </li>
-            </ul>
-          </section>
-          <section id="footer">
-            <left>
-              <b>Workshop</b><br />
-              <img
-                src="https://hitwebcounter.com/counter/counter.php?page=7831196&style=0038&nbdigits=9&type=page&initCount=0"
-                title="Migrate"
-                alt="web counter"
-                border="0"
-              /><br />
-              <b
-                ><a href="https://cloudjourney.awsstudygroup.com/"
-                  >Cloud Journey</a
-                ></b
-              ><br />
-              <img
-                src="https://hitwebcounter.com/counter/counter.php?page=7830807&style=0038&nbdigits=9&type=page&initCount=0"
-                title="Total CLoud Journey"
-                alt="web counter"
-                border="0"
-              />
-            </left>
-            <left>
-              <br /><br />
-              <b>Last Updated</b><br />
-              <i><font color="orange">27-7-2025</font></i>
-            </left>
-            <left>
-              <br /><br />
-              <b>Team</b><br />
-              <i
-                ><br /><a
-                  href="https://www.linkedin.com/in/jotaguy"
-                  style="color: orange"
-                  >Gia Hưng</a
-                ><br
-              /></i>
-            </left>
-            <script
-              async
-              defer
-              src="https://buttons.github.io/buttons.js"
-            ></script>
-          </section>
+          <left>
+            <b>Workshop</b><br />
+            <img src="https://hitwebcounter.com/counter/counter.php?page=7831196&style=0038&nbdigits=9&type=page&initCount=0" title="Migrate" alt="web counter" border="0" /><br />
+            <b><a href="https://cloudjourney.awsstudygroup.com/">Cloud Journey</a></b><br />
+            <img src="https://hitwebcounter.com/counter/counter.php?page=7830807&style=0038&nbdigits=9&type=page&initCount=0" title="Total CLoud Journey" alt="web counter" border="0" />
+          </left>
+          <left>
+            <br /><br />
+            <b>Last Updated</b><br />
+            <i><font color="orange">27-7-2025</font></i>
+          </left>
+          <left>
+            <br /><br />
+            <b>Team</b><br />
+            <i><br /><a href="https://www.linkedin.com/in/jotaguy" style="color: orange">Gia Hưng</a><br /></i>
+          </left>
+          <script async defer src="https://buttons.github.io/buttons.js"></script>
         </section>
-      </div>
-    </nav>
 
-    <section id="body">
-      <div id="overlay"></div>
-      <div class="padding highlightable">
-        <div>
-          <div id="top-bar">
-            <div
-              id="breadcrumbs"
-              itemscope=""
-              itemtype="http://data-vocabulary.org/Breadcrumb"
-            >
-              <span id="sidebar-toggle-span">
-                <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
-                  <i class="fas fa-bars"></i>
-                </a>
-              </span>
+    </section>
+  </div>
+</nav>
 
-              <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
 
-              <span class="links">
-                <a href="/">In-Memory Database Caching Architecture Workshop</a>
-                > 4. Setup ElastiCache Redis
-              </span>
-            </div>
 
-            <div class="progress">
-              <div class="wrapper">
-                <nav id="TableOfContents">
-                  <ul>
-                    <li>
-                      <a href="#step-1-navigate-to-elasticache-console"
-                        >Step 1: Navigate to ElastiCache Console</a
-                      >
-                    </li>
-                    <li>
-                      <a href="#step-2-create-subnet-group"
-                        >Step 2: Create Subnet Group</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#navigate-to-subnet-groups"
-                            >Navigate to Subnet Groups</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#configure-subnet-group"
-                            >Configure Subnet Group</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#step-3-create-redis-oss-cache"
-                        >Step 3: Create Redis OSS Cache</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#navigate-to-redis-oss-caches"
-                            >Navigate to Redis OSS Caches</a
-                          >
-                        </li>
-                        <li><a href="#choose-engine">Choose Engine</a></li>
-                        <li>
-                          <a href="#choose-deployment-option"
-                            >Choose Deployment Option</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#choose-creation-method"
-                            >Choose Creation Method</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#configure-cache-settings"
-                            >Configure Cache Settings</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#configure-default-settings"
-                            >Configure Default Settings</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#step-4-configure-connectivity"
-                        >Step 4: Configure Connectivity</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#network-settings">Network Settings</a>
-                        </li>
-                        <li>
-                          <a href="#security-settings">Security Settings</a>
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#step-5-configure-advanced-settings"
-                        >Step 5: Configure Advanced Settings</a
-                      >
-                      <ul>
-                        <li><a href="#backup-settings">Backup Settings</a></li>
-                        <li>
-                          <a href="#maintenance-settings"
-                            >Maintenance Settings</a
-                          >
-                        </li>
-                        <li><a href="#log-settings">Log Settings</a></li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#step-6-review-and-create"
-                        >Step 6: Review and Create</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#review-configuration"
-                            >Review Configuration</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#step-7-monitor-cache-creation"
-                        >Step 7: Monitor Cache Creation</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#check-creation-progress"
-                            >Check Creation Progress</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#verify-cache-is-available"
-                            >Verify Cache is Available</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#step-8-note-cache-endpoints"
-                        >Step 8: Note Cache Endpoints</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#primary-endpoint">Primary Endpoint</a>
-                        </li>
-                        <li><a href="#reader-endpoint">Reader Endpoint</a></li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#step-9-test-redis-connectivity"
-                        >Step 9: Test Redis Connectivity</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#launch-test-instance"
-                            >Launch Test Instance</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#install-redis-cli">Install Redis CLI</a>
-                        </li>
-                        <li>
-                          <a href="#test-redis-connection"
-                            >Test Redis Connection</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#step-10-configure-redis-for-application-use"
-                        >Step 10: Configure Redis for Application Use</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#set-memory-policy">Set Memory Policy</a>
-                        </li>
-                        <li>
-                          <a href="#test-cache-functionality"
-                            >Test Cache Functionality</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#step-11-monitor-redis-performance"
-                        >Step 11: Monitor Redis Performance</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#enable-cloudwatch-metrics"
-                            >Enable CloudWatch Metrics</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#step-12-document-redis-configuration"
-                        >Step 12: Document Redis Configuration</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#redis-cache-information"
-                            >Redis Cache Information</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#performance-characteristics"
-                            >Performance Characteristics</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#troubleshooting-common-issues"
-                        >Troubleshooting Common Issues</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#issue-cannot-connect-to-redis"
-                            >Issue: Cannot Connect to Redis</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#issue-high-memory-usage"
-                            >Issue: High Memory Usage</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#next-steps">Next Steps</a>
-                      <ul>
-                        <li>
-                          <a href="#redis-benefits-achieved"
-                            >Redis Benefits Achieved:</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                  </ul>
-                </nav>
+
+        <section id="body">
+        <div id="overlay"></div>
+        <div class="padding highlightable">
+              
+              <div>
+                <div id="top-bar">
+                
+                
+                <div id="breadcrumbs" itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb">
+                    <span id="sidebar-toggle-span">
+                        <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+                          <i class="fas fa-bars"></i>
+                        </a>
+                    </span>
+                  
+                  <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
+                  
+                  <span class="links">
+                 
+                 
+                    
+          
+          
+            
+            
+          
+          
+            <a href='/'>In-Memory Database Caching Architecture Workshop</a> > 4. Setup ElastiCache Redis
+          
+        
+          
+        
+                 
+                  </span>
+                </div>
+                
+                    <div class="progress">
+    <div class="wrapper">
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#step-1-navigate-to-elasticache-console">Step 1: Navigate to ElastiCache Console</a></li>
+    <li><a href="#step-2-create-subnet-group">Step 2: Create Subnet Group</a>
+      <ul>
+        <li><a href="#navigate-to-subnet-groups">Navigate to Subnet Groups</a></li>
+        <li><a href="#configure-subnet-group">Configure Subnet Group</a></li>
+      </ul>
+    </li>
+    <li><a href="#step-3-create-redis-oss-cache">Step 3: Create Redis OSS Cache</a>
+      <ul>
+        <li><a href="#navigate-to-redis-oss-caches">Navigate to Redis OSS Caches</a></li>
+        <li><a href="#choose-engine">Choose Engine</a></li>
+        <li><a href="#choose-deployment-option">Choose Deployment Option</a></li>
+        <li><a href="#choose-creation-method">Choose Creation Method</a></li>
+        <li><a href="#configure-cache-settings">Configure Cache Settings</a></li>
+        <li><a href="#configure-default-settings">Configure Default Settings</a></li>
+      </ul>
+    </li>
+    <li><a href="#step-4-configure-connectivity">Step 4: Configure Connectivity</a>
+      <ul>
+        <li><a href="#network-settings">Network Settings</a></li>
+        <li><a href="#security-settings">Security Settings</a></li>
+      </ul>
+    </li>
+    <li><a href="#step-5-configure-advanced-settings">Step 5: Configure Advanced Settings</a>
+      <ul>
+        <li><a href="#backup-settings">Backup Settings</a></li>
+        <li><a href="#maintenance-settings">Maintenance Settings</a></li>
+        <li><a href="#log-settings">Log Settings</a></li>
+      </ul>
+    </li>
+    <li><a href="#step-6-review-and-create">Step 6: Review and Create</a>
+      <ul>
+        <li><a href="#review-configuration">Review Configuration</a></li>
+      </ul>
+    </li>
+    <li><a href="#step-7-monitor-cache-creation">Step 7: Monitor Cache Creation</a>
+      <ul>
+        <li><a href="#check-creation-progress">Check Creation Progress</a></li>
+        <li><a href="#verify-cache-is-available">Verify Cache is Available</a></li>
+      </ul>
+    </li>
+    <li><a href="#step-8-note-cache-endpoints">Step 8: Note Cache Endpoints</a>
+      <ul>
+        <li><a href="#primary-endpoint">Primary Endpoint</a></li>
+        <li><a href="#reader-endpoint">Reader Endpoint</a></li>
+      </ul>
+    </li>
+    <li><a href="#step-9-test-redis-connectivity">Step 9: Test Redis Connectivity</a>
+      <ul>
+        <li><a href="#launch-test-instance">Launch Test Instance</a></li>
+        <li><a href="#install-redis-cli">Install Redis CLI</a></li>
+        <li><a href="#test-redis-connection">Test Redis Connection</a></li>
+      </ul>
+    </li>
+    <li><a href="#step-10-configure-redis-for-application-use">Step 10: Configure Redis for Application Use</a>
+      <ul>
+        <li><a href="#set-memory-policy">Set Memory Policy</a></li>
+        <li><a href="#test-cache-functionality">Test Cache Functionality</a></li>
+      </ul>
+    </li>
+    <li><a href="#step-11-monitor-redis-performance">Step 11: Monitor Redis Performance</a>
+      <ul>
+        <li><a href="#enable-cloudwatch-metrics">Enable CloudWatch Metrics</a></li>
+      </ul>
+    </li>
+    <li><a href="#step-12-document-redis-configuration">Step 12: Document Redis Configuration</a>
+      <ul>
+        <li><a href="#redis-cache-information">Redis Cache Information</a></li>
+        <li><a href="#performance-characteristics">Performance Characteristics</a></li>
+      </ul>
+    </li>
+    <li><a href="#troubleshooting-common-issues">Troubleshooting Common Issues</a>
+      <ul>
+        <li><a href="#issue-cannot-connect-to-redis">Issue: Cannot Connect to Redis</a></li>
+        <li><a href="#issue-high-memory-usage">Issue: High Memory Usage</a></li>
+      </ul>
+    </li>
+    <li><a href="#next-steps">Next Steps</a>
+      <ul>
+        <li><a href="#redis-benefits-achieved">Redis Benefits Achieved:</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+
+                
               </div>
             </div>
-          </div>
+            
+        <div id="head-tags">
+        
         </div>
-
-        <div id="head-tags"></div>
-
+        
         <div id="body-inner">
-          <h1>4. Setup ElastiCache Redis</h1>
+          
+            <h1>
+              
+              
+                4. Setup ElastiCache Redis
+              
+            </h1>
+          
 
-          <p>
-            In this step, we&rsquo;ll create an ElastiCache Redis cluster that
-            will serve as our application-level cache. This will be the first
-            layer of caching that our application checks before falling back to
-            DAX and DynamoDB.
-          </p>
-          <h2 id="step-1-navigate-to-elasticache-console">
-            Step 1: Navigate to ElastiCache Console
-          </h2>
-          <ol>
-            <li>Open the <strong>AWS Management Console</strong></li>
-            <li>Navigate to the <strong>ElastiCache service</strong></li>
-          </ol>
-          <p>
-            <img
-              src="../images/elasticache-console.png"
-              alt="ElastiCache Console"
-            />
-          </p>
-          <ol start="3">
-            <li>
-              Click <strong>Get started</strong> or <strong>Create</strong> if
-              this is your first time
-            </li>
-          </ol>
-          <h2 id="step-2-create-subnet-group">Step 2: Create Subnet Group</h2>
-          <h3 id="navigate-to-subnet-groups">Navigate to Subnet Groups</h3>
-          <ol>
-            <li>
-              <p>Click <strong>Subnet groups</strong> in the left navigation</p>
-            </li>
-            <li>
-              <p>Click <strong>Create subnet group</strong></p>
-            </li>
-          </ol>
-          <p>
-            <img
-              src="../images/create-subnet-group.png"
-              alt="Create Subnet Group"
-            />
-          </p>
-          <h3 id="configure-subnet-group">Configure Subnet Group</h3>
-          <ol start="3">
-            <li>
-              <p>Enter subnet group details:</p>
-              <ul>
-                <li><strong>Name</strong>: <code>redis-subnet-group</code></li>
-                <li>
-                  <strong>Description</strong>:
-                  <code>Subnet group for Redis cluster</code>
-                </li>
-                <li>
-                  <strong>VPC ID</strong>: Select your
-                  <code>caching-workshop-vpc</code>
-                </li>
-              </ul>
-            </li>
-          </ol>
-          <p>
-            <img
-              src="../images/subnet-group-config.png"
-              alt="Subnet Group Configuration"
-            />
-          </p>
-          <ol start="4">
-            <li>
-              <p>Select availability zones and subnets:</p>
-              <ul>
-                <li>
-                  Choose both <strong>private subnets</strong> from different
-                  AZs
-                </li>
-                <li>This ensures high availability for the Redis cluster</li>
-              </ul>
-            </li>
-            <li>
-              <p>Click <strong>Create</strong></p>
-            </li>
-          </ol>
-          <h2 id="step-3-create-redis-oss-cache">
-            Step 3: Create Redis OSS Cache
-          </h2>
-          <h3 id="navigate-to-redis-oss-caches">
-            Navigate to Redis OSS Caches
-          </h3>
-          <ol>
-            <li>
-              Click <strong>Redis OSS caches</strong> in the left navigation
-            </li>
-          </ol>
-          <p>
-            <img
-              src="../images/redis-oss-nav.png"
-              alt="Redis OSS Caches Navigation"
-            />
-          </p>
-          <ol start="2">
-            <li>Click <strong>Create Redis OSS cache</strong></li>
-          </ol>
-          <h3 id="choose-engine">Choose Engine</h3>
-          <ol start="3">
-            <li>
-              Select the caching engine:
-              <ul>
-                <li><strong>Engine</strong>: Redis OSS (keep default)</li>
-                <li>
-                  Note: Valkey is recommended for cost savings, but we&rsquo;ll
-                  use Redis OSS for this workshop
-                </li>
-              </ul>
-            </li>
-          </ol>
-          <p>
-            <img src="../images/engine-selection.png" alt="Engine Selection" />
-          </p>
+        
 
-          <div class="notices info">
-            <p>
-              Valkey offers enhanced price and performance (up to 33% savings
-              with Serverless, 20% with node-based) and is fully compatible with
-              Redis OSS v7.0. For production workloads, consider Valkey as a
-              drop-in replacement.
-            </p>
-          </div>
 
-          <h3 id="choose-deployment-option">Choose Deployment Option</h3>
-          <ol start="4">
-            <li>
-              Select deployment option:
-              <ul>
-                <li>
-                  <strong>Deployment option</strong>: Design your own cache
-                </li>
-                <li>
-                  This allows us to select specific node types and
-                  configurations
-                </li>
-              </ul>
-            </li>
-          </ol>
-          <p>
-            <img
-              src="../images/deployment-option.png"
-              alt="Deployment Option"
-            />
-            <img
-              src="../images/deployment-configuration.png"
-              alt="Deployment Option"
-            />
-            <img
-              src="../images/deployment-subnet.png"
-              alt="Deployment Option"
-            />
-          </p>
 
-          <div class="notices tip">
-            <p>
-              Serverless option automatically scales but &ldquo;Design your own
-              cache&rdquo; gives us more control over node types and costs for
-              this workshop.
-            </p>
-          </div>
+	<p>In this step, we&rsquo;ll create an ElastiCache Redis cluster that will serve as our application-level cache. This will be the first layer of caching that our application checks before falling back to DAX and DynamoDB.</p>
+<h2 id="step-1-navigate-to-elasticache-console">Step 1: Navigate to ElastiCache Console</h2>
+<ol>
+<li>Open the <strong>AWS Management Console</strong></li>
+<li>Navigate to the <strong>ElastiCache service</strong></li>
+</ol>
+<p><img src="../images/elasticache-console.png" alt="ElastiCache Console"></p>
+<ol start="3">
+<li>Click <strong>Get started</strong> or <strong>Create</strong> if this is your first time</li>
+</ol>
+<h2 id="step-2-create-subnet-group">Step 2: Create Subnet Group</h2>
+<h3 id="navigate-to-subnet-groups">Navigate to Subnet Groups</h3>
+<ol>
+<li>
+<p>Click <strong>Subnet groups</strong> in the left navigation</p>
+</li>
+<li>
+<p>Click <strong>Create subnet group</strong></p>
+</li>
+</ol>
+<p><img src="../images/create-subnet-group.png" alt="Create Subnet Group"></p>
+<h3 id="configure-subnet-group">Configure Subnet Group</h3>
+<ol start="3">
+<li>
+<p>Enter subnet group details:</p>
+<ul>
+<li><strong>Name</strong>: <code>redis-subnet-group</code></li>
+<li><strong>Description</strong>: <code>Subnet group for Redis cluster</code></li>
+<li><strong>VPC ID</strong>: Select your <code>caching-workshop-vpc</code></li>
+</ul>
+</li>
+</ol>
+<p><img src="../images/subnet-group-config.png" alt="Subnet Group Configuration"></p>
+<ol start="4">
+<li>
+<p>Select availability zones and subnets:</p>
+<ul>
+<li>Choose both <strong>private subnets</strong> from different AZs</li>
+<li>This ensures high availability for the Redis cluster</li>
+</ul>
+</li>
+<li>
+<p>Click <strong>Create</strong></p>
+</li>
+</ol>
+<h2 id="step-3-create-redis-oss-cache">Step 3: Create Redis OSS Cache</h2>
+<h3 id="navigate-to-redis-oss-caches">Navigate to Redis OSS Caches</h3>
+<ol>
+<li>Click <strong>Redis OSS caches</strong> in the left navigation</li>
+</ol>
+<p><img src="../images/redis-oss-nav.png" alt="Redis OSS Caches Navigation"></p>
+<ol start="2">
+<li>Click <strong>Create Redis OSS cache</strong></li>
+</ol>
+<h3 id="choose-engine">Choose Engine</h3>
+<ol start="3">
+<li>Select the caching engine:
+<ul>
+<li><strong>Engine</strong>: Redis OSS (keep default)</li>
+<li>Note: Valkey is recommended for cost savings, but we&rsquo;ll use Redis OSS for this workshop</li>
+</ul>
+</li>
+</ol>
+<p><img src="../images/engine-selection.png" alt="Engine Selection"></p>
 
-          <h3 id="choose-creation-method">Choose Creation Method</h3>
-          <ol start="5">
-            <li>
-              Select creation method:
-              <ul>
-                <li><strong>Creation method</strong>: New cache</li>
-                <li>
-                  <strong>Restore from backup</strong>: Not selected
-                  (we&rsquo;re creating a new empty cache)
-                </li>
-              </ul>
-            </li>
-          </ol>
-          <h3 id="configure-cache-settings">Configure Cache Settings</h3>
-          <ol start="6">
-            <li>
-              <p>Configure basic cache information:</p>
-              <ul>
-                <li><strong>Name</strong>: <code>product-cache</code></li>
-                <li>
-                  <strong>Description</strong>:
-                  <code>Redis cache for product catalog caching</code>
-                </li>
-              </ul>
-            </li>
-          </ol>
-          <h3 id="configure-default-settings">Configure Default Settings</h3>
-          <ol start="7">
-            <li>
-              Configure cache specifications:
-              <ul>
-                <li>
-                  <strong>Use default settings</strong>: Uncheck to customize
-                </li>
-                <li><strong>Engine version</strong>: 7.2 (latest stable)</li>
-                <li><strong>Port</strong>: 6379</li>
-                <li><strong>Node type</strong>: <code>cache.t3.micro</code></li>
-                <li><strong>Multi-AZ</strong>: Enabled</li>
-                <li><strong>Replicas</strong>: 1</li>
-              </ul>
-            </li>
-          </ol>
+<div class="notices info" ><p>Valkey offers enhanced price and performance (up to 33% savings with Serverless, 20% with node-based) and is fully compatible with Redis OSS v7.0. For production workloads, consider Valkey as a drop-in replacement.</p>
+</div>
 
-          <div class="notices tip">
-            <p>
-              Multi-AZ with replicas provides high availability and automatic
-              failover capabilities.
-            </p>
-          </div>
+<h3 id="choose-deployment-option">Choose Deployment Option</h3>
+<ol start="4">
+<li>Select deployment option:
+<ul>
+<li><strong>Deployment option</strong>: Design your own cache</li>
+<li>This allows us to select specific node types and configurations</li>
+</ul>
+</li>
+</ol>
+<p><img src="../images/deployment-option.png" alt="Deployment Option">
+<img src="../images/deployment-configuration.png" alt="Deployment Option">
+<img src="../images/deployment-subnet.png" alt="Deployment Option"></p>
 
-          <h2 id="step-4-configure-connectivity">
-            Step 4: Configure Connectivity
-          </h2>
-          <h3 id="network-settings">Network Settings</h3>
-          <ol start="5">
-            <li>
-              <p>Configure network settings:</p>
-              <ul>
-                <li><strong>Network type</strong>: IPv4</li>
-                <li>
-                  <strong>Subnet group</strong>: <code>redis-subnet-group</code>
-                </li>
-                <li>
-                  <strong>Preferred availability zones</strong>: No preference
-                </li>
-              </ul>
-            </li>
-          </ol>
-          <h3 id="security-settings">Security Settings</h3>
-          <ol start="6">
-            <li>
-              <p>Configure security:</p>
-              <ul>
-                <li>
-                  <strong>Security groups</strong>: Select
-                  <code>redis-sg</code> (remove default)
-                </li>
-                <li>
-                  <strong>Encryption at rest</strong>: Disabled (for workshop)
-                </li>
-                <li>
-                  <strong>Encryption in transit</strong>: Disabled (for
-                  workshop)
-                </li>
-              </ul>
-            </li>
-          </ol>
+<div class="notices tip" ><p>Serverless option automatically scales but &ldquo;Design your own cache&rdquo; gives us more control over node types and costs for this workshop.</p>
+</div>
 
-          <div class="notices warning">
-            <p>
-              In production environments, always enable encryption at rest and
-              in transit for security compliance.
-            </p>
-          </div>
+<h3 id="choose-creation-method">Choose Creation Method</h3>
+<ol start="5">
+<li>Select creation method:
+<ul>
+<li><strong>Creation method</strong>: New cache</li>
+<li><strong>Restore from backup</strong>: Not selected (we&rsquo;re creating a new empty cache)</li>
+</ul>
+</li>
+</ol>
+<h3 id="configure-cache-settings">Configure Cache Settings</h3>
+<ol start="6">
+<li>
+<p>Configure basic cache information:</p>
+<ul>
+<li><strong>Name</strong>: <code>product-cache</code></li>
+<li><strong>Description</strong>: <code>Redis cache for product catalog caching</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="configure-default-settings">Configure Default Settings</h3>
+<ol start="7">
+<li>Configure cache specifications:
+<ul>
+<li><strong>Use default settings</strong>: Uncheck to customize</li>
+<li><strong>Engine version</strong>: 7.2 (latest stable)</li>
+<li><strong>Port</strong>: 6379</li>
+<li><strong>Node type</strong>: <code>cache.t3.micro</code></li>
+<li><strong>Multi-AZ</strong>: Enabled</li>
+<li><strong>Replicas</strong>: 1</li>
+</ul>
+</li>
+</ol>
 
-          <h2 id="step-5-configure-advanced-settings">
-            Step 5: Configure Advanced Settings
-          </h2>
-          <h3 id="backup-settings">Backup Settings</h3>
-          <ol start="7">
-            <li>
-              <p>Configure backup options:</p>
-              <ul>
-                <li><strong>Enable automatic backups</strong>: Yes</li>
-                <li><strong>Backup retention period</strong>: 1 day</li>
-                <li><strong>Backup window</strong>: No preference</li>
-              </ul>
-            </li>
-          </ol>
-          <h3 id="maintenance-settings">Maintenance Settings</h3>
-          <ol start="8">
-            <li>
-              <p>Configure maintenance:</p>
-              <ul>
-                <li><strong>Maintenance window</strong>: No preference</li>
-                <li>
-                  <strong>Topic for SNS notification</strong>: None (for
-                  workshop)
-                </li>
-              </ul>
-            </li>
-          </ol>
-          <h3 id="log-settings">Log Settings</h3>
-          <ol start="9">
-            <li>
-              <p>Configure logging (optional):</p>
-              <ul>
-                <li><strong>Log format</strong>: Text</li>
-                <li><strong>Log destination</strong>: None (for workshop)</li>
-              </ul>
-            </li>
-          </ol>
-          <h2 id="step-6-review-and-create">Step 6: Review and Create</h2>
-          <h3 id="review-configuration">Review Configuration</h3>
-          <ol start="10">
-            <li>
-              <p>Review all settings</p>
-            </li>
-            <li>
-              <p>Verify:</p>
-              <ul>
-                <li>Cache name and description</li>
-                <li>Engine version and node type</li>
-                <li>Network and security configuration</li>
-                <li>Backup and maintenance settings</li>
-              </ul>
-            </li>
-            <li>
-              <p>Click <strong>Create Redis OSS cache</strong></p>
-            </li>
-          </ol>
+<div class="notices tip" ><p>Multi-AZ with replicas provides high availability and automatic failover capabilities.</p>
+</div>
 
-          <div class="notices info">
-            <p>
-              Redis cache creation takes 10-15 minutes. The cache will show
-              &ldquo;Creating&rdquo; status during this time.
-            </p>
-          </div>
+<h2 id="step-4-configure-connectivity">Step 4: Configure Connectivity</h2>
+<h3 id="network-settings">Network Settings</h3>
+<ol start="5">
+<li>
+<p>Configure network settings:</p>
+<ul>
+<li><strong>Network type</strong>: IPv4</li>
+<li><strong>Subnet group</strong>: <code>redis-subnet-group</code></li>
+<li><strong>Preferred availability zones</strong>: No preference</li>
+</ul>
+</li>
+</ol>
+<h3 id="security-settings">Security Settings</h3>
+<ol start="6">
+<li>
+<p>Configure security:</p>
+<ul>
+<li><strong>Security groups</strong>: Select <code>redis-sg</code> (remove default)</li>
+<li><strong>Encryption at rest</strong>: Disabled (for workshop)</li>
+<li><strong>Encryption in transit</strong>: Disabled (for workshop)</li>
+</ul>
+</li>
+</ol>
 
-          <h2 id="step-7-monitor-cache-creation">
-            Step 7: Monitor Cache Creation
-          </h2>
-          <h3 id="check-creation-progress">Check Creation Progress</h3>
-          <ol>
-            <li>
-              <p>Monitor the cache creation progress</p>
-            </li>
-            <li>
-              <p>You can see individual nodes being created</p>
-            </li>
-          </ol>
-          <h3 id="verify-cache-is-available">Verify Cache is Available</h3>
-          <ol start="3">
-            <li>
-              <p>
-                Once created, the cache status will show &ldquo;Available&rdquo;
-              </p>
-            </li>
-            <li>
-              <p>Click on the cache name to view details</p>
-            </li>
-          </ol>
-          <h2 id="step-8-note-cache-endpoints">Step 8: Note Cache Endpoints</h2>
-          <h3 id="primary-endpoint">Primary Endpoint</h3>
-          <ol>
-            <li>
-              Note the <strong>Primary endpoint</strong> for write operations:
-            </li>
-          </ol>
-          <pre tabindex="0"><code>product-cache.xxxxxx.cache.amazonaws.com:6379
-</code></pre>
-          <h3 id="reader-endpoint">Reader Endpoint</h3>
-          <ol start="2">
-            <li>
-              Note the <strong>Reader endpoint</strong> for read operations:
-            </li>
-          </ol>
-          <pre
-            tabindex="0"
-          ><code>product-cache-ro.xxxxxx.cache.amazonaws.com:6379
-</code></pre>
-          <h2 id="step-9-test-redis-connectivity">
-            Step 9: Test Redis Connectivity
-          </h2>
-          <h3 id="launch-test-instance">Launch Test Instance</h3>
-          <ol>
-            <li>
-              <p>
-                Use the same test EC2 instance from the DAX testing, or launch a
-                new one:
-              </p>
-              <ul>
-                <li><strong>AMI</strong>: Amazon Linux 2023</li>
-                <li><strong>Instance type</strong>: t3.micro</li>
-                <li><strong>Subnet</strong>: One of your private subnets</li>
-                <li><strong>Security group</strong>: <code>app-sg</code></li>
-              </ul>
-            </li>
-          </ol>
-          <h3 id="install-redis-cli">Install Redis CLI</h3>
-          <ol start="2">
-            <li>Connect to your test instance and install Redis CLI:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Update system</span>
+<div class="notices warning" ><p>In production environments, always enable encryption at rest and in transit for security compliance.</p>
+</div>
+
+<h2 id="step-5-configure-advanced-settings">Step 5: Configure Advanced Settings</h2>
+<h3 id="backup-settings">Backup Settings</h3>
+<ol start="7">
+<li>
+<p>Configure backup options:</p>
+<ul>
+<li><strong>Enable automatic backups</strong>: Yes</li>
+<li><strong>Backup retention period</strong>: 1 day</li>
+<li><strong>Backup window</strong>: No preference</li>
+</ul>
+</li>
+</ol>
+<h3 id="maintenance-settings">Maintenance Settings</h3>
+<ol start="8">
+<li>
+<p>Configure maintenance:</p>
+<ul>
+<li><strong>Maintenance window</strong>: No preference</li>
+<li><strong>Topic for SNS notification</strong>: None (for workshop)</li>
+</ul>
+</li>
+</ol>
+<h3 id="log-settings">Log Settings</h3>
+<ol start="9">
+<li>
+<p>Configure logging (optional):</p>
+<ul>
+<li><strong>Log format</strong>: Text</li>
+<li><strong>Log destination</strong>: None (for workshop)</li>
+</ul>
+</li>
+</ol>
+<h2 id="step-6-review-and-create">Step 6: Review and Create</h2>
+<h3 id="review-configuration">Review Configuration</h3>
+<ol start="10">
+<li>
+<p>Review all settings</p>
+</li>
+<li>
+<p>Verify:</p>
+<ul>
+<li>Cache name and description</li>
+<li>Engine version and node type</li>
+<li>Network and security configuration</li>
+<li>Backup and maintenance settings</li>
+</ul>
+</li>
+<li>
+<p>Click <strong>Create Redis OSS cache</strong></p>
+</li>
+</ol>
+
+<div class="notices info" ><p>Redis cache creation takes 10-15 minutes. The cache will show &ldquo;Creating&rdquo; status during this time.</p>
+</div>
+
+<h2 id="step-7-monitor-cache-creation">Step 7: Monitor Cache Creation</h2>
+<h3 id="check-creation-progress">Check Creation Progress</h3>
+<ol>
+<li>
+<p>Monitor the cache creation progress</p>
+</li>
+<li>
+<p>You can see individual nodes being created</p>
+</li>
+</ol>
+<h3 id="verify-cache-is-available">Verify Cache is Available</h3>
+<ol start="3">
+<li>
+<p>Once created, the cache status will show &ldquo;Available&rdquo;</p>
+</li>
+<li>
+<p>Click on the cache name to view details</p>
+</li>
+</ol>
+<h2 id="step-8-note-cache-endpoints">Step 8: Note Cache Endpoints</h2>
+<h3 id="primary-endpoint">Primary Endpoint</h3>
+<ol>
+<li>Note the <strong>Primary endpoint</strong> for write operations:</li>
+</ol>
+<pre tabindex="0"><code>product-cache.xxxxxx.cache.amazonaws.com:6379
+</code></pre><h3 id="reader-endpoint">Reader Endpoint</h3>
+<ol start="2">
+<li>Note the <strong>Reader endpoint</strong> for read operations:</li>
+</ol>
+<pre tabindex="0"><code>product-cache-ro.xxxxxx.cache.amazonaws.com:6379
+</code></pre><h2 id="step-9-test-redis-connectivity">Step 9: Test Redis Connectivity</h2>
+<h3 id="launch-test-instance">Launch Test Instance</h3>
+<ol>
+<li>
+<p>Use the same test EC2 instance from the DAX testing, or launch a new one:</p>
+<ul>
+<li><strong>AMI</strong>: Amazon Linux 2023</li>
+<li><strong>Instance type</strong>: t3.micro</li>
+<li><strong>Subnet</strong>: One of your private subnets</li>
+<li><strong>Security group</strong>: <code>app-sg</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="install-redis-cli">Install Redis CLI</h3>
+<ol start="2">
+<li>Connect to your test instance and install Redis CLI:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Update system</span>
 </span></span><span style="display:flex;"><span>sudo yum update -y
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Install Redis CLI</span>
 </span></span><span style="display:flex;"><span>sudo yum install -y redis6
-</span></span></code></pre>
-          </div>
-          <h3 id="test-redis-connection">Test Redis Connection</h3>
-          <ol start="3">
-            <li>Connect to your Redis cache:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Connect to primary endpoint</span>
+</span></span></code></pre></div><h3 id="test-redis-connection">Test Redis Connection</h3>
+<ol start="3">
+<li>Connect to your Redis cache:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Connect to primary endpoint</span>
 </span></span><span style="display:flex;"><span>redis-cli -h product-cache.xxxxxx.cache.amazonaws.com -p <span style="color:#ae81ff">6379</span>
-</span></span></code></pre>
-          </div>
-          <ol>
-            <li>Test basic Redis operations:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test connection</span>
+</span></span></code></pre></div><ol>
+<li>Test basic Redis operations:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test connection</span>
 </span></span><span style="display:flex;"><span>PING
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Set a test key</span>
@@ -1136,26 +1168,12 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Check Redis info</span>
 </span></span><span style="display:flex;"><span>INFO server
-</span></span></code></pre>
-          </div>
-          <h2 id="step-10-configure-redis-for-application-use">
-            Step 10: Configure Redis for Application Use
-          </h2>
-          <h3 id="set-memory-policy">Set Memory Policy</h3>
-          <ol>
-            <li>Configure memory eviction policy:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Connect to primary endpoint</span>
+</span></span></code></pre></div><h2 id="step-10-configure-redis-for-application-use">Step 10: Configure Redis for Application Use</h2>
+<h3 id="set-memory-policy">Set Memory Policy</h3>
+<ol>
+<li>Configure memory eviction policy:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Connect to primary endpoint</span>
 </span></span><span style="display:flex;"><span>redis-cli -h product-cache.xxxxxx.cache.amazonaws.com -p <span style="color:#ae81ff">6379</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Set LRU eviction policy</span>
@@ -1163,23 +1181,11 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Verify configuration</span>
 </span></span><span style="display:flex;"><span>CONFIG GET maxmemory-policy
-</span></span></code></pre>
-          </div>
-          <h3 id="test-cache-functionality">Test Cache Functionality</h3>
-          <ol start="2">
-            <li>Test cache behavior with TTL:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Set multiple products with different TTLs</span>
+</span></span></code></pre></div><h3 id="test-cache-functionality">Test Cache Functionality</h3>
+<ol start="2">
+<li>Test cache behavior with TTL:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Set multiple products with different TTLs</span>
 </span></span><span style="display:flex;"><span>SETEX product:PROD001 <span style="color:#ae81ff">300</span> <span style="color:#e6db74">&#39;{&#34;id&#34;:&#34;PROD001&#34;,&#34;name&#34;:&#34;Laptop Pro&#34;,&#34;price&#34;:999.99,&#34;category&#34;:&#34;Electronics&#34;}&#39;</span>
 </span></span><span style="display:flex;"><span>SETEX product:PROD002 <span style="color:#ae81ff">600</span> <span style="color:#e6db74">&#39;{&#34;id&#34;:&#34;PROD002&#34;,&#34;name&#34;:&#34;Smartphone X&#34;,&#34;price&#34;:699.99,&#34;category&#34;:&#34;Electronics&#34;}&#39;</span>
 </span></span><span style="display:flex;"><span>SETEX product:PROD003 <span style="color:#ae81ff">900</span> <span style="color:#e6db74">&#39;{&#34;id&#34;:&#34;PROD003&#34;,&#34;name&#34;:&#34;Cloud Guide&#34;,&#34;price&#34;:49.99,&#34;category&#34;:&#34;Books&#34;}&#39;</span>
@@ -1194,207 +1200,472 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Get cached data</span>
 </span></span><span style="display:flex;"><span>GET product:PROD001
-</span></span></code></pre>
-          </div>
-          <h2 id="step-11-monitor-redis-performance">
-            Step 11: Monitor Redis Performance
-          </h2>
-          <h3 id="enable-cloudwatch-metrics">Enable CloudWatch Metrics</h3>
-          <ol>
-            <li>
-              <p>
-                In the ElastiCache console, go to the
-                <strong>Monitoring</strong> tab
-              </p>
-            </li>
-            <li>
-              <p>Key metrics to monitor:</p>
-              <ul>
-                <li><strong>CPUUtilization</strong>: CPU usage across nodes</li>
-                <li>
-                  <strong>DatabaseMemoryUsagePercentage</strong>: Memory
-                  utilization
-                </li>
-                <li>
-                  <strong>CacheHits/CacheMisses</strong>: Cache effectiveness
-                </li>
-                <li><strong>NetworkBytesIn/Out</strong>: Network traffic</li>
-                <li><strong>Evictions</strong>: Number of evicted keys</li>
-              </ul>
-            </li>
-          </ol>
-          <h2 id="step-12-document-redis-configuration">
-            Step 12: Document Redis Configuration
-          </h2>
-          <p>Record the following information for application configuration:</p>
-          <h3 id="redis-cache-information">Redis Cache Information</h3>
-          <ul>
-            <li><strong>Cache Name</strong>: <code>product-cache</code></li>
-            <li>
-              <strong>Primary Endpoint</strong>:
-              <code>product-cache.xxxxxx.cache.amazonaws.com:6379</code>
-            </li>
-            <li>
-              <strong>Reader Endpoint</strong>:
-              <code>product-cache-ro.xxxxxx.cache.amazonaws.com:6379</code>
-            </li>
-            <li><strong>Node Type</strong>: <code>cache.t3.micro</code></li>
-            <li><strong>Replica Count</strong>: 1</li>
-            <li><strong>Security Group</strong>: <code>redis-sg</code></li>
-            <li>
-              <strong>Subnet Group</strong>: <code>redis-subnet-group</code>
-            </li>
-          </ul>
-          <h3 id="performance-characteristics">Performance Characteristics</h3>
-          <ul>
-            <li><strong>Latency</strong>: Sub-millisecond for cached data</li>
-            <li><strong>Throughput</strong>: ~100,000 operations per second</li>
-            <li><strong>Memory</strong>: ~555 MB available (t3.micro)</li>
-            <li><strong>Eviction Policy</strong>: allkeys-lru</li>
-          </ul>
-          <h2 id="troubleshooting-common-issues">
-            Troubleshooting Common Issues
-          </h2>
-          <h3 id="issue-cannot-connect-to-redis">
-            Issue: Cannot Connect to Redis
-          </h3>
-          <p><strong>Possible Causes:</strong></p>
-          <ul>
-            <li>Security group blocking traffic</li>
-            <li>Incorrect endpoint configuration</li>
-            <li>Network connectivity issues</li>
-          </ul>
-          <p><strong>Solutions:</strong></p>
-          <ul>
-            <li>Verify security group allows inbound traffic on port 6379</li>
-            <li>Check Redis endpoint URL and port</li>
-            <li>Ensure client is in same VPC as Redis cache</li>
-          </ul>
-          <h3 id="issue-high-memory-usage">Issue: High Memory Usage</h3>
-          <p><strong>Possible Causes:</strong></p>
-          <ul>
-            <li>Too much data cached</li>
-            <li>No TTL set on keys</li>
-            <li>Memory leak in application</li>
-          </ul>
-          <p><strong>Solutions:</strong></p>
-          <ul>
-            <li>Monitor memory usage in CloudWatch</li>
-            <li>Set appropriate TTL values</li>
-            <li>Use memory-efficient data structures</li>
-            <li>Consider larger node types</li>
-          </ul>
-          <h2 id="next-steps">Next Steps</h2>
-          <p>Your ElastiCache Redis setup is now complete! You have:</p>
-          <p>
-            ✅ <strong>Redis OSS Cache</strong> with primary and replica
-            nodes<br />
-            ✅ <strong>Multi-AZ deployment</strong> for high availability<br />
-            ✅ <strong>Subnet Group</strong> configured for private network
-            access<br />
-            ✅ <strong>Security Group</strong> allowing application access<br />
-            ✅ <strong>Automatic backups</strong> enabled<br />
-            ✅ <strong>CloudWatch monitoring</strong> configured<br />
-            ✅ <strong>Connection tested</strong> and verified
-          </p>
-          <h3 id="redis-benefits-achieved">Redis Benefits Achieved:</h3>
-          <ul>
-            <li>
-              <strong>Sub-millisecond latency</strong> for cached application
-              data
-            </li>
-            <li>
-              <strong>High throughput</strong> with 100K+ operations per second
-            </li>
-            <li>
-              <strong>Automatic failover</strong> with Multi-AZ deployment
-            </li>
-            <li>
-              <strong>Flexible data structures</strong> for complex caching
-              scenarios
-            </li>
-          </ul>
+</span></span></code></pre></div><h2 id="step-11-monitor-redis-performance">Step 11: Monitor Redis Performance</h2>
+<h3 id="enable-cloudwatch-metrics">Enable CloudWatch Metrics</h3>
+<ol>
+<li>
+<p>In the ElastiCache console, go to the <strong>Monitoring</strong> tab</p>
+</li>
+<li>
+<p>Key metrics to monitor:</p>
+<ul>
+<li><strong>CPUUtilization</strong>: CPU usage across nodes</li>
+<li><strong>DatabaseMemoryUsagePercentage</strong>: Memory utilization</li>
+<li><strong>CacheHits/CacheMisses</strong>: Cache effectiveness</li>
+<li><strong>NetworkBytesIn/Out</strong>: Network traffic</li>
+<li><strong>Evictions</strong>: Number of evicted keys</li>
+</ul>
+</li>
+</ol>
+<h2 id="step-12-document-redis-configuration">Step 12: Document Redis Configuration</h2>
+<p>Record the following information for application configuration:</p>
+<h3 id="redis-cache-information">Redis Cache Information</h3>
+<ul>
+<li><strong>Cache Name</strong>: <code>product-cache</code></li>
+<li><strong>Primary Endpoint</strong>: <code>product-cache.xxxxxx.cache.amazonaws.com:6379</code></li>
+<li><strong>Reader Endpoint</strong>: <code>product-cache-ro.xxxxxx.cache.amazonaws.com:6379</code></li>
+<li><strong>Node Type</strong>: <code>cache.t3.micro</code></li>
+<li><strong>Replica Count</strong>: 1</li>
+<li><strong>Security Group</strong>: <code>redis-sg</code></li>
+<li><strong>Subnet Group</strong>: <code>redis-subnet-group</code></li>
+</ul>
+<h3 id="performance-characteristics">Performance Characteristics</h3>
+<ul>
+<li><strong>Latency</strong>: Sub-millisecond for cached data</li>
+<li><strong>Throughput</strong>: ~100,000 operations per second</li>
+<li><strong>Memory</strong>: ~555 MB available (t3.micro)</li>
+<li><strong>Eviction Policy</strong>: allkeys-lru</li>
+</ul>
+<h2 id="troubleshooting-common-issues">Troubleshooting Common Issues</h2>
+<h3 id="issue-cannot-connect-to-redis">Issue: Cannot Connect to Redis</h3>
+<p><strong>Possible Causes:</strong></p>
+<ul>
+<li>Security group blocking traffic</li>
+<li>Incorrect endpoint configuration</li>
+<li>Network connectivity issues</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Verify security group allows inbound traffic on port 6379</li>
+<li>Check Redis endpoint URL and port</li>
+<li>Ensure client is in same VPC as Redis cache</li>
+</ul>
+<h3 id="issue-high-memory-usage">Issue: High Memory Usage</h3>
+<p><strong>Possible Causes:</strong></p>
+<ul>
+<li>Too much data cached</li>
+<li>No TTL set on keys</li>
+<li>Memory leak in application</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Monitor memory usage in CloudWatch</li>
+<li>Set appropriate TTL values</li>
+<li>Use memory-efficient data structures</li>
+<li>Consider larger node types</li>
+</ul>
+<h2 id="next-steps">Next Steps</h2>
+<p>Your ElastiCache Redis setup is now complete! You have:</p>
+<p>✅ <strong>Redis OSS Cache</strong> with primary and replica nodes<br>
+✅ <strong>Multi-AZ deployment</strong> for high availability<br>
+✅ <strong>Subnet Group</strong> configured for private network access<br>
+✅ <strong>Security Group</strong> allowing application access<br>
+✅ <strong>Automatic backups</strong> enabled<br>
+✅ <strong>CloudWatch monitoring</strong> configured<br>
+✅ <strong>Connection tested</strong> and verified</p>
+<h3 id="redis-benefits-achieved">Redis Benefits Achieved:</h3>
+<ul>
+<li><strong>Sub-millisecond latency</strong> for cached application data</li>
+<li><strong>High throughput</strong> with 100K+ operations per second</li>
+<li><strong>Automatic failover</strong> with Multi-AZ deployment</li>
+<li><strong>Flexible data structures</strong> for complex caching scenarios</li>
+</ul>
 
-          <div class="notices tip">
-            <p>
-              Use the primary endpoint for read/write operations and reader
-              endpoint for read-only operations to distribute load and improve
-              performance.
-            </p>
-          </div>
+<div class="notices tip" ><p>Use the primary endpoint for read/write operations and reader endpoint for read-only operations to distribute load and improve performance.</p>
+</div>
 
-          <p>
-            Next, we&rsquo;ll deploy our Node.js application that will utilize
-            both Redis and DAX for multi-layer caching.
-          </p>
+<p>Next, we&rsquo;ll deploy our Node.js application that will utilize both Redis and DAX for multi-layer caching.</p>
 
-          <footer class="footline"></footer>
+
+
+
+
+<footer class=" footline" >
+	
+</footer>
+
+        
         </div>
+        
+
       </div>
 
-      <div id="navigation">
-        <a
-          class="nav nav-prev"
-          href="/3-setup-dynamodb/3.2-setup-dax/"
-          title="3.2 Setup DynamoDB DAX"
-        >
-          <i class="fa fa-chevron-left"></i
-        ></a>
+    <div id="navigation">
+        
+        
 
-        <a
-          class="nav nav-next"
-          href="/5-setup-application/"
-          title="5. Setup Application"
-          style="margin-right: 0px"
-          ><i class="fa fa-chevron-right"></i
-        ></a>
-      </div>
+        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+
+        
+
+
+	 
+	 
+		
+			<a class="nav nav-prev" href="/3-setup-dynamodb/3.2-setup-dax/" title="3.2 Setup DynamoDB DAX"> <i class="fa fa-chevron-left"></i></a>
+		
+		
+			<a class="nav nav-next" href="/5-setup-application/" title="5. Setup Application" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
+		
+	
+    </div>
+
     </section>
 
-    <div
-      style="
-        left: -1000px;
-        overflow: scroll;
-        position: absolute;
-        top: -1000px;
-        border: none;
-        box-sizing: content-box;
-        height: 200px;
-        margin: 0px;
-        padding: 0px;
-        width: 200px;
-      "
-    >
-      <div
-        style="
-          border: none;
-          box-sizing: content-box;
-          height: 200px;
-          margin: 0px;
-          padding: 0px;
-          width: 200px;
-        "
-      ></div>
+    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
+      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
     </div>
-    <script src="/js/clipboard.min.js?1754898926"></script>
-    <script src="/js/perfect-scrollbar.min.js?1754898926"></script>
-    <script src="/js/perfect-scrollbar.jquery.min.js?1754898926"></script>
-    <script src="/js/jquery.sticky.js?1754898926"></script>
-    <script src="/js/featherlight.min.js?1754898926"></script>
-    <script src="/js/highlight.pack.js?1754898926"></script>
-    <script>
-      hljs.initHighlightingOnLoad();
-    </script>
-    <script src="/js/modernizr.custom-3.6.0.js?1754898926"></script>
-    <script src="/js/learn.js?1754898926"></script>
-    <script src="/js/hugo-learn.js?1754898926"></script>
-    <script src="/js/language-switcher.js?1754898926"></script>
-    <script src="/js/multilingual.js?1754898926"></script>
+    <script src="/js/clipboard.min.js?1754900054"></script>
+    <script src="/js/perfect-scrollbar.min.js?1754900054"></script>
+    <script src="/js/perfect-scrollbar.jquery.min.js?1754900054"></script>
+    <script src="/js/jquery.sticky.js?1754900054"></script>
+    <script src="/js/featherlight.min.js?1754900054"></script>
+    <script src="/js/highlight.pack.js?1754900054"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="/js/modernizr.custom-3.6.0.js?1754900054"></script>
+    <script src="/js/learn.js?1754900054"></script>
+    <script src="/js/hugo-learn.js?1754900054"></script>
+    <script src="/js/language-switcher.js?1754900054"></script>
+    <script src="/js/multilingual.js?1754900054"></script>
+    
+        
+            <script src="/mermaid/mermaid.js?1754900054"></script>
+        
+        <script>
+            mermaid.initialize({ startOnLoad: true });
+        </script>
+    
+    
 
-    <script src="/mermaid/mermaid.js?1754898926"></script>
-
-    <script>
-      mermaid.initialize({ startOnLoad: true });
-    </script>
   </body>
 </html>

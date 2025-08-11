@@ -1,759 +1,911 @@
 <!DOCTYPE html>
 <html lang="vi" class="js csstransforms3d">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="generator" content="Hugo 0.147.9" />
-    <meta name="description" content="" />
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=50292&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Hugo 0.147.9">
+    <meta name="description" content="">
 
-    <link rel="icon" href="/images/favicon.png" type="image/png" />
 
-    <title>
-      5.2 Triển Khai Application :: Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ
-    </title>
+    <link rel="icon" href="/images/favicon.png" type="image/png">
 
-    <link href="/css/nucleus.css?1754898927" rel="stylesheet" />
-    <link href="/css/fontawesome-all.min.css?1754898927" rel="stylesheet" />
-    <link href="/css/hybrid.css?1754898927" rel="stylesheet" />
-    <link href="/css/featherlight.min.css?1754898927" rel="stylesheet" />
-    <link href="/css/perfect-scrollbar.min.css?1754898927" rel="stylesheet" />
-    <link href="/css/auto-complete.css?1754898927" rel="stylesheet" />
-    <link
-      href="/css/atom-one-dark-reasonable.css?1754898927"
-      rel="stylesheet"
-    />
-    <link href="/css/theme.css?1754898927" rel="stylesheet" />
-    <link href="/css/tabs.css?1754898927" rel="stylesheet" />
-    <link href="/css/hugo-theme.css?1754898927" rel="stylesheet" />
+    <title>5.2 Triển Khai Application :: Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</title>
 
-    <script src="/js/jquery-3.3.1.min.js?1754898927"></script>
+    
+    <link href="/css/nucleus.css?1754900055" rel="stylesheet">
+    <link href="/css/fontawesome-all.min.css?1754900055" rel="stylesheet">
+    <link href="/css/hybrid.css?1754900055" rel="stylesheet">
+    <link href="/css/featherlight.min.css?1754900055" rel="stylesheet">
+    <link href="/css/perfect-scrollbar.min.css?1754900055" rel="stylesheet">
+    <link href="/css/auto-complete.css?1754900055" rel="stylesheet">
+    <link href="/css/atom-one-dark-reasonable.css?1754900055" rel="stylesheet">
+    <link href="/css/theme.css?1754900055" rel="stylesheet">
+    <link href="/css/tabs.css?1754900055" rel="stylesheet">
+    <link href="/css/hugo-theme.css?1754900055" rel="stylesheet">
+    
+    
+
+    <script src="/js/jquery-3.3.1.min.js?1754900055"></script>
 
     <style>
-      :root #header + #content > #left > #rlblock_left {
-        display: none !important;
+      :root #header + #content > #left > #rlblock_left{
+          display:none !important;
       }
+      
     </style>
+    
   </head>
   <body class="" data-url="/vi/5-setup-application/5.2-deploy-app/">
     <nav id="sidebar" class="">
-      <div id="header-wrapper">
-        <div id="header">
-          <a id="logo" href="/">
-            <svg
-              id="Layer_1"
-              data-name="Layer 1"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 60 30"
-              width="30%"
-            >
-              <defs>
-                <style>
-                  .cls-1 {
-                    fill: #fff;
-                  }
-                  .cls-2 {
-                    fill: #f90;
-                    fill-rule: evenodd;
-                  }
-                </style>
-              </defs>
-              <title>AWS-Logo_White-Color</title>
-              <path
-                class="cls-1"
-                d="M14.09,10.85a4.7,4.7,0,0,0,.19,1.48,7.73,7.73,0,0,0,.54,1.19.77.77,0,0,1,.12.38.64.64,0,0,1-.32.49l-1,.7a.83.83,0,0,1-.44.15.69.69,0,0,1-.49-.23,3.8,3.8,0,0,1-.6-.77q-.25-.42-.51-1a6.14,6.14,0,0,1-4.89,2.3,4.54,4.54,0,0,1-3.32-1.19,4.27,4.27,0,0,1-1.22-3.2A4.28,4.28,0,0,1,3.61,7.75,6.06,6.06,0,0,1,7.69,6.46a12.47,12.47,0,0,1,1.76.13q.92.13,1.91.36V5.73a3.65,3.65,0,0,0-.79-2.66A3.81,3.81,0,0,0,7.86,2.3a7.71,7.71,0,0,0-1.79.22,12.78,12.78,0,0,0-1.79.57,4.55,4.55,0,0,1-.58.22l-.26,0q-.35,0-.35-.52V2a1.09,1.09,0,0,1,.12-.58,1.2,1.2,0,0,1,.47-.35A10.88,10.88,0,0,1,5.77.32,10.19,10.19,0,0,1,8.36,0a6,6,0,0,1,4.35,1.35,5.49,5.49,0,0,1,1.38,4.09ZM7.34,13.38a5.36,5.36,0,0,0,1.72-.31A3.63,3.63,0,0,0,10.63,12,2.62,2.62,0,0,0,11.19,11a5.63,5.63,0,0,0,.16-1.44v-.7a14.35,14.35,0,0,0-1.53-.28,12.37,12.37,0,0,0-1.56-.1,3.84,3.84,0,0,0-2.47.67A2.34,2.34,0,0,0,5,11a2.35,2.35,0,0,0,.61,1.76A2.4,2.4,0,0,0,7.34,13.38Zm13.35,1.8a1,1,0,0,1-.64-.16,1.3,1.3,0,0,1-.35-.65L15.81,1.51a3,3,0,0,1-.15-.67.36.36,0,0,1,.41-.41H17.7a1,1,0,0,1,.65.16,1.4,1.4,0,0,1,.33.65l2.79,11,2.59-11A1.17,1.17,0,0,1,24.39.6a1.1,1.1,0,0,1,.67-.16H26.4a1.1,1.1,0,0,1,.67.16,1.17,1.17,0,0,1,.32.65L30,12.39,32.88,1.25A1.39,1.39,0,0,1,33.22.6a1,1,0,0,1,.65-.16h1.54a.36.36,0,0,1,.41.41,1.36,1.36,0,0,1,0,.26,3.64,3.64,0,0,1-.12.41l-4,12.86a1.3,1.3,0,0,1-.35.65,1,1,0,0,1-.64.16H29.25a1,1,0,0,1-.67-.17,1.26,1.26,0,0,1-.32-.67L25.67,3.64,23.11,14.34a1.26,1.26,0,0,1-.32.67,1,1,0,0,1-.67.17Zm21.36.44a11.28,11.28,0,0,1-2.56-.29,7.44,7.44,0,0,1-1.92-.67,1,1,0,0,1-.61-.93v-.84q0-.52.38-.52a.9.9,0,0,1,.31.06l.42.17a8.77,8.77,0,0,0,1.83.58,9.78,9.78,0,0,0,2,.2,4.48,4.48,0,0,0,2.43-.55,1.76,1.76,0,0,0,.86-1.57,1.61,1.61,0,0,0-.45-1.16A4.29,4.29,0,0,0,43,9.22l-2.41-.76A5.15,5.15,0,0,1,38,6.78a3.94,3.94,0,0,1-.83-2.41,3.7,3.7,0,0,1,.45-1.85,4.47,4.47,0,0,1,1.19-1.37A5.27,5.27,0,0,1,40.51.29,7.4,7.4,0,0,1,42.6,0a8.87,8.87,0,0,1,1.12.07q.57.07,1.08.19t.95.26a4.27,4.27,0,0,1,.7.29,1.59,1.59,0,0,1,.49.41.94.94,0,0,1,.15.55v.79q0,.52-.38.52a1.76,1.76,0,0,1-.64-.2,7.74,7.74,0,0,0-3.2-.64,4.37,4.37,0,0,0-2.21.47,1.6,1.6,0,0,0-.79,1.48,1.58,1.58,0,0,0,.49,1.18,4.94,4.94,0,0,0,1.83.92L44.55,7a5.08,5.08,0,0,1,2.57,1.6A3.76,3.76,0,0,1,47.9,11a4.21,4.21,0,0,1-.44,1.93,4.4,4.4,0,0,1-1.21,1.47,5.43,5.43,0,0,1-1.85.93A8.25,8.25,0,0,1,42.05,15.62Z"
-              ></path>
-              <path
-                class="cls-2"
-                d="M45.19,23.81C39.72,27.85,31.78,30,25,30A36.64,36.64,0,0,1,.22,20.57c-.51-.46-.06-1.09.56-.74A49.78,49.78,0,0,0,25.53,26.4,49.23,49.23,0,0,0,44.4,22.53C45.32,22.14,46.1,23.14,45.19,23.81Z"
-              ></path>
-              <path
-                class="cls-2"
-                d="M47.47,21.21c-.7-.9-4.63-.42-6.39-.21-.53.06-.62-.4-.14-.74,3.13-2.2,8.27-1.57,8.86-.83s-.16,5.89-3.09,8.35c-.45.38-.88.18-.68-.32C46.69,25.8,48.17,22.11,47.47,21.21Z"
-              ></path>
-            </svg>
-          </a>
-        </div>
 
+
+
+  <div id="header-wrapper">
+    <div id="header">
+      <a
+  id="logo"
+  href='/'
+>
+  <svg
+    id="Layer_1"
+    data-name="Layer 1"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 60 30"
+    width="30%"
+  >
+    <defs>
+      <style>
+        .cls-1 {
+          fill: #fff;
+        }
+        .cls-2 {
+          fill: #f90;
+          fill-rule: evenodd;
+        }
+      </style>
+    </defs>
+    <title>AWS-Logo_White-Color</title>
+    <path
+      class="cls-1"
+      d="M14.09,10.85a4.7,4.7,0,0,0,.19,1.48,7.73,7.73,0,0,0,.54,1.19.77.77,0,0,1,.12.38.64.64,0,0,1-.32.49l-1,.7a.83.83,0,0,1-.44.15.69.69,0,0,1-.49-.23,3.8,3.8,0,0,1-.6-.77q-.25-.42-.51-1a6.14,6.14,0,0,1-4.89,2.3,4.54,4.54,0,0,1-3.32-1.19,4.27,4.27,0,0,1-1.22-3.2A4.28,4.28,0,0,1,3.61,7.75,6.06,6.06,0,0,1,7.69,6.46a12.47,12.47,0,0,1,1.76.13q.92.13,1.91.36V5.73a3.65,3.65,0,0,0-.79-2.66A3.81,3.81,0,0,0,7.86,2.3a7.71,7.71,0,0,0-1.79.22,12.78,12.78,0,0,0-1.79.57,4.55,4.55,0,0,1-.58.22l-.26,0q-.35,0-.35-.52V2a1.09,1.09,0,0,1,.12-.58,1.2,1.2,0,0,1,.47-.35A10.88,10.88,0,0,1,5.77.32,10.19,10.19,0,0,1,8.36,0a6,6,0,0,1,4.35,1.35,5.49,5.49,0,0,1,1.38,4.09ZM7.34,13.38a5.36,5.36,0,0,0,1.72-.31A3.63,3.63,0,0,0,10.63,12,2.62,2.62,0,0,0,11.19,11a5.63,5.63,0,0,0,.16-1.44v-.7a14.35,14.35,0,0,0-1.53-.28,12.37,12.37,0,0,0-1.56-.1,3.84,3.84,0,0,0-2.47.67A2.34,2.34,0,0,0,5,11a2.35,2.35,0,0,0,.61,1.76A2.4,2.4,0,0,0,7.34,13.38Zm13.35,1.8a1,1,0,0,1-.64-.16,1.3,1.3,0,0,1-.35-.65L15.81,1.51a3,3,0,0,1-.15-.67.36.36,0,0,1,.41-.41H17.7a1,1,0,0,1,.65.16,1.4,1.4,0,0,1,.33.65l2.79,11,2.59-11A1.17,1.17,0,0,1,24.39.6a1.1,1.1,0,0,1,.67-.16H26.4a1.1,1.1,0,0,1,.67.16,1.17,1.17,0,0,1,.32.65L30,12.39,32.88,1.25A1.39,1.39,0,0,1,33.22.6a1,1,0,0,1,.65-.16h1.54a.36.36,0,0,1,.41.41,1.36,1.36,0,0,1,0,.26,3.64,3.64,0,0,1-.12.41l-4,12.86a1.3,1.3,0,0,1-.35.65,1,1,0,0,1-.64.16H29.25a1,1,0,0,1-.67-.17,1.26,1.26,0,0,1-.32-.67L25.67,3.64,23.11,14.34a1.26,1.26,0,0,1-.32.67,1,1,0,0,1-.67.17Zm21.36.44a11.28,11.28,0,0,1-2.56-.29,7.44,7.44,0,0,1-1.92-.67,1,1,0,0,1-.61-.93v-.84q0-.52.38-.52a.9.9,0,0,1,.31.06l.42.17a8.77,8.77,0,0,0,1.83.58,9.78,9.78,0,0,0,2,.2,4.48,4.48,0,0,0,2.43-.55,1.76,1.76,0,0,0,.86-1.57,1.61,1.61,0,0,0-.45-1.16A4.29,4.29,0,0,0,43,9.22l-2.41-.76A5.15,5.15,0,0,1,38,6.78a3.94,3.94,0,0,1-.83-2.41,3.7,3.7,0,0,1,.45-1.85,4.47,4.47,0,0,1,1.19-1.37A5.27,5.27,0,0,1,40.51.29,7.4,7.4,0,0,1,42.6,0a8.87,8.87,0,0,1,1.12.07q.57.07,1.08.19t.95.26a4.27,4.27,0,0,1,.7.29,1.59,1.59,0,0,1,.49.41.94.94,0,0,1,.15.55v.79q0,.52-.38.52a1.76,1.76,0,0,1-.64-.2,7.74,7.74,0,0,0-3.2-.64,4.37,4.37,0,0,0-2.21.47,1.6,1.6,0,0,0-.79,1.48,1.58,1.58,0,0,0,.49,1.18,4.94,4.94,0,0,0,1.83.92L44.55,7a5.08,5.08,0,0,1,2.57,1.6A3.76,3.76,0,0,1,47.9,11a4.21,4.21,0,0,1-.44,1.93,4.4,4.4,0,0,1-1.21,1.47,5.43,5.43,0,0,1-1.85.93A8.25,8.25,0,0,1,42.05,15.62Z"
+    ></path>
+    <path
+      class="cls-2"
+      d="M45.19,23.81C39.72,27.85,31.78,30,25,30A36.64,36.64,0,0,1,.22,20.57c-.51-.46-.06-1.09.56-.74A49.78,49.78,0,0,0,25.53,26.4,49.23,49.23,0,0,0,44.4,22.53C45.32,22.14,46.1,23.14,45.19,23.81Z"
+    ></path>
+    <path
+      class="cls-2"
+      d="M47.47,21.21c-.7-.9-4.63-.42-6.39-.21-.53.06-.62-.4-.14-.74,3.13-2.2,8.27-1.57,8.86-.83s-.16,5.89-3.09,8.35c-.45.38-.88.18-.68-.32C46.69,25.8,48.17,22.11,47.47,21.21Z"
+    ></path>
+  </svg>
+</a>
+
+    </div>
+    
         <div class="searchbox">
-          <label for="search-by"><i class="fas fa-search"></i></label>
-          <input
-            data-search-input
-            id="search-by"
-            type="search"
-            placeholder="Search..."
-          />
-          <span data-search-clear=""><i class="fas fa-times"></i></span>
-        </div>
+    <label for="search-by"><i class="fas fa-search"></i></label>
+    <input data-search-input id="search-by" type="search" placeholder="Search...">
+    <span data-search-clear=""><i class="fas fa-times"></i></span>
+</div>
 
-        <script
-          type="text/javascript"
-          src="/js/lunr.min.js?1754898927"
-        ></script>
-        <script
-          type="text/javascript"
-          src="/js/auto-complete.js?1754898927"
-        ></script>
-        <script type="text/javascript">
-          var baseurl = "\/\/vi";
-        </script>
-        <script type="text/javascript" src="/js/search.js?1754898927"></script>
-      </div>
+<script type="text/javascript" src="/js/lunr.min.js?1754900055"></script>
+<script type="text/javascript" src="/js/auto-complete.js?1754900055"></script>
+<script type="text/javascript">
+    var baseurl = "\/\/localhost:50292\/\/vi";
+</script>
+<script type="text/javascript" src="/js/search.js?1754900055"></script>
 
-      <div class="highlightable">
-        <ul class="topics">
-          <li
-            data-nav-id="/vi/1-introduction/"
-            title="1. Giới Thiệu"
-            class="dd-item"
-          >
-            <a href="/vi/1-introduction/"> <b></b>1. Giới Thiệu </a>
+    
+  </div>
 
-            <ul>
-              <li
-                data-nav-id="/vi/1-introduction/1.1-overview/"
-                title="1.1 Tổng Quan Workshop"
-                class="dd-item"
-              >
-                <a href="/vi/1-introduction/1.1-overview/">
-                  <b></b>1.1 Tổng Quan Workshop
-                </a>
-              </li>
 
-              <li
-                data-nav-id="/vi/1-introduction/1.2-architecture/"
-                title="1.2 Tổng Quan Kiến Trúc"
-                class="dd-item"
-              >
-                <a href="/vi/1-introduction/1.2-architecture/">
-                  <b></b>1.2 Tổng Quan Kiến Trúc
-                </a>
-              </li>
-            </ul>
-          </li>
+    <div class="highlightable">
+    <ul class="topics">
 
-          <li
-            data-nav-id="/vi/2-setup-vpc/"
-            title="2. Thiết Lập VPC và Hạ Tầng Mạng"
-            class="dd-item"
-          >
-            <a href="/vi/2-setup-vpc/">
-              <b></b>2. Thiết Lập VPC và Hạ Tầng Mạng
-            </a>
+        
+          
+          
 
-            <ul>
-              <li
-                data-nav-id="/vi/2-setup-vpc/2.1-create-vpc/"
-                title="2.1 Tạo VPC"
-                class="dd-item"
-              >
-                <a href="/vi/2-setup-vpc/2.1-create-vpc/">
-                  <b></b>2.1 Tạo VPC
-                </a>
-              </li>
 
-              <li
-                data-nav-id="/vi/2-setup-vpc/2.2-security-groups/"
-                title="2.2 Tạo Security Groups"
-                class="dd-item"
-              >
-                <a href="/vi/2-setup-vpc/2.2-security-groups/">
-                  <b></b>2.2 Tạo Security Groups
-                </a>
-              </li>
-            </ul>
-          </li>
 
-          <li
-            data-nav-id="/vi/3-setup-dynamodb/"
-            title="3. Thiết Lập DynamoDB và DAX"
-            class="dd-item"
-          >
-            <a href="/vi/3-setup-dynamodb/">
-              <b></b>3. Thiết Lập DynamoDB và DAX
-            </a>
 
-            <ul>
-              <li
-                data-nav-id="/vi/3-setup-dynamodb/3.1-create-table/"
-                title="3.1 Tạo DynamoDB Table"
-                class="dd-item"
-              >
-                <a href="/vi/3-setup-dynamodb/3.1-create-table/">
-                  <b></b>3.1 Tạo DynamoDB Table
-                </a>
-              </li>
+ 
+  
+    
+    <li data-nav-id="/vi/1-introduction/" title="1. Giới Thiệu" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/1-introduction/">
+          <b></b>1. Giới Thiệu
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
 
-              <li
-                data-nav-id="/vi/3-setup-dynamodb/3.2-setup-dax/"
-                title="3.2 Thiết Lập DynamoDB DAX"
-                class="dd-item"
-              >
-                <a href="/vi/3-setup-dynamodb/3.2-setup-dax/">
-                  <b></b>3.2 Thiết Lập DynamoDB DAX
-                </a>
-              </li>
-            </ul>
-          </li>
+        
+          
+            
+            
 
-          <li
-            data-nav-id="/vi/4-setup-elasticache/"
-            title="4. Thiết Lập ElastiCache Redis"
-            class="dd-item"
-          >
-            <a href="/vi/4-setup-elasticache/">
-              <b></b>4. Thiết Lập ElastiCache Redis
-            </a>
-          </li>
 
-          <li
-            data-nav-id="/vi/5-setup-application/"
-            title="5. Thiết Lập Application"
-            class="dd-item parent"
-          >
-            <a href="/vi/5-setup-application/">
-              <b></b>5. Thiết Lập Application
-            </a>
 
-            <ul>
-              <li
-                data-nav-id="/vi/5-setup-application/5.1-launch-ec2/"
-                title="5.1 Khởi Chạy EC2 Instance"
-                class="dd-item"
-              >
-                <a href="/vi/5-setup-application/5.1-launch-ec2/">
-                  <b></b>5.1 Khởi Chạy EC2 Instance
-                </a>
-              </li>
 
-              <li
-                data-nav-id="/vi/5-setup-application/5.2-deploy-app/"
-                title="5.2 Triển Khai Application"
-                class="dd-item active"
-              >
-                <a href="/vi/5-setup-application/5.2-deploy-app/">
-                  <b></b>5.2 Triển Khai Application
-                </a>
-              </li>
-            </ul>
-          </li>
+ 
+  
+    
+    <li data-nav-id="/vi/1-introduction/1.1-overview/" title="1.1 Tổng Quan Workshop" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/1-introduction/1.1-overview/">
+          <b></b>1.1 Tổng Quan Workshop
+          
+      </a>
+      
+      
+    </li>
+  
+ 
 
-          <li
-            data-nav-id="/vi/6-setup-loadbalancer/"
-            title="6. Thiết Lập Application Load Balancer"
-            class="dd-item"
-          >
-            <a href="/vi/6-setup-loadbalancer/">
-              <b></b>6. Thiết Lập Application Load Balancer
-            </a>
-          </li>
+            
+          
+            
+            
 
-          <li
-            data-nav-id="/vi/7-setup-cloudfront/"
-            title="7. Thiết Lập CloudFront CDN"
-            class="dd-item"
-          >
-            <a href="/vi/7-setup-cloudfront/">
-              <b></b>7. Thiết Lập CloudFront CDN
-            </a>
-          </li>
 
-          <li
-            data-nav-id="/vi/8-performance-testing/"
-            title="8. Kiểm Tra Hiệu Suất"
-            class="dd-item"
-          >
-            <a href="/vi/8-performance-testing/">
-              <b></b>8. Kiểm Tra Hiệu Suất
-            </a>
-          </li>
 
-          <li
-            data-nav-id="/vi/9-monitoring/"
-            title="9. Giám Sát và Cảnh Báo"
-            class="dd-item"
-          >
-            <a href="/vi/9-monitoring/"> <b></b>9. Giám Sát và Cảnh Báo </a>
-          </li>
 
-          <li
-            data-nav-id="/vi/10-cleanup/"
-            title="10. Hướng Dẫn Dọn Dẹp Tài Nguyên"
-            class="dd-item"
-          >
-            <a href="/vi/10-cleanup/">
-              <b></b>10. Hướng Dẫn Dọn Dẹp Tài Nguyên
-            </a>
-          </li>
+ 
+  
+    
+    <li data-nav-id="/vi/1-introduction/1.2-architecture/" title="1.2 Tổng Quan Kiến Trúc" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/1-introduction/1.2-architecture/">
+          <b></b>1.2 Tổng Quan Kiến Trúc
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
         </ul>
+      
+    </li>
+  
+ 
 
-        <section id="prefooter">
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/2-setup-vpc/" title="2. Thiết Lập VPC và Hạ Tầng Mạng" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/2-setup-vpc/">
+          <b></b>2. Thiết Lập VPC và Hạ Tầng Mạng
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/2-setup-vpc/2.1-create-vpc/" title="2.1 Tạo VPC" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/2-setup-vpc/2.1-create-vpc/">
+          <b></b>2.1 Tạo VPC
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/2-setup-vpc/2.2-security-groups/" title="2.2 Tạo Security Groups" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/2-setup-vpc/2.2-security-groups/">
+          <b></b>2.2 Tạo Security Groups
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/3-setup-dynamodb/" title="3. Thiết Lập DynamoDB và DAX" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/3-setup-dynamodb/">
+          <b></b>3. Thiết Lập DynamoDB và DAX
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/3-setup-dynamodb/3.1-create-table/" title="3.1 Tạo DynamoDB Table" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/3-setup-dynamodb/3.1-create-table/">
+          <b></b>3.1 Tạo DynamoDB Table
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/3-setup-dynamodb/3.2-setup-dax/" title="3.2 Thiết Lập DynamoDB DAX" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/3-setup-dynamodb/3.2-setup-dax/">
+          <b></b>3.2 Thiết Lập DynamoDB DAX
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/4-setup-elasticache/" title="4. Thiết Lập ElastiCache Redis" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/4-setup-elasticache/">
+          <b></b>4. Thiết Lập ElastiCache Redis
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/5-setup-application/" title="5. Thiết Lập Application" class="dd-item
+        parent
+        
+        
+        ">
+      <a href="/vi/5-setup-application/">
+          <b></b>5. Thiết Lập Application
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/5-setup-application/5.1-launch-ec2/" title="5.1 Khởi Chạy EC2 Instance" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/5-setup-application/5.1-launch-ec2/">
+          <b></b>5.1 Khởi Chạy EC2 Instance
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/5-setup-application/5.2-deploy-app/" title="5.2 Triển Khai Application" class="dd-item
+        
+        active
+        
+        ">
+      <a href="/vi/5-setup-application/5.2-deploy-app/">
+          <b></b>5.2 Triển Khai Application
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/6-setup-loadbalancer/" title="6. Thiết Lập Application Load Balancer" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/6-setup-loadbalancer/">
+          <b></b>6. Thiết Lập Application Load Balancer
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/7-setup-cloudfront/" title="7. Thiết Lập CloudFront CDN" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/7-setup-cloudfront/">
+          <b></b>7. Thiết Lập CloudFront CDN
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/8-performance-testing/" title="8. Kiểm Tra Hiệu Suất" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/8-performance-testing/">
+          <b></b>8. Kiểm Tra Hiệu Suất
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/9-monitoring/" title="9. Giám Sát và Cảnh Báo" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/9-monitoring/">
+          <b></b>9. Giám Sát và Cảnh Báo
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/10-cleanup/" title="10. Hướng Dẫn Dọn Dẹp Tài Nguyên" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/10-cleanup/">
+          <b></b>10. Hướng Dẫn Dọn Dẹp Tài Nguyên
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+        
+    </ul>
+
+    
+    
+
+    
+    <section id="prefooter">
+      <hr/>
+      <ul>
+      
+        <li>
+          <a class="padding">
+            <i class="fas fa-language fa-fw"></i>
+          <div class="select-style">
+            <select id="select-language" onchange="location = this.value;">
+          
+          
+          
+              
+              
+                  
+                    
+                    
+                      <option id="en" value="//localhost:50292/5-setup-application/5.2-deploy-app/">English</option>
+                    
+                  
+              
+                  
+              
+          
+              
+              
+                  
+              
+                  
+                    
+                    
+                      <option id="vi" value="//localhost:50292/vi/5-setup-application/5.2-deploy-app/" selected>Tiếng Việt</option>
+                    
+                  
+              
+          
+        </select>
+        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+          width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
+          <g>
+            <g id="arrow-drop-down">
+              <polygon points="0,63.75 127.5,191.25 255,63.75 		" />
+            </g>
+          </g>
+        </svg>
+        </div>
+        </a>
+        </li>
+      
+
+      
+      </ul>
+    </section>
+    
+    <section id="footer">
+      <section id="shortcuts" style="font-weight: bold;">
+        <h3>More</h3>
+        <ul>
+          
+              <li> 
+                  <a class="padding" href="https://aws.amazon.com/blogs"><i class="fab fa-aws"></i> AWS Study Group - Blog</a>
+              </li>
+          
+              <li> 
+                  <a class="padding" href="https://www.facebook.com/groups/awsstudygroupfcj"><i class="fab fa-facebook"></i> AWS Study Group - FB Group</a>
+              </li>
+          
+        </ul>
+      </section>
+      <section id="prefooter">
           <hr />
           <ul>
             <li>
               <a class="padding">
                 <i class="fas fa-language fa-fw"></i>
                 <div class="select-style">
-                  <select
-                    id="select-language"
-                    onchange="location = this.value;"
-                  >
-                    <option
-                      id="en"
-                      value="/5-setup-application/5.2-deploy-app/"
-                    >
-                      English
-                    </option>
-
-                    <option
-                      id="vi"
-                      value="/vi/5-setup-application/5.2-deploy-app/"
-                      selected
-                    >
-                      Tiếng Việt
-                    </option>
+                  <select id="select-language" onchange="changeLanguage()">
+                    
+                      <option value="en" >
+                        English
+                      </option>
+                    
+                      <option value="vi" selected>
+                        Tiếng Việt
+                      </option>
+                    
                   </select>
-                  <svg
-                    version="1.1"
-                    id="Capa_1"
-                    xmlns="http://www.w3.org/2000/svg"
-                    xmlns:xlink="http://www.w3.org/1999/xlink"
-                    x="0px"
-                    y="0px"
-                    width="255px"
-                    height="255px"
-                    viewBox="0 0 255 255"
-                    style="enable-background: new 0 0 255 255"
-                    xml:space="preserve"
-                  >
+                  <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
                     <g>
                       <g id="arrow-drop-down">
-                        <polygon points="0,63.75 127.5,191.25 255,63.75 		" />
+                        <polygon points="0,63.75 127.5,191.25 255,63.75" />
                       </g>
                     </g>
                   </svg>
                 </div>
               </a>
             </li>
+            <li>
+              <a class="padding" href="#" data-clear-history-toggle=""><i class="fas fa-history fa-fw"></i> Clear History</a>
+            </li>
           </ul>
         </section>
-
         <section id="footer">
-          <section id="shortcuts" style="font-weight: bold">
-            <h3>More</h3>
-            <ul>
-              <li>
-                <a class="padding" href="https://aws.amazon.com/blogs"
-                  ><i class="fab fa-aws"></i> AWS Study Group - Blog</a
-                >
-              </li>
-
-              <li>
-                <a
-                  class="padding"
-                  href="https://www.facebook.com/groups/awsstudygroupfcj"
-                  ><i class="fab fa-facebook"></i> AWS Study Group - FB Group</a
-                >
-              </li>
-            </ul>
-          </section>
-          <section id="prefooter">
-            <hr />
-            <ul>
-              <li>
-                <a class="padding">
-                  <i class="fas fa-language fa-fw"></i>
-                  <div class="select-style">
-                    <select id="select-language" onchange="changeLanguage()">
-                      <option value="en">English</option>
-
-                      <option value="vi" selected>Tiếng Việt</option>
-                    </select>
-                    <svg
-                      version="1.1"
-                      id="Capa_1"
-                      xmlns="http://www.w3.org/2000/svg"
-                      xmlns:xlink="http://www.w3.org/1999/xlink"
-                      x="0px"
-                      y="0px"
-                      width="255px"
-                      height="255px"
-                      viewBox="0 0 255 255"
-                      style="enable-background: new 0 0 255 255"
-                      xml:space="preserve"
-                    >
-                      <g>
-                        <g id="arrow-drop-down">
-                          <polygon points="0,63.75 127.5,191.25 255,63.75" />
-                        </g>
-                      </g>
-                    </svg>
-                  </div>
-                </a>
-              </li>
-              <li>
-                <a class="padding" href="#" data-clear-history-toggle=""
-                  ><i class="fas fa-history fa-fw"></i> Clear History</a
-                >
-              </li>
-            </ul>
-          </section>
-          <section id="footer">
-            <left>
-              <b>Workshop</b><br />
-              <img
-                src="https://hitwebcounter.com/counter/counter.php?page=7831196&style=0038&nbdigits=9&type=page&initCount=0"
-                title="Migrate"
-                alt="web counter"
-                border="0"
-              /><br />
-              <b
-                ><a href="https://cloudjourney.awsstudygroup.com/"
-                  >Cloud Journey</a
-                ></b
-              ><br />
-              <img
-                src="https://hitwebcounter.com/counter/counter.php?page=7830807&style=0038&nbdigits=9&type=page&initCount=0"
-                title="Total CLoud Journey"
-                alt="web counter"
-                border="0"
-              />
-            </left>
-            <left>
-              <br /><br />
-              <b>Last Updated</b><br />
-              <i><font color="orange">27-7-2025</font></i>
-            </left>
-            <left>
-              <br /><br />
-              <b>Team</b><br />
-              <i
-                ><br /><a
-                  href="https://www.linkedin.com/in/jotaguy"
-                  style="color: orange"
-                  >Gia Hưng</a
-                ><br
-              /></i>
-            </left>
-            <script
-              async
-              defer
-              src="https://buttons.github.io/buttons.js"
-            ></script>
-          </section>
+          <left>
+            <b>Workshop</b><br />
+            <img src="https://hitwebcounter.com/counter/counter.php?page=7831196&style=0038&nbdigits=9&type=page&initCount=0" title="Migrate" alt="web counter" border="0" /><br />
+            <b><a href="https://cloudjourney.awsstudygroup.com/">Cloud Journey</a></b><br />
+            <img src="https://hitwebcounter.com/counter/counter.php?page=7830807&style=0038&nbdigits=9&type=page&initCount=0" title="Total CLoud Journey" alt="web counter" border="0" />
+          </left>
+          <left>
+            <br /><br />
+            <b>Last Updated</b><br />
+            <i><font color="orange">27-7-2025</font></i>
+          </left>
+          <left>
+            <br /><br />
+            <b>Team</b><br />
+            <i><br /><a href="https://www.linkedin.com/in/jotaguy" style="color: orange">Gia Hưng</a><br /></i>
+          </left>
+          <script async defer src="https://buttons.github.io/buttons.js"></script>
         </section>
-      </div>
-    </nav>
 
-    <section id="body">
-      <div id="overlay"></div>
-      <div class="padding highlightable">
-        <div>
-          <div id="top-bar">
-            <div
-              id="breadcrumbs"
-              itemscope=""
-              itemtype="http://data-vocabulary.org/Breadcrumb"
-            >
-              <span id="sidebar-toggle-span">
-                <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
-                  <i class="fas fa-bars"></i>
-                </a>
-              </span>
+    </section>
+  </div>
+</nav>
 
-              <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
 
-              <span class="links">
-                <a href="/vi/"
-                  >Workshop Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</a
-                >
-                >
-                <a href="/vi/5-setup-application/">5. Thiết Lập Application</a>
-                > 5.2 Triển Khai Application
-              </span>
-            </div>
 
-            <div class="progress">
-              <div class="wrapper">
-                <nav id="TableOfContents">
-                  <ul>
-                    <li>
-                      <a href="#bước-1-chuẩn-bị-application-directory"
-                        >Bước 1: Chuẩn Bị Application Directory</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#điều-hướng-đến-application-directory"
-                            >Điều Hướng Đến Application Directory</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#initialize-nodejs-project"
-                            >Initialize Node.js Project</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-2-cài-đặt-dependencies"
-                        >Bước 2: Cài Đặt Dependencies</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#cài-đặt-required-packages"
-                            >Cài Đặt Required Packages</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#xác-minh-installation"
-                            >Xác Minh Installation</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-3-tạo-environment-configuration"
-                        >Bước 3: Tạo Environment Configuration</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#tạo-environment-file"
-                            >Tạo Environment File</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-4-tạo-main-application-file"
-                        >Bước 4: Tạo Main Application File</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#tạo-application-code"
-                            >Tạo Application Code</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-5-update-packagejson-scripts"
-                        >Bước 5: Update Package.json Scripts</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#thêm-npm-scripts">Thêm NPM Scripts</a>
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-6-test-application-locally"
-                        >Bước 6: Test Application Locally</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#start-application">Start Application</a>
-                        </li>
-                        <li>
-                          <a href="#test-health-endpoint"
-                            >Test Health Endpoint</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#test-product-endpoint"
-                            >Test Product Endpoint</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#test-cache-statistics"
-                            >Test Cache Statistics</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-7-deploy-với-pm2"
-                        >Bước 7: Deploy với PM2</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#stop-development-server"
-                            >Stop Development Server</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#kiểm-tra-pm2-status">Kiểm Tra PM2 Status</a>
-                        </li>
-                        <li>
-                          <a href="#xem-application-logs"
-                            >Xem Application Logs</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-8-performance-testing"
-                        >Bước 8: Performance Testing</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#test-cache-performance"
-                            >Test Cache Performance</a
-                          >
-                        </li>
-                        <li><a href="#load-testing">Load Testing</a></li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-9-cấu-hình-application-monitoring"
-                        >Bước 9: Cấu Hình Application Monitoring</a
-                      >
-                      <ul>
-                        <li><a href="#pm2-monitoring">PM2 Monitoring</a></li>
-                        <li>
-                          <a href="#application-logs">Application Logs</a>
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-11-ghi-lại-application-configuration"
-                        >Bước 11: Ghi Lại Application Configuration</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#application-information"
-                            >Application Information</a
-                          >
-                        </li>
-                        <li><a href="#api-endpoints">API Endpoints</a></li>
-                        <li>
-                          <a href="#performance-characteristics"
-                            >Performance Characteristics</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#khắc-phục-các-vấn-đề-thường-gặp"
-                        >Khắc Phục Các Vấn Đề Thường Gặp</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#vấn-đề-application-không-start"
-                            >Vấn Đề: Application Không Start</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#vấn-đề-không-thể-connect-đến-redisdax"
-                            >Vấn Đề: Không Thể Connect Đến Redis/DAX</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#vấn-đề-high-error-rate"
-                            >Vấn Đề: High Error Rate</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#các-bước-tiếp-theo">Các Bước Tiếp Theo</a>
-                      <ul>
-                        <li>
-                          <a href="#application-features"
-                            >Application Features:</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                  </ul>
-                </nav>
+
+        <section id="body">
+        <div id="overlay"></div>
+        <div class="padding highlightable">
+              
+              <div>
+                <div id="top-bar">
+                
+                
+                <div id="breadcrumbs" itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb">
+                    <span id="sidebar-toggle-span">
+                        <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+                          <i class="fas fa-bars"></i>
+                        </a>
+                    </span>
+                  
+                  <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
+                  
+                  <span class="links">
+                 
+                 
+                    
+          
+          
+            
+            
+          
+          
+            
+            
+          
+          
+            <a href='/vi/'>Workshop Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</a> > <a href='/vi/5-setup-application/'>5. Thiết Lập Application</a> > 5.2 Triển Khai Application
+          
+        
+          
+        
+          
+        
+                 
+                  </span>
+                </div>
+                
+                    <div class="progress">
+    <div class="wrapper">
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#bước-1-chuẩn-bị-application-directory">Bước 1: Chuẩn Bị Application Directory</a>
+      <ul>
+        <li><a href="#điều-hướng-đến-application-directory">Điều Hướng Đến Application Directory</a></li>
+        <li><a href="#initialize-nodejs-project">Initialize Node.js Project</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-2-cài-đặt-dependencies">Bước 2: Cài Đặt Dependencies</a>
+      <ul>
+        <li><a href="#cài-đặt-required-packages">Cài Đặt Required Packages</a></li>
+        <li><a href="#xác-minh-installation">Xác Minh Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-3-tạo-environment-configuration">Bước 3: Tạo Environment Configuration</a>
+      <ul>
+        <li><a href="#tạo-environment-file">Tạo Environment File</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-4-tạo-main-application-file">Bước 4: Tạo Main Application File</a>
+      <ul>
+        <li><a href="#tạo-application-code">Tạo Application Code</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-5-update-packagejson-scripts">Bước 5: Update Package.json Scripts</a>
+      <ul>
+        <li><a href="#thêm-npm-scripts">Thêm NPM Scripts</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-6-test-application-locally">Bước 6: Test Application Locally</a>
+      <ul>
+        <li><a href="#start-application">Start Application</a></li>
+        <li><a href="#test-health-endpoint">Test Health Endpoint</a></li>
+        <li><a href="#test-product-endpoint">Test Product Endpoint</a></li>
+        <li><a href="#test-cache-statistics">Test Cache Statistics</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-7-deploy-với-pm2">Bước 7: Deploy với PM2</a>
+      <ul>
+        <li><a href="#stop-development-server">Stop Development Server</a></li>
+        <li><a href="#kiểm-tra-pm2-status">Kiểm Tra PM2 Status</a></li>
+        <li><a href="#xem-application-logs">Xem Application Logs</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-8-performance-testing">Bước 8: Performance Testing</a>
+      <ul>
+        <li><a href="#test-cache-performance">Test Cache Performance</a></li>
+        <li><a href="#load-testing">Load Testing</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-9-cấu-hình-application-monitoring">Bước 9: Cấu Hình Application Monitoring</a>
+      <ul>
+        <li><a href="#pm2-monitoring">PM2 Monitoring</a></li>
+        <li><a href="#application-logs">Application Logs</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-11-ghi-lại-application-configuration">Bước 11: Ghi Lại Application Configuration</a>
+      <ul>
+        <li><a href="#application-information">Application Information</a></li>
+        <li><a href="#api-endpoints">API Endpoints</a></li>
+        <li><a href="#performance-characteristics">Performance Characteristics</a></li>
+      </ul>
+    </li>
+    <li><a href="#khắc-phục-các-vấn-đề-thường-gặp">Khắc Phục Các Vấn Đề Thường Gặp</a>
+      <ul>
+        <li><a href="#vấn-đề-application-không-start">Vấn Đề: Application Không Start</a></li>
+        <li><a href="#vấn-đề-không-thể-connect-đến-redisdax">Vấn Đề: Không Thể Connect Đến Redis/DAX</a></li>
+        <li><a href="#vấn-đề-high-error-rate">Vấn Đề: High Error Rate</a></li>
+      </ul>
+    </li>
+    <li><a href="#các-bước-tiếp-theo">Các Bước Tiếp Theo</a>
+      <ul>
+        <li><a href="#application-features">Application Features:</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+
+                
               </div>
             </div>
-          </div>
+            
+        <div id="head-tags">
+        
         </div>
-
-        <div id="head-tags"></div>
-
+        
         <div id="body-inner">
-          <h1>Triển Khai Application</h1>
+          
+            <h1>
+              
+              
+                Triển Khai Application
+              
+            </h1>
+          
 
-          <p>
-            Trong bước này, chúng ta sẽ triển khai ứng dụng Node.js triển khai
-            chiến lược multi-layer caching. Ứng dụng sẽ minh họa cách sử dụng
-            hiệu quả Redis, DAX, và DynamoDB cùng nhau.
-          </p>
-          <h2 id="bước-1-chuẩn-bị-application-directory">
-            Bước 1: Chuẩn Bị Application Directory
-          </h2>
-          <h3 id="điều-hướng-đến-application-directory">
-            Điều Hướng Đến Application Directory
-          </h3>
-          <ol>
-            <li>
-              SSH vào EC2 instance của bạn và điều hướng đến application
-              directory:
-            </li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cd /home/ec2-user/caching-app
-</span></span></code></pre>
-          </div>
-          <p>
-            <img
-              src="../../../images/navigate-app-directory.png"
-              alt="Navigate to App Directory"
-            />
-          </p>
-          <h3 id="initialize-nodejs-project">Initialize Node.js Project</h3>
-          <ol start="2">
-            <li>Initialize npm project:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Initialize package.json</span>
+        
+
+
+
+	<p>Trong bước này, chúng ta sẽ triển khai ứng dụng Node.js triển khai chiến lược multi-layer caching. Ứng dụng sẽ minh họa cách sử dụng hiệu quả Redis, DAX, và DynamoDB cùng nhau.</p>
+<h2 id="bước-1-chuẩn-bị-application-directory">Bước 1: Chuẩn Bị Application Directory</h2>
+<h3 id="điều-hướng-đến-application-directory">Điều Hướng Đến Application Directory</h3>
+<ol>
+<li>SSH vào EC2 instance của bạn và điều hướng đến application directory:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cd /home/ec2-user/caching-app
+</span></span></code></pre></div><p><img src="../../../images/navigate-app-directory.png" alt="Navigate to App Directory"></p>
+<h3 id="initialize-nodejs-project">Initialize Node.js Project</h3>
+<ol start="2">
+<li>Initialize npm project:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Initialize package.json</span>
 </span></span><span style="display:flex;"><span>npm init -y
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Update package.json name</span>
 </span></span><span style="display:flex;"><span>sed -i <span style="color:#e6db74">&#39;s/&#34;name&#34;: &#34;caching-app&#34;/&#34;name&#34;: &#34;multi-layer-caching-app&#34;/&#39;</span> package.json
-</span></span></code></pre>
-          </div>
-          <p>
-            <img
-              src="../../../images/initialize-npm-project.png"
-              alt="Initialize NPM Project"
-            />
-          </p>
-          <h2 id="bước-2-cài-đặt-dependencies">Bước 2: Cài Đặt Dependencies</h2>
-          <h3 id="cài-đặt-required-packages">Cài Đặt Required Packages</h3>
-          <ol>
-            <li>Cài đặt tất cả required dependencies:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Core dependencies</span>
+</span></span></code></pre></div><p><img src="../../../images/initialize-npm-project.png" alt="Initialize NPM Project"></p>
+<h2 id="bước-2-cài-đặt-dependencies">Bước 2: Cài Đặt Dependencies</h2>
+<h3 id="cài-đặt-required-packages">Cài Đặt Required Packages</h3>
+<ol>
+<li>Cài đặt tất cả required dependencies:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Core dependencies</span>
 </span></span><span style="display:flex;"><span>npm install express redis aws-sdk amazon-dax-client
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Utility dependencies</span>
@@ -761,75 +913,27 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Development dependencies</span>
 </span></span><span style="display:flex;"><span>npm install --save-dev nodemon
-</span></span></code></pre>
-          </div>
-          <p>
-            <img
-              src="../../../images/install-dependencies.png"
-              alt="Install Dependencies"
-            />
-          </p>
-          <h3 id="xác-minh-installation">Xác Minh Installation</h3>
-          <ol start="2">
-            <li>Kiểm tra installed packages:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># List installed packages</span>
+</span></span></code></pre></div><p><img src="../../../images/install-dependencies.png" alt="Install Dependencies"></p>
+<h3 id="xác-minh-installation">Xác Minh Installation</h3>
+<ol start="2">
+<li>Kiểm tra installed packages:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># List installed packages</span>
 </span></span><span style="display:flex;"><span>npm list --depth<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Check package.json</span>
 </span></span><span style="display:flex;"><span>cat package.json
-</span></span></code></pre>
-          </div>
-          <p>
-            <img
-              src="../../../images/verify-installation.png"
-              alt="Verify Installation"
-            />
-          </p>
-          <h2 id="bước-3-tạo-environment-configuration">
-            Bước 3: Tạo Environment Configuration
-          </h2>
-          <h3 id="tạo-environment-file">Tạo Environment File</h3>
-          <ol>
-            <li>Tạo <code>.env</code> file với configuration của bạn:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>nano .env
-</span></span></code></pre>
-          </div>
-          <ol start="2">
-            <li>Thêm configuration của bạn (thay thế với actual endpoints):</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-env" data-lang="env"><span style="display:flex;"><span><span style="color:#75715e"># Redis Configuration</span>
+</span></span></code></pre></div><p><img src="../../../images/verify-installation.png" alt="Verify Installation"></p>
+<h2 id="bước-3-tạo-environment-configuration">Bước 3: Tạo Environment Configuration</h2>
+<h3 id="tạo-environment-file">Tạo Environment File</h3>
+<ol>
+<li>Tạo <code>.env</code> file với configuration của bạn:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>nano .env
+</span></span></code></pre></div><ol start="2">
+<li>Thêm configuration của bạn (thay thế với actual endpoints):</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-env" data-lang="env"><span style="display:flex;"><span><span style="color:#75715e"># Redis Configuration</span>
 </span></span><span style="display:flex;"><span>REDIS_ENDPOINT<span style="color:#f92672">=</span>product-cache.xxxxxx.cache.amazonaws.com
 </span></span><span style="display:flex;"><span>REDIS_PORT<span style="color:#f92672">=</span><span style="color:#ae81ff">6379</span>
 </span></span><span style="display:flex;"><span>
@@ -850,56 +954,21 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Logging</span>
 </span></span><span style="display:flex;"><span>LOG_LEVEL<span style="color:#f92672">=</span>info
-</span></span></code></pre>
-          </div>
-          <p>
-            <img
-              src="../../../images/env-configuration.png"
-              alt="Environment Configuration"
-            />
-          </p>
+</span></span></code></pre></div><p><img src="../../../images/env-configuration.png" alt="Environment Configuration"></p>
 
-          <div class="notices tip">
-            <p>
-              Thay thế endpoint URLs với actual Redis và DAX cluster endpoints
-              từ các bước trước.
-            </p>
-          </div>
+<div class="notices tip" ><p>Thay thế endpoint URLs với actual Redis và DAX cluster endpoints từ các bước trước.</p>
+</div>
 
-          <h2 id="bước-4-tạo-main-application-file">
-            Bước 4: Tạo Main Application File
-          </h2>
-          <h3 id="tạo-application-code">Tạo Application Code</h3>
-          <ol>
-            <li>Tạo main application file:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>nano app.js
-</span></span></code></pre>
-          </div>
-          <ol start="2">
-            <li>Thêm complete application code:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">express</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;express&#39;</span>);
+<h2 id="bước-4-tạo-main-application-file">Bước 4: Tạo Main Application File</h2>
+<h3 id="tạo-application-code">Tạo Application Code</h3>
+<ol>
+<li>Tạo main application file:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>nano app.js
+</span></span></code></pre></div><ol start="2">
+<li>Thêm complete application code:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">express</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;express&#39;</span>);
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">redis</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;redis&#39;</span>);
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">AWS</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;aws-sdk&#39;</span>);
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">AmazonDaxClient</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;amazon-dax-client&#39;</span>);
@@ -1326,48 +1395,17 @@
 </span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">redisClient</span>.<span style="color:#a6e22e">quit</span>();
 </span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">exit</span>(<span style="color:#ae81ff">0</span>);
 </span></span><span style="display:flex;"><span>});
-</span></span></code></pre>
-          </div>
-          <p>
-            <img
-              src="../../../images/application-code.png"
-              alt="Application Code"
-            />
-          </p>
-          <h2 id="bước-5-update-packagejson-scripts">
-            Bước 5: Update Package.json Scripts
-          </h2>
-          <h3 id="thêm-npm-scripts">Thêm NPM Scripts</h3>
-          <ol>
-            <li>Update <code>package.json</code> để thêm useful scripts:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>nano package.json
-</span></span></code></pre>
-          </div>
-          <ol start="2">
-            <li>Thêm scripts này vào scripts section:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span></code></pre></div><p><img src="../../../images/application-code.png" alt="Application Code"></p>
+<h2 id="bước-5-update-packagejson-scripts">Bước 5: Update Package.json Scripts</h2>
+<h3 id="thêm-npm-scripts">Thêm NPM Scripts</h3>
+<ol>
+<li>Update <code>package.json</code> để thêm useful scripts:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>nano package.json
+</span></span></code></pre></div><ol start="2">
+<li>Thêm scripts này vào scripts section:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;multi-layer-caching-app&#34;</span>,
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;version&#34;</span>: <span style="color:#e6db74">&#34;1.0.0&#34;</span>,
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;description&#34;</span>: <span style="color:#e6db74">&#34;Multi-layer caching application with Redis, DAX, and DynamoDB&#34;</span>,
@@ -1386,177 +1424,60 @@
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;author&#34;</span>: <span style="color:#e6db74">&#34;Workshop Participant&#34;</span>,
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;license&#34;</span>: <span style="color:#e6db74">&#34;MIT&#34;</span>
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre>
-          </div>
-          <p>
-            <img
-              src="../../../images/package-scripts.png"
-              alt="Package.json Scripts"
-            />
-          </p>
-          <h2 id="bước-6-test-application-locally">
-            Bước 6: Test Application Locally
-          </h2>
-          <h3 id="start-application">Start Application</h3>
-          <ol>
-            <li>Test ứng dụng locally trước:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Start the application</span>
+</span></span></code></pre></div><p><img src="../../../images/package-scripts.png" alt="Package.json Scripts"></p>
+<h2 id="bước-6-test-application-locally">Bước 6: Test Application Locally</h2>
+<h3 id="start-application">Start Application</h3>
+<ol>
+<li>Test ứng dụng locally trước:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Start the application</span>
 </span></span><span style="display:flex;"><span>npm start
-</span></span></code></pre>
-          </div>
-          <h3 id="test-health-endpoint">Test Health Endpoint</h3>
-          <ol start="2">
-            <li>Trong terminal khác, test health endpoint:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test health check</span>
+</span></span></code></pre></div><h3 id="test-health-endpoint">Test Health Endpoint</h3>
+<ol start="2">
+<li>Trong terminal khác, test health endpoint:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test health check</span>
 </span></span><span style="display:flex;"><span>curl http://your-instance-public-ip:3000/health
-</span></span></code></pre>
-          </div>
-          <p>
-            <img
-              src="../../../images/health-check-test.png"
-              alt="Health Check Test"
-            />
-          </p>
-          <h3 id="test-product-endpoint">Test Product Endpoint</h3>
-          <ol start="3">
-            <li>Test product retrieval:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test product endpoint</span>
+</span></span></code></pre></div><p><img src="../../../images/health-check-test.png" alt="Health Check Test"></p>
+<h3 id="test-product-endpoint">Test Product Endpoint</h3>
+<ol start="3">
+<li>Test product retrieval:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test product endpoint</span>
 </span></span><span style="display:flex;"><span>curl <span style="color:#e6db74">&#34;http://your-instance-public-ip:3000/product/PROD001?category=Electronics&#34;</span>
-</span></span></code></pre>
-          </div>
-          <p>
-            <img src="../../../images/product-test.png" alt="Product Test" />
-          </p>
-          <h3 id="test-cache-statistics">Test Cache Statistics</h3>
-          <ol start="4">
-            <li>Kiểm tra cache statistics:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Check stats</span>
+</span></span></code></pre></div><p><img src="../../../images/product-test.png" alt="Product Test"></p>
+<h3 id="test-cache-statistics">Test Cache Statistics</h3>
+<ol start="4">
+<li>Kiểm tra cache statistics:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Check stats</span>
 </span></span><span style="display:flex;"><span>curl http://your-instance-public-ip:3000/stats
-</span></span></code></pre>
-          </div>
-          <p>
-            <img
-              src="../../../images/cache-stats-test.png"
-              alt="Cache Stats Test"
-            />
-          </p>
-          <h2 id="bước-7-deploy-với-pm2">Bước 7: Deploy với PM2</h2>
-          <h3 id="stop-development-server">Stop Development Server</h3>
-          <ol>
-            <li>Stop development server (Ctrl+C) và start với PM2:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Start with PM2</span>
+</span></span></code></pre></div><p><img src="../../../images/cache-stats-test.png" alt="Cache Stats Test"></p>
+<h2 id="bước-7-deploy-với-pm2">Bước 7: Deploy với PM2</h2>
+<h3 id="stop-development-server">Stop Development Server</h3>
+<ol>
+<li>Stop development server (Ctrl+C) và start với PM2:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Start with PM2</span>
 </span></span><span style="display:flex;"><span>npm run pm2:start
-</span></span></code></pre>
-          </div>
-          <h3 id="kiểm-tra-pm2-status">Kiểm Tra PM2 Status</h3>
-          <ol start="2">
-            <li>Xác minh PM2 đang chạy application:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Check PM2 status</span>
+</span></span></code></pre></div><h3 id="kiểm-tra-pm2-status">Kiểm Tra PM2 Status</h3>
+<ol start="2">
+<li>Xác minh PM2 đang chạy application:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Check PM2 status</span>
 </span></span><span style="display:flex;"><span>npm run pm2:status
-</span></span></code></pre>
-          </div>
-          <h3 id="xem-application-logs">Xem Application Logs</h3>
-          <ol start="3">
-            <li>Giám sát application logs:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># View logs</span>
+</span></span></code></pre></div><h3 id="xem-application-logs">Xem Application Logs</h3>
+<ol start="3">
+<li>Giám sát application logs:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># View logs</span>
 </span></span><span style="display:flex;"><span>npm run pm2:logs
-</span></span></code></pre>
-          </div>
-          <h2 id="bước-8-performance-testing">Bước 8: Performance Testing</h2>
-          <h3 id="test-cache-performance">Test Cache Performance</h3>
-          <ol>
-            <li>
-              Test caching behavior bằng cách thực hiện multiple requests:
-            </li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># First request (cache miss)</span>
+</span></span></code></pre></div><h2 id="bước-8-performance-testing">Bước 8: Performance Testing</h2>
+<h3 id="test-cache-performance">Test Cache Performance</h3>
+<ol>
+<li>Test caching behavior bằng cách thực hiện multiple requests:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># First request (cache miss)</span>
 </span></span><span style="display:flex;"><span>time curl <span style="color:#e6db74">&#34;http://your-instance-public-ip:3000/product/PROD001?category=Electronics&#34;</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Second request (cache hit)</span>
@@ -1564,293 +1485,509 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Check statistics</span>
 </span></span><span style="display:flex;"><span>curl http://your-instance-public-ip:3000/stats
-</span></span></code></pre>
-          </div>
-          <h3 id="load-testing">Load Testing</h3>
-          <ol start="2">
-            <li>Thực hiện basic load testing:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Install Apache Bench (if not available)</span>
+</span></span></code></pre></div><h3 id="load-testing">Load Testing</h3>
+<ol start="2">
+<li>Thực hiện basic load testing:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Install Apache Bench (if not available)</span>
 </span></span><span style="display:flex;"><span>sudo yum install -y httpd-tools
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Run load test</span>
 </span></span><span style="display:flex;"><span>ab -n <span style="color:#ae81ff">100</span> -c <span style="color:#ae81ff">10</span> http://your-instance-public-ip:3000/product/PROD001?category<span style="color:#f92672">=</span>Electronics
-</span></span></code></pre>
-          </div>
-          <h2 id="bước-9-cấu-hình-application-monitoring">
-            Bước 9: Cấu Hình Application Monitoring
-          </h2>
-          <h3 id="pm2-monitoring">PM2 Monitoring</h3>
-          <ol>
-            <li>Enable PM2 monitoring:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Enable PM2 monitoring</span>
+</span></span></code></pre></div><h2 id="bước-9-cấu-hình-application-monitoring">Bước 9: Cấu Hình Application Monitoring</h2>
+<h3 id="pm2-monitoring">PM2 Monitoring</h3>
+<ol>
+<li>Enable PM2 monitoring:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Enable PM2 monitoring</span>
 </span></span><span style="display:flex;"><span>pm2 install pm2-logrotate
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Set log rotation</span>
 </span></span><span style="display:flex;"><span>pm2 set pm2-logrotate:max_size 10M
 </span></span><span style="display:flex;"><span>pm2 set pm2-logrotate:retain <span style="color:#ae81ff">7</span>
-</span></span></code></pre>
-          </div>
-          <h3 id="application-logs">Application Logs</h3>
-          <ol start="2">
-            <li>Kiểm tra application logs location:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># View log files</span>
+</span></span></code></pre></div><h3 id="application-logs">Application Logs</h3>
+<ol start="2">
+<li>Kiểm tra application logs location:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># View log files</span>
 </span></span><span style="display:flex;"><span>ls -la /var/log/caching-app/
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Tail application logs</span>
 </span></span><span style="display:flex;"><span>tail -f /var/log/caching-app/app.log
-</span></span></code></pre>
-          </div>
-          <h2 id="bước-11-ghi-lại-application-configuration">
-            Bước 11: Ghi Lại Application Configuration
-          </h2>
-          <p>Ghi lại thông tin sau:</p>
-          <h3 id="application-information">Application Information</h3>
-          <ul>
-            <li>
-              <strong>Application Name</strong>:
-              <code>multi-layer-caching-app</code>
-            </li>
-            <li><strong>Port</strong>: 3000</li>
-            <li><strong>Process Manager</strong>: PM2</li>
-            <li>
-              <strong>Log Location</strong>:
-              <code>/var/log/caching-app/app.log</code>
-            </li>
-          </ul>
-          <h3 id="api-endpoints">API Endpoints</h3>
-          <ul>
-            <li><strong>Health Check</strong>: <code>GET /health</code></li>
-            <li>
-              <strong>Get Product</strong>:
-              <code>GET /product/:id?category=:category</code>
-            </li>
-            <li>
-              <strong>Get Products</strong>:
-              <code>GET /products?category=:category</code>
-            </li>
-            <li><strong>Cache Stats</strong>: <code>GET /stats</code></li>
-            <li>
-              <strong>Clear Cache</strong>: <code>DELETE /cache/:key</code>
-            </li>
-            <li>
-              <strong>Warm Cache</strong>: <code>POST /cache/warmup</code>
-            </li>
-            <li>
-              <strong>Reset Stats</strong>: <code>POST /stats/reset</code>
-            </li>
-          </ul>
-          <h3 id="performance-characteristics">Performance Characteristics</h3>
-          <ul>
-            <li><strong>Cold Start</strong>: ~500ms (DynamoDB)</li>
-            <li><strong>Warm Cache (DAX)</strong>: ~10ms</li>
-            <li><strong>Hot Cache (Redis)</strong>: ~1ms</li>
-            <li><strong>Expected Hit Rate</strong>: 90%+</li>
-          </ul>
-          <h2 id="khắc-phục-các-vấn-đề-thường-gặp">
-            Khắc Phục Các Vấn Đề Thường Gặp
-          </h2>
-          <h3 id="vấn-đề-application-không-start">
-            Vấn Đề: Application Không Start
-          </h3>
-          <p><strong>Nguyên Nhân Có Thể:</strong></p>
-          <ul>
-            <li>Missing dependencies</li>
-            <li>Environment configuration errors</li>
-            <li>Port conflicts</li>
-          </ul>
-          <p><strong>Giải Pháp:</strong></p>
-          <ul>
-            <li>
-              Chạy <code>npm install</code> để đảm bảo tất cả dependencies được
-              cài đặt
-            </li>
-            <li>Kiểm tra <code>.env</code> file cho correct endpoint URLs</li>
-            <li>
-              Xác minh port 3000 không được sử dụng:
-              <code>netstat -tlnp | grep 3000</code>
-            </li>
-          </ul>
-          <h3 id="vấn-đề-không-thể-connect-đến-redisdax">
-            Vấn Đề: Không Thể Connect Đến Redis/DAX
-          </h3>
-          <p><strong>Nguyên Nhân Có Thể:</strong></p>
-          <ul>
-            <li>Incorrect endpoint URLs</li>
-            <li>Security group restrictions</li>
-            <li>Network connectivity issues</li>
-          </ul>
-          <p><strong>Giải Pháp:</strong></p>
-          <ul>
-            <li>Xác minh endpoint URLs trong <code>.env</code> file</li>
-            <li>
-              Kiểm tra security groups cho phép traffic trên ports 6379 (Redis)
-              và 8111 (DAX)
-            </li>
-            <li>Test connectivity: <code>telnet redis-endpoint 6379</code></li>
-          </ul>
-          <h3 id="vấn-đề-high-error-rate">Vấn Đề: High Error Rate</h3>
-          <p><strong>Nguyên Nhân Có Thể:</strong></p>
-          <ul>
-            <li>Service unavailability</li>
-            <li>IAM permission issues</li>
-            <li>Network timeouts</li>
-          </ul>
-          <p><strong>Giải Pháp:</strong></p>
-          <ul>
-            <li>Kiểm tra CloudWatch logs cho specific errors</li>
-            <li>Xác minh IAM role có necessary permissions</li>
-            <li>Giám sát service health trong AWS console</li>
-          </ul>
-          <h2 id="các-bước-tiếp-theo">Các Bước Tiếp Theo</h2>
-          <p>
-            Ứng dụng multi-layer caching của bạn giờ đã được deployed và đang
-            chạy! Bạn có:
-          </p>
-          <p>
-            ✅ <strong>Node.js Application</strong> với Express framework<br />
-            ✅ <strong>Multi-layer Caching</strong> implementation<br />
-            ✅ <strong>Redis Integration</strong> cho L1 caching<br />
-            ✅ <strong>DAX Integration</strong> cho L2 caching<br />
-            ✅ <strong>DynamoDB Fallback</strong> như source of truth<br />
-            ✅ <strong>PM2 Process Management</strong> cho production<br />
-            ✅ <strong>Comprehensive API</strong> cho testing và monitoring<br />
-            ✅ <strong>Performance Monitoring</strong> với statistics
-          </p>
-          <h3 id="application-features">Application Features:</h3>
-          <ul>
-            <li>
-              <strong>Intelligent Cache Fallback</strong>: Redis → DAX →
-              DynamoDB
-            </li>
-            <li>
-              <strong>Performance Tracking</strong>: Response times và hit rates
-            </li>
-            <li>
-              <strong>Cache Management</strong>: Warmup, clearing, và statistics
-            </li>
-            <li>
-              <strong>Error Handling</strong>: Graceful degradation khi services
-              unavailable
-            </li>
-            <li>
-              <strong>Production Ready</strong>: PM2 process management và
-              logging
-            </li>
-          </ul>
+</span></span></code></pre></div><h2 id="bước-11-ghi-lại-application-configuration">Bước 11: Ghi Lại Application Configuration</h2>
+<p>Ghi lại thông tin sau:</p>
+<h3 id="application-information">Application Information</h3>
+<ul>
+<li><strong>Application Name</strong>: <code>multi-layer-caching-app</code></li>
+<li><strong>Port</strong>: 3000</li>
+<li><strong>Process Manager</strong>: PM2</li>
+<li><strong>Log Location</strong>: <code>/var/log/caching-app/app.log</code></li>
+</ul>
+<h3 id="api-endpoints">API Endpoints</h3>
+<ul>
+<li><strong>Health Check</strong>: <code>GET /health</code></li>
+<li><strong>Get Product</strong>: <code>GET /product/:id?category=:category</code></li>
+<li><strong>Get Products</strong>: <code>GET /products?category=:category</code></li>
+<li><strong>Cache Stats</strong>: <code>GET /stats</code></li>
+<li><strong>Clear Cache</strong>: <code>DELETE /cache/:key</code></li>
+<li><strong>Warm Cache</strong>: <code>POST /cache/warmup</code></li>
+<li><strong>Reset Stats</strong>: <code>POST /stats/reset</code></li>
+</ul>
+<h3 id="performance-characteristics">Performance Characteristics</h3>
+<ul>
+<li><strong>Cold Start</strong>: ~500ms (DynamoDB)</li>
+<li><strong>Warm Cache (DAX)</strong>: ~10ms</li>
+<li><strong>Hot Cache (Redis)</strong>: ~1ms</li>
+<li><strong>Expected Hit Rate</strong>: 90%+</li>
+</ul>
+<h2 id="khắc-phục-các-vấn-đề-thường-gặp">Khắc Phục Các Vấn Đề Thường Gặp</h2>
+<h3 id="vấn-đề-application-không-start">Vấn Đề: Application Không Start</h3>
+<p><strong>Nguyên Nhân Có Thể:</strong></p>
+<ul>
+<li>Missing dependencies</li>
+<li>Environment configuration errors</li>
+<li>Port conflicts</li>
+</ul>
+<p><strong>Giải Pháp:</strong></p>
+<ul>
+<li>Chạy <code>npm install</code> để đảm bảo tất cả dependencies được cài đặt</li>
+<li>Kiểm tra <code>.env</code> file cho correct endpoint URLs</li>
+<li>Xác minh port 3000 không được sử dụng: <code>netstat -tlnp | grep 3000</code></li>
+</ul>
+<h3 id="vấn-đề-không-thể-connect-đến-redisdax">Vấn Đề: Không Thể Connect Đến Redis/DAX</h3>
+<p><strong>Nguyên Nhân Có Thể:</strong></p>
+<ul>
+<li>Incorrect endpoint URLs</li>
+<li>Security group restrictions</li>
+<li>Network connectivity issues</li>
+</ul>
+<p><strong>Giải Pháp:</strong></p>
+<ul>
+<li>Xác minh endpoint URLs trong <code>.env</code> file</li>
+<li>Kiểm tra security groups cho phép traffic trên ports 6379 (Redis) và 8111 (DAX)</li>
+<li>Test connectivity: <code>telnet redis-endpoint 6379</code></li>
+</ul>
+<h3 id="vấn-đề-high-error-rate">Vấn Đề: High Error Rate</h3>
+<p><strong>Nguyên Nhân Có Thể:</strong></p>
+<ul>
+<li>Service unavailability</li>
+<li>IAM permission issues</li>
+<li>Network timeouts</li>
+</ul>
+<p><strong>Giải Pháp:</strong></p>
+<ul>
+<li>Kiểm tra CloudWatch logs cho specific errors</li>
+<li>Xác minh IAM role có necessary permissions</li>
+<li>Giám sát service health trong AWS console</li>
+</ul>
+<h2 id="các-bước-tiếp-theo">Các Bước Tiếp Theo</h2>
+<p>Ứng dụng multi-layer caching của bạn giờ đã được deployed và đang chạy! Bạn có:</p>
+<p>✅ <strong>Node.js Application</strong> với Express framework<br>
+✅ <strong>Multi-layer Caching</strong> implementation<br>
+✅ <strong>Redis Integration</strong> cho L1 caching<br>
+✅ <strong>DAX Integration</strong> cho L2 caching<br>
+✅ <strong>DynamoDB Fallback</strong> như source of truth<br>
+✅ <strong>PM2 Process Management</strong> cho production<br>
+✅ <strong>Comprehensive API</strong> cho testing và monitoring<br>
+✅ <strong>Performance Monitoring</strong> với statistics</p>
+<h3 id="application-features">Application Features:</h3>
+<ul>
+<li><strong>Intelligent Cache Fallback</strong>: Redis → DAX → DynamoDB</li>
+<li><strong>Performance Tracking</strong>: Response times và hit rates</li>
+<li><strong>Cache Management</strong>: Warmup, clearing, và statistics</li>
+<li><strong>Error Handling</strong>: Graceful degradation khi services unavailable</li>
+<li><strong>Production Ready</strong>: PM2 process management và logging</li>
+</ul>
 
-          <div class="notices tip">
-            <p>
-              Giám sát application logs với <code>pm2 logs caching-app</code> để
-              xem caching behavior real-time và hiểu performance improvements.
-            </p>
-          </div>
+<div class="notices tip" ><p>Giám sát application logs với <code>pm2 logs caching-app</code> để xem caching behavior real-time và hiểu performance improvements.</p>
+</div>
 
-          <p>
-            Tiếp theo, chúng ta sẽ thiết lập Application Load Balancer để phân
-            phối traffic và cung cấp high availability cho ứng dụng của chúng
-            ta.
-          </p>
+<p>Tiếp theo, chúng ta sẽ thiết lập Application Load Balancer để phân phối traffic và cung cấp high availability cho ứng dụng của chúng ta.</p>
 
-          <footer class="footline"></footer>
+
+
+
+
+<footer class=" footline" >
+	
+</footer>
+
+        
         </div>
+        
+
       </div>
 
-      <div id="navigation">
-        <a
-          class="nav nav-prev"
-          href="/vi/5-setup-application/5.1-launch-ec2/"
-          title="5.1 Khởi Chạy EC2 Instance"
-        >
-          <i class="fa fa-chevron-left"></i
-        ></a>
+    <div id="navigation">
+        
+        
 
-        <a
-          class="nav nav-next"
-          href="/vi/6-setup-loadbalancer/"
-          title="6. Thiết Lập Application Load Balancer"
-          style="margin-right: 0px"
-          ><i class="fa fa-chevron-right"></i
-        ></a>
-      </div>
+        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+
+        
+
+
+	 
+	 
+		
+			<a class="nav nav-prev" href="/vi/5-setup-application/5.1-launch-ec2/" title="5.1 Khởi Chạy EC2 Instance"> <i class="fa fa-chevron-left"></i></a>
+		
+		
+			<a class="nav nav-next" href="/vi/6-setup-loadbalancer/" title="6. Thiết Lập Application Load Balancer" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
+		
+	
+    </div>
+
     </section>
 
-    <div
-      style="
-        left: -1000px;
-        overflow: scroll;
-        position: absolute;
-        top: -1000px;
-        border: none;
-        box-sizing: content-box;
-        height: 200px;
-        margin: 0px;
-        padding: 0px;
-        width: 200px;
-      "
-    >
-      <div
-        style="
-          border: none;
-          box-sizing: content-box;
-          height: 200px;
-          margin: 0px;
-          padding: 0px;
-          width: 200px;
-        "
-      ></div>
+    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
+      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
     </div>
-    <script src="/js/clipboard.min.js?1754898927"></script>
-    <script src="/js/perfect-scrollbar.min.js?1754898927"></script>
-    <script src="/js/perfect-scrollbar.jquery.min.js?1754898927"></script>
-    <script src="/js/jquery.sticky.js?1754898927"></script>
-    <script src="/js/featherlight.min.js?1754898927"></script>
-    <script src="/js/highlight.pack.js?1754898927"></script>
-    <script>
-      hljs.initHighlightingOnLoad();
-    </script>
-    <script src="/js/modernizr.custom-3.6.0.js?1754898927"></script>
-    <script src="/js/learn.js?1754898927"></script>
-    <script src="/js/hugo-learn.js?1754898927"></script>
-    <script src="/js/language-switcher.js?1754898927"></script>
-    <script src="/js/multilingual.js?1754898927"></script>
+    <script src="/js/clipboard.min.js?1754900055"></script>
+    <script src="/js/perfect-scrollbar.min.js?1754900055"></script>
+    <script src="/js/perfect-scrollbar.jquery.min.js?1754900055"></script>
+    <script src="/js/jquery.sticky.js?1754900055"></script>
+    <script src="/js/featherlight.min.js?1754900055"></script>
+    <script src="/js/highlight.pack.js?1754900055"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="/js/modernizr.custom-3.6.0.js?1754900055"></script>
+    <script src="/js/learn.js?1754900055"></script>
+    <script src="/js/hugo-learn.js?1754900055"></script>
+    <script src="/js/language-switcher.js?1754900055"></script>
+    <script src="/js/multilingual.js?1754900055"></script>
+    
+        
+            <script src="/mermaid/mermaid.js?1754900055"></script>
+        
+        <script>
+            mermaid.initialize({ startOnLoad: true });
+        </script>
+    
+    
 
-    <script src="/mermaid/mermaid.js?1754898927"></script>
-
-    <script>
-      mermaid.initialize({ startOnLoad: true });
-    </script>
   </body>
 </html>

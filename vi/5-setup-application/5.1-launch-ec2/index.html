@@ -1,869 +1,998 @@
 <!DOCTYPE html>
 <html lang="vi" class="js csstransforms3d">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="generator" content="Hugo 0.147.9" />
-    <meta name="description" content="" />
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=50292&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Hugo 0.147.9">
+    <meta name="description" content="">
 
-    <link rel="icon" href="/images/favicon.png" type="image/png" />
 
-    <title>
-      5.1 Khởi Chạy EC2 Instance :: Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ
-    </title>
+    <link rel="icon" href="/images/favicon.png" type="image/png">
 
-    <link href="/css/nucleus.css?1754898927" rel="stylesheet" />
-    <link href="/css/fontawesome-all.min.css?1754898927" rel="stylesheet" />
-    <link href="/css/hybrid.css?1754898927" rel="stylesheet" />
-    <link href="/css/featherlight.min.css?1754898927" rel="stylesheet" />
-    <link href="/css/perfect-scrollbar.min.css?1754898927" rel="stylesheet" />
-    <link href="/css/auto-complete.css?1754898927" rel="stylesheet" />
-    <link
-      href="/css/atom-one-dark-reasonable.css?1754898927"
-      rel="stylesheet"
-    />
-    <link href="/css/theme.css?1754898927" rel="stylesheet" />
-    <link href="/css/tabs.css?1754898927" rel="stylesheet" />
-    <link href="/css/hugo-theme.css?1754898927" rel="stylesheet" />
+    <title>5.1 Khởi Chạy EC2 Instance :: Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</title>
 
-    <script src="/js/jquery-3.3.1.min.js?1754898927"></script>
+    
+    <link href="/css/nucleus.css?1754900055" rel="stylesheet">
+    <link href="/css/fontawesome-all.min.css?1754900055" rel="stylesheet">
+    <link href="/css/hybrid.css?1754900055" rel="stylesheet">
+    <link href="/css/featherlight.min.css?1754900055" rel="stylesheet">
+    <link href="/css/perfect-scrollbar.min.css?1754900055" rel="stylesheet">
+    <link href="/css/auto-complete.css?1754900055" rel="stylesheet">
+    <link href="/css/atom-one-dark-reasonable.css?1754900055" rel="stylesheet">
+    <link href="/css/theme.css?1754900055" rel="stylesheet">
+    <link href="/css/tabs.css?1754900055" rel="stylesheet">
+    <link href="/css/hugo-theme.css?1754900055" rel="stylesheet">
+    
+    
+
+    <script src="/js/jquery-3.3.1.min.js?1754900055"></script>
 
     <style>
-      :root #header + #content > #left > #rlblock_left {
-        display: none !important;
+      :root #header + #content > #left > #rlblock_left{
+          display:none !important;
       }
+      
     </style>
+    
   </head>
   <body class="" data-url="/vi/5-setup-application/5.1-launch-ec2/">
     <nav id="sidebar" class="">
-      <div id="header-wrapper">
-        <div id="header">
-          <a id="logo" href="/">
-            <svg
-              id="Layer_1"
-              data-name="Layer 1"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 60 30"
-              width="30%"
-            >
-              <defs>
-                <style>
-                  .cls-1 {
-                    fill: #fff;
-                  }
-                  .cls-2 {
-                    fill: #f90;
-                    fill-rule: evenodd;
-                  }
-                </style>
-              </defs>
-              <title>AWS-Logo_White-Color</title>
-              <path
-                class="cls-1"
-                d="M14.09,10.85a4.7,4.7,0,0,0,.19,1.48,7.73,7.73,0,0,0,.54,1.19.77.77,0,0,1,.12.38.64.64,0,0,1-.32.49l-1,.7a.83.83,0,0,1-.44.15.69.69,0,0,1-.49-.23,3.8,3.8,0,0,1-.6-.77q-.25-.42-.51-1a6.14,6.14,0,0,1-4.89,2.3,4.54,4.54,0,0,1-3.32-1.19,4.27,4.27,0,0,1-1.22-3.2A4.28,4.28,0,0,1,3.61,7.75,6.06,6.06,0,0,1,7.69,6.46a12.47,12.47,0,0,1,1.76.13q.92.13,1.91.36V5.73a3.65,3.65,0,0,0-.79-2.66A3.81,3.81,0,0,0,7.86,2.3a7.71,7.71,0,0,0-1.79.22,12.78,12.78,0,0,0-1.79.57,4.55,4.55,0,0,1-.58.22l-.26,0q-.35,0-.35-.52V2a1.09,1.09,0,0,1,.12-.58,1.2,1.2,0,0,1,.47-.35A10.88,10.88,0,0,1,5.77.32,10.19,10.19,0,0,1,8.36,0a6,6,0,0,1,4.35,1.35,5.49,5.49,0,0,1,1.38,4.09ZM7.34,13.38a5.36,5.36,0,0,0,1.72-.31A3.63,3.63,0,0,0,10.63,12,2.62,2.62,0,0,0,11.19,11a5.63,5.63,0,0,0,.16-1.44v-.7a14.35,14.35,0,0,0-1.53-.28,12.37,12.37,0,0,0-1.56-.1,3.84,3.84,0,0,0-2.47.67A2.34,2.34,0,0,0,5,11a2.35,2.35,0,0,0,.61,1.76A2.4,2.4,0,0,0,7.34,13.38Zm13.35,1.8a1,1,0,0,1-.64-.16,1.3,1.3,0,0,1-.35-.65L15.81,1.51a3,3,0,0,1-.15-.67.36.36,0,0,1,.41-.41H17.7a1,1,0,0,1,.65.16,1.4,1.4,0,0,1,.33.65l2.79,11,2.59-11A1.17,1.17,0,0,1,24.39.6a1.1,1.1,0,0,1,.67-.16H26.4a1.1,1.1,0,0,1,.67.16,1.17,1.17,0,0,1,.32.65L30,12.39,32.88,1.25A1.39,1.39,0,0,1,33.22.6a1,1,0,0,1,.65-.16h1.54a.36.36,0,0,1,.41.41,1.36,1.36,0,0,1,0,.26,3.64,3.64,0,0,1-.12.41l-4,12.86a1.3,1.3,0,0,1-.35.65,1,1,0,0,1-.64.16H29.25a1,1,0,0,1-.67-.17,1.26,1.26,0,0,1-.32-.67L25.67,3.64,23.11,14.34a1.26,1.26,0,0,1-.32.67,1,1,0,0,1-.67.17Zm21.36.44a11.28,11.28,0,0,1-2.56-.29,7.44,7.44,0,0,1-1.92-.67,1,1,0,0,1-.61-.93v-.84q0-.52.38-.52a.9.9,0,0,1,.31.06l.42.17a8.77,8.77,0,0,0,1.83.58,9.78,9.78,0,0,0,2,.2,4.48,4.48,0,0,0,2.43-.55,1.76,1.76,0,0,0,.86-1.57,1.61,1.61,0,0,0-.45-1.16A4.29,4.29,0,0,0,43,9.22l-2.41-.76A5.15,5.15,0,0,1,38,6.78a3.94,3.94,0,0,1-.83-2.41,3.7,3.7,0,0,1,.45-1.85,4.47,4.47,0,0,1,1.19-1.37A5.27,5.27,0,0,1,40.51.29,7.4,7.4,0,0,1,42.6,0a8.87,8.87,0,0,1,1.12.07q.57.07,1.08.19t.95.26a4.27,4.27,0,0,1,.7.29,1.59,1.59,0,0,1,.49.41.94.94,0,0,1,.15.55v.79q0,.52-.38.52a1.76,1.76,0,0,1-.64-.2,7.74,7.74,0,0,0-3.2-.64,4.37,4.37,0,0,0-2.21.47,1.6,1.6,0,0,0-.79,1.48,1.58,1.58,0,0,0,.49,1.18,4.94,4.94,0,0,0,1.83.92L44.55,7a5.08,5.08,0,0,1,2.57,1.6A3.76,3.76,0,0,1,47.9,11a4.21,4.21,0,0,1-.44,1.93,4.4,4.4,0,0,1-1.21,1.47,5.43,5.43,0,0,1-1.85.93A8.25,8.25,0,0,1,42.05,15.62Z"
-              ></path>
-              <path
-                class="cls-2"
-                d="M45.19,23.81C39.72,27.85,31.78,30,25,30A36.64,36.64,0,0,1,.22,20.57c-.51-.46-.06-1.09.56-.74A49.78,49.78,0,0,0,25.53,26.4,49.23,49.23,0,0,0,44.4,22.53C45.32,22.14,46.1,23.14,45.19,23.81Z"
-              ></path>
-              <path
-                class="cls-2"
-                d="M47.47,21.21c-.7-.9-4.63-.42-6.39-.21-.53.06-.62-.4-.14-.74,3.13-2.2,8.27-1.57,8.86-.83s-.16,5.89-3.09,8.35c-.45.38-.88.18-.68-.32C46.69,25.8,48.17,22.11,47.47,21.21Z"
-              ></path>
-            </svg>
-          </a>
-        </div>
 
+
+
+  <div id="header-wrapper">
+    <div id="header">
+      <a
+  id="logo"
+  href='/'
+>
+  <svg
+    id="Layer_1"
+    data-name="Layer 1"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 60 30"
+    width="30%"
+  >
+    <defs>
+      <style>
+        .cls-1 {
+          fill: #fff;
+        }
+        .cls-2 {
+          fill: #f90;
+          fill-rule: evenodd;
+        }
+      </style>
+    </defs>
+    <title>AWS-Logo_White-Color</title>
+    <path
+      class="cls-1"
+      d="M14.09,10.85a4.7,4.7,0,0,0,.19,1.48,7.73,7.73,0,0,0,.54,1.19.77.77,0,0,1,.12.38.64.64,0,0,1-.32.49l-1,.7a.83.83,0,0,1-.44.15.69.69,0,0,1-.49-.23,3.8,3.8,0,0,1-.6-.77q-.25-.42-.51-1a6.14,6.14,0,0,1-4.89,2.3,4.54,4.54,0,0,1-3.32-1.19,4.27,4.27,0,0,1-1.22-3.2A4.28,4.28,0,0,1,3.61,7.75,6.06,6.06,0,0,1,7.69,6.46a12.47,12.47,0,0,1,1.76.13q.92.13,1.91.36V5.73a3.65,3.65,0,0,0-.79-2.66A3.81,3.81,0,0,0,7.86,2.3a7.71,7.71,0,0,0-1.79.22,12.78,12.78,0,0,0-1.79.57,4.55,4.55,0,0,1-.58.22l-.26,0q-.35,0-.35-.52V2a1.09,1.09,0,0,1,.12-.58,1.2,1.2,0,0,1,.47-.35A10.88,10.88,0,0,1,5.77.32,10.19,10.19,0,0,1,8.36,0a6,6,0,0,1,4.35,1.35,5.49,5.49,0,0,1,1.38,4.09ZM7.34,13.38a5.36,5.36,0,0,0,1.72-.31A3.63,3.63,0,0,0,10.63,12,2.62,2.62,0,0,0,11.19,11a5.63,5.63,0,0,0,.16-1.44v-.7a14.35,14.35,0,0,0-1.53-.28,12.37,12.37,0,0,0-1.56-.1,3.84,3.84,0,0,0-2.47.67A2.34,2.34,0,0,0,5,11a2.35,2.35,0,0,0,.61,1.76A2.4,2.4,0,0,0,7.34,13.38Zm13.35,1.8a1,1,0,0,1-.64-.16,1.3,1.3,0,0,1-.35-.65L15.81,1.51a3,3,0,0,1-.15-.67.36.36,0,0,1,.41-.41H17.7a1,1,0,0,1,.65.16,1.4,1.4,0,0,1,.33.65l2.79,11,2.59-11A1.17,1.17,0,0,1,24.39.6a1.1,1.1,0,0,1,.67-.16H26.4a1.1,1.1,0,0,1,.67.16,1.17,1.17,0,0,1,.32.65L30,12.39,32.88,1.25A1.39,1.39,0,0,1,33.22.6a1,1,0,0,1,.65-.16h1.54a.36.36,0,0,1,.41.41,1.36,1.36,0,0,1,0,.26,3.64,3.64,0,0,1-.12.41l-4,12.86a1.3,1.3,0,0,1-.35.65,1,1,0,0,1-.64.16H29.25a1,1,0,0,1-.67-.17,1.26,1.26,0,0,1-.32-.67L25.67,3.64,23.11,14.34a1.26,1.26,0,0,1-.32.67,1,1,0,0,1-.67.17Zm21.36.44a11.28,11.28,0,0,1-2.56-.29,7.44,7.44,0,0,1-1.92-.67,1,1,0,0,1-.61-.93v-.84q0-.52.38-.52a.9.9,0,0,1,.31.06l.42.17a8.77,8.77,0,0,0,1.83.58,9.78,9.78,0,0,0,2,.2,4.48,4.48,0,0,0,2.43-.55,1.76,1.76,0,0,0,.86-1.57,1.61,1.61,0,0,0-.45-1.16A4.29,4.29,0,0,0,43,9.22l-2.41-.76A5.15,5.15,0,0,1,38,6.78a3.94,3.94,0,0,1-.83-2.41,3.7,3.7,0,0,1,.45-1.85,4.47,4.47,0,0,1,1.19-1.37A5.27,5.27,0,0,1,40.51.29,7.4,7.4,0,0,1,42.6,0a8.87,8.87,0,0,1,1.12.07q.57.07,1.08.19t.95.26a4.27,4.27,0,0,1,.7.29,1.59,1.59,0,0,1,.49.41.94.94,0,0,1,.15.55v.79q0,.52-.38.52a1.76,1.76,0,0,1-.64-.2,7.74,7.74,0,0,0-3.2-.64,4.37,4.37,0,0,0-2.21.47,1.6,1.6,0,0,0-.79,1.48,1.58,1.58,0,0,0,.49,1.18,4.94,4.94,0,0,0,1.83.92L44.55,7a5.08,5.08,0,0,1,2.57,1.6A3.76,3.76,0,0,1,47.9,11a4.21,4.21,0,0,1-.44,1.93,4.4,4.4,0,0,1-1.21,1.47,5.43,5.43,0,0,1-1.85.93A8.25,8.25,0,0,1,42.05,15.62Z"
+    ></path>
+    <path
+      class="cls-2"
+      d="M45.19,23.81C39.72,27.85,31.78,30,25,30A36.64,36.64,0,0,1,.22,20.57c-.51-.46-.06-1.09.56-.74A49.78,49.78,0,0,0,25.53,26.4,49.23,49.23,0,0,0,44.4,22.53C45.32,22.14,46.1,23.14,45.19,23.81Z"
+    ></path>
+    <path
+      class="cls-2"
+      d="M47.47,21.21c-.7-.9-4.63-.42-6.39-.21-.53.06-.62-.4-.14-.74,3.13-2.2,8.27-1.57,8.86-.83s-.16,5.89-3.09,8.35c-.45.38-.88.18-.68-.32C46.69,25.8,48.17,22.11,47.47,21.21Z"
+    ></path>
+  </svg>
+</a>
+
+    </div>
+    
         <div class="searchbox">
-          <label for="search-by"><i class="fas fa-search"></i></label>
-          <input
-            data-search-input
-            id="search-by"
-            type="search"
-            placeholder="Search..."
-          />
-          <span data-search-clear=""><i class="fas fa-times"></i></span>
-        </div>
+    <label for="search-by"><i class="fas fa-search"></i></label>
+    <input data-search-input id="search-by" type="search" placeholder="Search...">
+    <span data-search-clear=""><i class="fas fa-times"></i></span>
+</div>
 
-        <script
-          type="text/javascript"
-          src="/js/lunr.min.js?1754898927"
-        ></script>
-        <script
-          type="text/javascript"
-          src="/js/auto-complete.js?1754898927"
-        ></script>
-        <script type="text/javascript">
-          var baseurl = "\/\/vi";
-        </script>
-        <script type="text/javascript" src="/js/search.js?1754898927"></script>
-      </div>
+<script type="text/javascript" src="/js/lunr.min.js?1754900055"></script>
+<script type="text/javascript" src="/js/auto-complete.js?1754900055"></script>
+<script type="text/javascript">
+    var baseurl = "\/\/localhost:50292\/\/vi";
+</script>
+<script type="text/javascript" src="/js/search.js?1754900055"></script>
 
-      <div class="highlightable">
-        <ul class="topics">
-          <li
-            data-nav-id="/vi/1-introduction/"
-            title="1. Giới Thiệu"
-            class="dd-item"
-          >
-            <a href="/vi/1-introduction/"> <b></b>1. Giới Thiệu </a>
+    
+  </div>
 
-            <ul>
-              <li
-                data-nav-id="/vi/1-introduction/1.1-overview/"
-                title="1.1 Tổng Quan Workshop"
-                class="dd-item"
-              >
-                <a href="/vi/1-introduction/1.1-overview/">
-                  <b></b>1.1 Tổng Quan Workshop
-                </a>
-              </li>
 
-              <li
-                data-nav-id="/vi/1-introduction/1.2-architecture/"
-                title="1.2 Tổng Quan Kiến Trúc"
-                class="dd-item"
-              >
-                <a href="/vi/1-introduction/1.2-architecture/">
-                  <b></b>1.2 Tổng Quan Kiến Trúc
-                </a>
-              </li>
-            </ul>
-          </li>
+    <div class="highlightable">
+    <ul class="topics">
 
-          <li
-            data-nav-id="/vi/2-setup-vpc/"
-            title="2. Thiết Lập VPC và Hạ Tầng Mạng"
-            class="dd-item"
-          >
-            <a href="/vi/2-setup-vpc/">
-              <b></b>2. Thiết Lập VPC và Hạ Tầng Mạng
-            </a>
+        
+          
+          
 
-            <ul>
-              <li
-                data-nav-id="/vi/2-setup-vpc/2.1-create-vpc/"
-                title="2.1 Tạo VPC"
-                class="dd-item"
-              >
-                <a href="/vi/2-setup-vpc/2.1-create-vpc/">
-                  <b></b>2.1 Tạo VPC
-                </a>
-              </li>
 
-              <li
-                data-nav-id="/vi/2-setup-vpc/2.2-security-groups/"
-                title="2.2 Tạo Security Groups"
-                class="dd-item"
-              >
-                <a href="/vi/2-setup-vpc/2.2-security-groups/">
-                  <b></b>2.2 Tạo Security Groups
-                </a>
-              </li>
-            </ul>
-          </li>
 
-          <li
-            data-nav-id="/vi/3-setup-dynamodb/"
-            title="3. Thiết Lập DynamoDB và DAX"
-            class="dd-item"
-          >
-            <a href="/vi/3-setup-dynamodb/">
-              <b></b>3. Thiết Lập DynamoDB và DAX
-            </a>
 
-            <ul>
-              <li
-                data-nav-id="/vi/3-setup-dynamodb/3.1-create-table/"
-                title="3.1 Tạo DynamoDB Table"
-                class="dd-item"
-              >
-                <a href="/vi/3-setup-dynamodb/3.1-create-table/">
-                  <b></b>3.1 Tạo DynamoDB Table
-                </a>
-              </li>
+ 
+  
+    
+    <li data-nav-id="/vi/1-introduction/" title="1. Giới Thiệu" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/1-introduction/">
+          <b></b>1. Giới Thiệu
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
 
-              <li
-                data-nav-id="/vi/3-setup-dynamodb/3.2-setup-dax/"
-                title="3.2 Thiết Lập DynamoDB DAX"
-                class="dd-item"
-              >
-                <a href="/vi/3-setup-dynamodb/3.2-setup-dax/">
-                  <b></b>3.2 Thiết Lập DynamoDB DAX
-                </a>
-              </li>
-            </ul>
-          </li>
+        
+          
+            
+            
 
-          <li
-            data-nav-id="/vi/4-setup-elasticache/"
-            title="4. Thiết Lập ElastiCache Redis"
-            class="dd-item"
-          >
-            <a href="/vi/4-setup-elasticache/">
-              <b></b>4. Thiết Lập ElastiCache Redis
-            </a>
-          </li>
 
-          <li
-            data-nav-id="/vi/5-setup-application/"
-            title="5. Thiết Lập Application"
-            class="dd-item parent"
-          >
-            <a href="/vi/5-setup-application/">
-              <b></b>5. Thiết Lập Application
-            </a>
 
-            <ul>
-              <li
-                data-nav-id="/vi/5-setup-application/5.1-launch-ec2/"
-                title="5.1 Khởi Chạy EC2 Instance"
-                class="dd-item active"
-              >
-                <a href="/vi/5-setup-application/5.1-launch-ec2/">
-                  <b></b>5.1 Khởi Chạy EC2 Instance
-                </a>
-              </li>
 
-              <li
-                data-nav-id="/vi/5-setup-application/5.2-deploy-app/"
-                title="5.2 Triển Khai Application"
-                class="dd-item"
-              >
-                <a href="/vi/5-setup-application/5.2-deploy-app/">
-                  <b></b>5.2 Triển Khai Application
-                </a>
-              </li>
-            </ul>
-          </li>
+ 
+  
+    
+    <li data-nav-id="/vi/1-introduction/1.1-overview/" title="1.1 Tổng Quan Workshop" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/1-introduction/1.1-overview/">
+          <b></b>1.1 Tổng Quan Workshop
+          
+      </a>
+      
+      
+    </li>
+  
+ 
 
-          <li
-            data-nav-id="/vi/6-setup-loadbalancer/"
-            title="6. Thiết Lập Application Load Balancer"
-            class="dd-item"
-          >
-            <a href="/vi/6-setup-loadbalancer/">
-              <b></b>6. Thiết Lập Application Load Balancer
-            </a>
-          </li>
+            
+          
+            
+            
 
-          <li
-            data-nav-id="/vi/7-setup-cloudfront/"
-            title="7. Thiết Lập CloudFront CDN"
-            class="dd-item"
-          >
-            <a href="/vi/7-setup-cloudfront/">
-              <b></b>7. Thiết Lập CloudFront CDN
-            </a>
-          </li>
 
-          <li
-            data-nav-id="/vi/8-performance-testing/"
-            title="8. Kiểm Tra Hiệu Suất"
-            class="dd-item"
-          >
-            <a href="/vi/8-performance-testing/">
-              <b></b>8. Kiểm Tra Hiệu Suất
-            </a>
-          </li>
 
-          <li
-            data-nav-id="/vi/9-monitoring/"
-            title="9. Giám Sát và Cảnh Báo"
-            class="dd-item"
-          >
-            <a href="/vi/9-monitoring/"> <b></b>9. Giám Sát và Cảnh Báo </a>
-          </li>
 
-          <li
-            data-nav-id="/vi/10-cleanup/"
-            title="10. Hướng Dẫn Dọn Dẹp Tài Nguyên"
-            class="dd-item"
-          >
-            <a href="/vi/10-cleanup/">
-              <b></b>10. Hướng Dẫn Dọn Dẹp Tài Nguyên
-            </a>
-          </li>
+ 
+  
+    
+    <li data-nav-id="/vi/1-introduction/1.2-architecture/" title="1.2 Tổng Quan Kiến Trúc" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/1-introduction/1.2-architecture/">
+          <b></b>1.2 Tổng Quan Kiến Trúc
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
         </ul>
+      
+    </li>
+  
+ 
 
-        <section id="prefooter">
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/2-setup-vpc/" title="2. Thiết Lập VPC và Hạ Tầng Mạng" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/2-setup-vpc/">
+          <b></b>2. Thiết Lập VPC và Hạ Tầng Mạng
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/2-setup-vpc/2.1-create-vpc/" title="2.1 Tạo VPC" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/2-setup-vpc/2.1-create-vpc/">
+          <b></b>2.1 Tạo VPC
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/2-setup-vpc/2.2-security-groups/" title="2.2 Tạo Security Groups" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/2-setup-vpc/2.2-security-groups/">
+          <b></b>2.2 Tạo Security Groups
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/3-setup-dynamodb/" title="3. Thiết Lập DynamoDB và DAX" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/3-setup-dynamodb/">
+          <b></b>3. Thiết Lập DynamoDB và DAX
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/3-setup-dynamodb/3.1-create-table/" title="3.1 Tạo DynamoDB Table" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/3-setup-dynamodb/3.1-create-table/">
+          <b></b>3.1 Tạo DynamoDB Table
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/3-setup-dynamodb/3.2-setup-dax/" title="3.2 Thiết Lập DynamoDB DAX" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/3-setup-dynamodb/3.2-setup-dax/">
+          <b></b>3.2 Thiết Lập DynamoDB DAX
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/4-setup-elasticache/" title="4. Thiết Lập ElastiCache Redis" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/4-setup-elasticache/">
+          <b></b>4. Thiết Lập ElastiCache Redis
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/5-setup-application/" title="5. Thiết Lập Application" class="dd-item
+        parent
+        
+        
+        ">
+      <a href="/vi/5-setup-application/">
+          <b></b>5. Thiết Lập Application
+          
+      </a>
+      
+      
+        <ul>
+          
+          
+            
+          
+          
+
+        
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/5-setup-application/5.1-launch-ec2/" title="5.1 Khởi Chạy EC2 Instance" class="dd-item
+        
+        active
+        
+        ">
+      <a href="/vi/5-setup-application/5.1-launch-ec2/">
+          <b></b>5.1 Khởi Chạy EC2 Instance
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+            
+            
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/5-setup-application/5.2-deploy-app/" title="5.2 Triển Khai Application" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/5-setup-application/5.2-deploy-app/">
+          <b></b>5.2 Triển Khai Application
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+            
+          
+        
+        </ul>
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/6-setup-loadbalancer/" title="6. Thiết Lập Application Load Balancer" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/6-setup-loadbalancer/">
+          <b></b>6. Thiết Lập Application Load Balancer
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/7-setup-cloudfront/" title="7. Thiết Lập CloudFront CDN" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/7-setup-cloudfront/">
+          <b></b>7. Thiết Lập CloudFront CDN
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/8-performance-testing/" title="8. Kiểm Tra Hiệu Suất" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/8-performance-testing/">
+          <b></b>8. Kiểm Tra Hiệu Suất
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/9-monitoring/" title="9. Giám Sát và Cảnh Báo" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/9-monitoring/">
+          <b></b>9. Giám Sát và Cảnh Báo
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/vi/10-cleanup/" title="10. Hướng Dẫn Dọn Dẹp Tài Nguyên" class="dd-item
+        
+        
+        
+        ">
+      <a href="/vi/10-cleanup/">
+          <b></b>10. Hướng Dẫn Dọn Dẹp Tài Nguyên
+          
+      </a>
+      
+      
+    </li>
+  
+ 
+
+          
+        
+    </ul>
+
+    
+    
+
+    
+    <section id="prefooter">
+      <hr/>
+      <ul>
+      
+        <li>
+          <a class="padding">
+            <i class="fas fa-language fa-fw"></i>
+          <div class="select-style">
+            <select id="select-language" onchange="location = this.value;">
+          
+          
+          
+              
+              
+                  
+                    
+                    
+                      <option id="en" value="//localhost:50292/5-setup-application/5.1-launch-ec2/">English</option>
+                    
+                  
+              
+                  
+              
+          
+              
+              
+                  
+              
+                  
+                    
+                    
+                      <option id="vi" value="//localhost:50292/vi/5-setup-application/5.1-launch-ec2/" selected>Tiếng Việt</option>
+                    
+                  
+              
+          
+        </select>
+        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+          width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
+          <g>
+            <g id="arrow-drop-down">
+              <polygon points="0,63.75 127.5,191.25 255,63.75 		" />
+            </g>
+          </g>
+        </svg>
+        </div>
+        </a>
+        </li>
+      
+
+      
+      </ul>
+    </section>
+    
+    <section id="footer">
+      <section id="shortcuts" style="font-weight: bold;">
+        <h3>More</h3>
+        <ul>
+          
+              <li> 
+                  <a class="padding" href="https://aws.amazon.com/blogs"><i class="fab fa-aws"></i> AWS Study Group - Blog</a>
+              </li>
+          
+              <li> 
+                  <a class="padding" href="https://www.facebook.com/groups/awsstudygroupfcj"><i class="fab fa-facebook"></i> AWS Study Group - FB Group</a>
+              </li>
+          
+        </ul>
+      </section>
+      <section id="prefooter">
           <hr />
           <ul>
             <li>
               <a class="padding">
                 <i class="fas fa-language fa-fw"></i>
                 <div class="select-style">
-                  <select
-                    id="select-language"
-                    onchange="location = this.value;"
-                  >
-                    <option
-                      id="en"
-                      value="/5-setup-application/5.1-launch-ec2/"
-                    >
-                      English
-                    </option>
-
-                    <option
-                      id="vi"
-                      value="/vi/5-setup-application/5.1-launch-ec2/"
-                      selected
-                    >
-                      Tiếng Việt
-                    </option>
+                  <select id="select-language" onchange="changeLanguage()">
+                    
+                      <option value="en" >
+                        English
+                      </option>
+                    
+                      <option value="vi" selected>
+                        Tiếng Việt
+                      </option>
+                    
                   </select>
-                  <svg
-                    version="1.1"
-                    id="Capa_1"
-                    xmlns="http://www.w3.org/2000/svg"
-                    xmlns:xlink="http://www.w3.org/1999/xlink"
-                    x="0px"
-                    y="0px"
-                    width="255px"
-                    height="255px"
-                    viewBox="0 0 255 255"
-                    style="enable-background: new 0 0 255 255"
-                    xml:space="preserve"
-                  >
+                  <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
                     <g>
                       <g id="arrow-drop-down">
-                        <polygon points="0,63.75 127.5,191.25 255,63.75 		" />
+                        <polygon points="0,63.75 127.5,191.25 255,63.75" />
                       </g>
                     </g>
                   </svg>
                 </div>
               </a>
             </li>
+            <li>
+              <a class="padding" href="#" data-clear-history-toggle=""><i class="fas fa-history fa-fw"></i> Clear History</a>
+            </li>
           </ul>
         </section>
-
         <section id="footer">
-          <section id="shortcuts" style="font-weight: bold">
-            <h3>More</h3>
-            <ul>
-              <li>
-                <a class="padding" href="https://aws.amazon.com/blogs"
-                  ><i class="fab fa-aws"></i> AWS Study Group - Blog</a
-                >
-              </li>
-
-              <li>
-                <a
-                  class="padding"
-                  href="https://www.facebook.com/groups/awsstudygroupfcj"
-                  ><i class="fab fa-facebook"></i> AWS Study Group - FB Group</a
-                >
-              </li>
-            </ul>
-          </section>
-          <section id="prefooter">
-            <hr />
-            <ul>
-              <li>
-                <a class="padding">
-                  <i class="fas fa-language fa-fw"></i>
-                  <div class="select-style">
-                    <select id="select-language" onchange="changeLanguage()">
-                      <option value="en">English</option>
-
-                      <option value="vi" selected>Tiếng Việt</option>
-                    </select>
-                    <svg
-                      version="1.1"
-                      id="Capa_1"
-                      xmlns="http://www.w3.org/2000/svg"
-                      xmlns:xlink="http://www.w3.org/1999/xlink"
-                      x="0px"
-                      y="0px"
-                      width="255px"
-                      height="255px"
-                      viewBox="0 0 255 255"
-                      style="enable-background: new 0 0 255 255"
-                      xml:space="preserve"
-                    >
-                      <g>
-                        <g id="arrow-drop-down">
-                          <polygon points="0,63.75 127.5,191.25 255,63.75" />
-                        </g>
-                      </g>
-                    </svg>
-                  </div>
-                </a>
-              </li>
-              <li>
-                <a class="padding" href="#" data-clear-history-toggle=""
-                  ><i class="fas fa-history fa-fw"></i> Clear History</a
-                >
-              </li>
-            </ul>
-          </section>
-          <section id="footer">
-            <left>
-              <b>Workshop</b><br />
-              <img
-                src="https://hitwebcounter.com/counter/counter.php?page=7831196&style=0038&nbdigits=9&type=page&initCount=0"
-                title="Migrate"
-                alt="web counter"
-                border="0"
-              /><br />
-              <b
-                ><a href="https://cloudjourney.awsstudygroup.com/"
-                  >Cloud Journey</a
-                ></b
-              ><br />
-              <img
-                src="https://hitwebcounter.com/counter/counter.php?page=7830807&style=0038&nbdigits=9&type=page&initCount=0"
-                title="Total CLoud Journey"
-                alt="web counter"
-                border="0"
-              />
-            </left>
-            <left>
-              <br /><br />
-              <b>Last Updated</b><br />
-              <i><font color="orange">27-7-2025</font></i>
-            </left>
-            <left>
-              <br /><br />
-              <b>Team</b><br />
-              <i
-                ><br /><a
-                  href="https://www.linkedin.com/in/jotaguy"
-                  style="color: orange"
-                  >Gia Hưng</a
-                ><br
-              /></i>
-            </left>
-            <script
-              async
-              defer
-              src="https://buttons.github.io/buttons.js"
-            ></script>
-          </section>
+          <left>
+            <b>Workshop</b><br />
+            <img src="https://hitwebcounter.com/counter/counter.php?page=7831196&style=0038&nbdigits=9&type=page&initCount=0" title="Migrate" alt="web counter" border="0" /><br />
+            <b><a href="https://cloudjourney.awsstudygroup.com/">Cloud Journey</a></b><br />
+            <img src="https://hitwebcounter.com/counter/counter.php?page=7830807&style=0038&nbdigits=9&type=page&initCount=0" title="Total CLoud Journey" alt="web counter" border="0" />
+          </left>
+          <left>
+            <br /><br />
+            <b>Last Updated</b><br />
+            <i><font color="orange">27-7-2025</font></i>
+          </left>
+          <left>
+            <br /><br />
+            <b>Team</b><br />
+            <i><br /><a href="https://www.linkedin.com/in/jotaguy" style="color: orange">Gia Hưng</a><br /></i>
+          </left>
+          <script async defer src="https://buttons.github.io/buttons.js"></script>
         </section>
-      </div>
-    </nav>
 
-    <section id="body">
-      <div id="overlay"></div>
-      <div class="padding highlightable">
-        <div>
-          <div id="top-bar">
-            <div
-              id="breadcrumbs"
-              itemscope=""
-              itemtype="http://data-vocabulary.org/Breadcrumb"
-            >
-              <span id="sidebar-toggle-span">
-                <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
-                  <i class="fas fa-bars"></i>
-                </a>
-              </span>
+    </section>
+  </div>
+</nav>
 
-              <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
 
-              <span class="links">
-                <a href="/vi/"
-                  >Workshop Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</a
-                >
-                >
-                <a href="/vi/5-setup-application/">5. Thiết Lập Application</a>
-                > 5.1 Khởi Chạy EC2 Instance
-              </span>
-            </div>
 
-            <div class="progress">
-              <div class="wrapper">
-                <nav id="TableOfContents">
-                  <ul>
-                    <li>
-                      <a href="#bước-1-điều-hướng-đến-ec2-console"
-                        >Bước 1: Điều Hướng Đến EC2 Console</a
-                      >
-                    </li>
-                    <li>
-                      <a href="#bước-2-cấu-hình-instance-details"
-                        >Bước 2: Cấu Hình Instance Details</a
-                      >
-                      <ul>
-                        <li><a href="#cấu-hình-cơ-bản">Cấu Hình Cơ Bản</a></li>
-                        <li><a href="#instance-type">Instance Type</a></li>
-                        <li><a href="#key-pair">Key Pair</a></li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-3-cấu-hình-network-settings"
-                        >Bước 3: Cấu Hình Network Settings</a
-                      >
-                      <ul>
-                        <li><a href="#vpc-và-subnet">VPC và Subnet</a></li>
-                        <li><a href="#security-group">Security Group</a></li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-4-cấu-hình-storage"
-                        >Bước 4: Cấu Hình Storage</a
-                      >
-                    </li>
-                    <li>
-                      <a href="#bước-5-thêm-user-data-script"
-                        >Bước 5: Thêm User Data Script</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#advanced-details">Advanced Details</a>
-                        </li>
-                        <li>
-                          <a href="#user-data-script">User Data Script</a>
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-6-tạo-iam-role-cho-ec2"
-                        >Bước 6: Tạo IAM Role cho EC2</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#điều-hướng-đến-iam-console"
-                            >Điều Hướng Đến IAM Console</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#cấu-hình-trusted-entity"
-                            >Cấu Hình Trusted Entity</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#attach-permissions">Attach Permissions</a>
-                        </li>
-                        <li>
-                          <a href="#name-và-create-role">Name và Create Role</a>
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-7-attach-iam-role-đến-instance"
-                        >Bước 7: Attach IAM Role Đến Instance</a
-                      >
-                      <ul>
-                        <li><a href="#modify-iam-role">Modify IAM Role</a></li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-8-review-và-launch"
-                        >Bước 8: Review và Launch</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#review-configuration"
-                            >Review Configuration</a
-                          >
-                        </li>
-                        <li><a href="#launch-instance">Launch Instance</a></li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-9-giám-sát-instance-launch"
-                        >Bước 9: Giám Sát Instance Launch</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#kiểm-tra-instance-status"
-                            >Kiểm Tra Instance Status</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#xem-instance-details"
-                            >Xem Instance Details</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-10-kết-nối-đến-instance"
-                        >Bước 10: Kết Nối Đến Instance</a
-                      >
-                      <ul>
-                        <li><a href="#ssh-connection">SSH Connection</a></li>
-                        <li>
-                          <a href="#xác-minh-installation"
-                            >Xác Minh Installation</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#kiểm-tra-user-data-logs"
-                            >Kiểm Tra User Data Logs</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-11-cấu-hình-aws-cli-tùy-chọn"
-                        >Bước 11: Cấu Hình AWS CLI (Tùy chọn)</a
-                      >
-                      <ul>
-                        <li><a href="#cài-đặt-aws-cli">Cài Đặt AWS CLI</a></li>
-                        <li>
-                          <a href="#test-aws-permissions"
-                            >Test AWS Permissions</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#bước-12-ghi-lại-instance-information"
-                        >Bước 12: Ghi Lại Instance Information</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#ec2-instance-information"
-                            >EC2 Instance Information</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#network-configuration"
-                            >Network Configuration</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#khắc-phục-các-vấn-đề-thường-gặp"
-                        >Khắc Phục Các Vấn Đề Thường Gặp</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#vấn-đề-không-thể-ssh-đến-instance"
-                            >Vấn Đề: Không Thể SSH Đến Instance</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#vấn-đề-user-data-script-thất-bại"
-                            >Vấn Đề: User Data Script Thất Bại</a
-                          >
-                        </li>
-                        <li>
-                          <a href="#vấn-đề-aws-cli-commands-thất-bại"
-                            >Vấn Đề: AWS CLI Commands Thất Bại</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#security-best-practices"
-                        >Security Best Practices</a
-                      >
-                      <ul>
-                        <li>
-                          <a href="#instance-security">Instance Security</a>
-                        </li>
-                        <li>
-                          <a href="#network-security">Network Security</a>
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#các-bước-tiếp-theo">Các Bước Tiếp Theo</a>
-                      <ul>
-                        <li>
-                          <a href="#instance-capabilities"
-                            >Instance Capabilities:</a
-                          >
-                        </li>
-                      </ul>
-                    </li>
-                  </ul>
-                </nav>
+
+        <section id="body">
+        <div id="overlay"></div>
+        <div class="padding highlightable">
+              
+              <div>
+                <div id="top-bar">
+                
+                
+                <div id="breadcrumbs" itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb">
+                    <span id="sidebar-toggle-span">
+                        <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+                          <i class="fas fa-bars"></i>
+                        </a>
+                    </span>
+                  
+                  <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
+                  
+                  <span class="links">
+                 
+                 
+                    
+          
+          
+            
+            
+          
+          
+            
+            
+          
+          
+            <a href='/vi/'>Workshop Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</a> > <a href='/vi/5-setup-application/'>5. Thiết Lập Application</a> > 5.1 Khởi Chạy EC2 Instance
+          
+        
+          
+        
+          
+        
+                 
+                  </span>
+                </div>
+                
+                    <div class="progress">
+    <div class="wrapper">
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#bước-1-điều-hướng-đến-ec2-console">Bước 1: Điều Hướng Đến EC2 Console</a></li>
+    <li><a href="#bước-2-cấu-hình-instance-details">Bước 2: Cấu Hình Instance Details</a>
+      <ul>
+        <li><a href="#cấu-hình-cơ-bản">Cấu Hình Cơ Bản</a></li>
+        <li><a href="#instance-type">Instance Type</a></li>
+        <li><a href="#key-pair">Key Pair</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-3-cấu-hình-network-settings">Bước 3: Cấu Hình Network Settings</a>
+      <ul>
+        <li><a href="#vpc-và-subnet">VPC và Subnet</a></li>
+        <li><a href="#security-group">Security Group</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-4-cấu-hình-storage">Bước 4: Cấu Hình Storage</a></li>
+    <li><a href="#bước-5-thêm-user-data-script">Bước 5: Thêm User Data Script</a>
+      <ul>
+        <li><a href="#advanced-details">Advanced Details</a></li>
+        <li><a href="#user-data-script">User Data Script</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-6-tạo-iam-role-cho-ec2">Bước 6: Tạo IAM Role cho EC2</a>
+      <ul>
+        <li><a href="#điều-hướng-đến-iam-console">Điều Hướng Đến IAM Console</a></li>
+        <li><a href="#cấu-hình-trusted-entity">Cấu Hình Trusted Entity</a></li>
+        <li><a href="#attach-permissions">Attach Permissions</a></li>
+        <li><a href="#name-và-create-role">Name và Create Role</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-7-attach-iam-role-đến-instance">Bước 7: Attach IAM Role Đến Instance</a>
+      <ul>
+        <li><a href="#modify-iam-role">Modify IAM Role</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-8-review-và-launch">Bước 8: Review và Launch</a>
+      <ul>
+        <li><a href="#review-configuration">Review Configuration</a></li>
+        <li><a href="#launch-instance">Launch Instance</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-9-giám-sát-instance-launch">Bước 9: Giám Sát Instance Launch</a>
+      <ul>
+        <li><a href="#kiểm-tra-instance-status">Kiểm Tra Instance Status</a></li>
+        <li><a href="#xem-instance-details">Xem Instance Details</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-10-kết-nối-đến-instance">Bước 10: Kết Nối Đến Instance</a>
+      <ul>
+        <li><a href="#ssh-connection">SSH Connection</a></li>
+        <li><a href="#xác-minh-installation">Xác Minh Installation</a></li>
+        <li><a href="#kiểm-tra-user-data-logs">Kiểm Tra User Data Logs</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-11-cấu-hình-aws-cli-tùy-chọn">Bước 11: Cấu Hình AWS CLI (Tùy chọn)</a>
+      <ul>
+        <li><a href="#cài-đặt-aws-cli">Cài Đặt AWS CLI</a></li>
+        <li><a href="#test-aws-permissions">Test AWS Permissions</a></li>
+      </ul>
+    </li>
+    <li><a href="#bước-12-ghi-lại-instance-information">Bước 12: Ghi Lại Instance Information</a>
+      <ul>
+        <li><a href="#ec2-instance-information">EC2 Instance Information</a></li>
+        <li><a href="#network-configuration">Network Configuration</a></li>
+      </ul>
+    </li>
+    <li><a href="#khắc-phục-các-vấn-đề-thường-gặp">Khắc Phục Các Vấn Đề Thường Gặp</a>
+      <ul>
+        <li><a href="#vấn-đề-không-thể-ssh-đến-instance">Vấn Đề: Không Thể SSH Đến Instance</a></li>
+        <li><a href="#vấn-đề-user-data-script-thất-bại">Vấn Đề: User Data Script Thất Bại</a></li>
+        <li><a href="#vấn-đề-aws-cli-commands-thất-bại">Vấn Đề: AWS CLI Commands Thất Bại</a></li>
+      </ul>
+    </li>
+    <li><a href="#security-best-practices">Security Best Practices</a>
+      <ul>
+        <li><a href="#instance-security">Instance Security</a></li>
+        <li><a href="#network-security">Network Security</a></li>
+      </ul>
+    </li>
+    <li><a href="#các-bước-tiếp-theo">Các Bước Tiếp Theo</a>
+      <ul>
+        <li><a href="#instance-capabilities">Instance Capabilities:</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+
+                
               </div>
             </div>
-          </div>
+            
+        <div id="head-tags">
+        
         </div>
-
-        <div id="head-tags"></div>
-
+        
         <div id="body-inner">
-          <h1>Khởi Chạy EC2 Instance</h1>
+          
+            <h1>
+              
+              
+                Khởi Chạy EC2 Instance
+              
+            </h1>
+          
 
-          <p>
-            Trong bước này, chúng ta sẽ khởi chạy một EC2 instance để host ứng
-            dụng Node.js của chúng ta. Instance này sẽ được cấu hình với
-            software và permissions cần thiết để tương tác với các caching
-            layers của chúng ta.
-          </p>
-          <h2 id="bước-1-điều-hướng-đến-ec2-console">
-            Bước 1: Điều Hướng Đến EC2 Console
-          </h2>
-          <ol>
-            <li>Mở <strong>AWS Management Console</strong></li>
-            <li>Điều hướng đến <strong>EC2 service</strong></li>
-          </ol>
-          <p><img src="../../../images/ec2-console.png" alt="EC2 Console" /></p>
-          <ol start="3">
-            <li>Nhấp <strong>Launch Instance</strong></li>
-          </ol>
-          <p>
-            <img
-              src="../../../images/launch-instance-button.png"
-              alt="Launch Instance"
-            />
-          </p>
-          <h2 id="bước-2-cấu-hình-instance-details">
-            Bước 2: Cấu Hình Instance Details
-          </h2>
-          <h3 id="cấu-hình-cơ-bản">Cấu Hình Cơ Bản</h3>
-          <ol>
-            <li>
-              <p>Cấu hình basic instance settings:</p>
-              <ul>
-                <li><strong>Name</strong>: <code>caching-app-server</code></li>
-                <li>
-                  <strong>Application and OS Images</strong>: Amazon Linux 2023
-                  AMI
-                </li>
-                <li><strong>Architecture</strong>: 64-bit (x86)</li>
-              </ul>
-            </li>
-          </ol>
-          <p>
-            <img
-              src="../../../images/instance-basic-config.png"
-              alt="Instance Basic Configuration"
-            />
-            <img
-              src="../../../images/instance-basic-config-1.png"
-              alt="Instance Basic Configuration"
-            />
-          </p>
-          <h3 id="instance-type">Instance Type</h3>
-          <ol start="2">
-            <li>
-              <p>Chọn instance type:</p>
-              <ul>
-                <li><strong>Instance type</strong>: <code>t3.micro</code></li>
-                <li><strong>vCPUs</strong>: 2</li>
-                <li><strong>Memory</strong>: 1 GiB</li>
-              </ul>
-            </li>
-          </ol>
-          <p>
-            <img
-              src="../../../images/instance-type-selection.png"
-              alt="Instance Type Selection"
-            />
-          </p>
+        
 
-          <div class="notices info">
-            <p>
-              t3.micro đủ cho workshop này. Trong production, chọn instance
-              types dựa trên CPU và memory requirements của ứng dụng.
-            </p>
-          </div>
 
-          <h3 id="key-pair">Key Pair</h3>
-          <ol start="3">
-            <li>
-              <p>Cấu hình key pair cho SSH access:</p>
-              <ul>
-                <li><strong>Key pair</strong>: Tạo mới hoặc chọn existing</li>
-                <li>
-                  Nếu tạo mới: <strong>Key pair name</strong>:
-                  <code>caching-workshop-key</code>
-                </li>
-              </ul>
-            </li>
-          </ol>
-          <p>
-            <img
-              src="../../../images/key-pair-config.png"
-              alt="Key Pair Configuration"
-            />
-          </p>
 
-          <div class="notices tip">
-            <p>
-              Download và lưu trữ an toàn private key file của bạn. Bạn sẽ cần
-              nó để SSH vào instance.
-            </p>
-          </div>
+	<p>Trong bước này, chúng ta sẽ khởi chạy một EC2 instance để host ứng dụng Node.js của chúng ta. Instance này sẽ được cấu hình với software và permissions cần thiết để tương tác với các caching layers của chúng ta.</p>
+<h2 id="bước-1-điều-hướng-đến-ec2-console">Bước 1: Điều Hướng Đến EC2 Console</h2>
+<ol>
+<li>Mở <strong>AWS Management Console</strong></li>
+<li>Điều hướng đến <strong>EC2 service</strong></li>
+</ol>
+<p><img src="../../../images/ec2-console.png" alt="EC2 Console"></p>
+<ol start="3">
+<li>Nhấp <strong>Launch Instance</strong></li>
+</ol>
+<p><img src="../../../images/launch-instance-button.png" alt="Launch Instance"></p>
+<h2 id="bước-2-cấu-hình-instance-details">Bước 2: Cấu Hình Instance Details</h2>
+<h3 id="cấu-hình-cơ-bản">Cấu Hình Cơ Bản</h3>
+<ol>
+<li>
+<p>Cấu hình basic instance settings:</p>
+<ul>
+<li><strong>Name</strong>: <code>caching-app-server</code></li>
+<li><strong>Application and OS Images</strong>: Amazon Linux 2023 AMI</li>
+<li><strong>Architecture</strong>: 64-bit (x86)</li>
+</ul>
+</li>
+</ol>
+<p><img src="../../../images/instance-basic-config.png" alt="Instance Basic Configuration">
+<img src="../../../images/instance-basic-config-1.png" alt="Instance Basic Configuration"></p>
+<h3 id="instance-type">Instance Type</h3>
+<ol start="2">
+<li>
+<p>Chọn instance type:</p>
+<ul>
+<li><strong>Instance type</strong>: <code>t3.micro</code></li>
+<li><strong>vCPUs</strong>: 2</li>
+<li><strong>Memory</strong>: 1 GiB</li>
+</ul>
+</li>
+</ol>
+<p><img src="../../../images/instance-type-selection.png" alt="Instance Type Selection"></p>
 
-          <h2 id="bước-3-cấu-hình-network-settings">
-            Bước 3: Cấu Hình Network Settings
-          </h2>
-          <h3 id="vpc-và-subnet">VPC và Subnet</h3>
-          <ol>
-            <li>
-              <p>Cấu hình network settings:</p>
-              <ul>
-                <li>
-                  <strong>VPC</strong>: Chọn
-                  <code>caching-workshop-vpc</code> của bạn
-                </li>
-                <li>
-                  <strong>Subnet</strong>: Chọn
-                  <strong>public subnet</strong> (cho internet access)
-                </li>
-                <li><strong>Auto-assign public IP</strong>: Enable</li>
-              </ul>
-            </li>
-          </ol>
-          <p>
-            <img
-              src="../../../images/network-configuration.png"
-              alt="Network Configuration"
-            />
-          </p>
-          <h3 id="security-group">Security Group</h3>
-          <ol start="2">
-            <li>
-              <p>Cấu hình security group:</p>
-              <ul>
-                <li>
-                  <strong>Security group</strong>: Chọn existing
-                  <code>app-sg</code>
-                </li>
-                <li>
-                  Xác minh nó cho phép HTTP (80), custom TCP (3000), và SSH (22)
-                </li>
-              </ul>
-            </li>
-          </ol>
-          <h2 id="bước-4-cấu-hình-storage">Bước 4: Cấu Hình Storage</h2>
-          <ol>
-            <li>
-              <p>Cấu hình storage settings:</p>
-              <ul>
-                <li><strong>Size</strong>: 8 GiB (default)</li>
-                <li><strong>Volume type</strong>: gp3</li>
-                <li><strong>IOPS</strong>: 3000</li>
-                <li><strong>Throughput</strong>: 125 MB/s</li>
-              </ul>
-            </li>
-          </ol>
-          <h2 id="bước-5-thêm-user-data-script">
-            Bước 5: Thêm User Data Script
-          </h2>
-          <h3 id="advanced-details">Advanced Details</h3>
-          <ol>
-            <li>Mở rộng phần <strong>Advanced details</strong></li>
-          </ol>
-          <h3 id="user-data-script">User Data Script</h3>
-          <ol start="2">
-            <li>
-              Thêm user data script sau để tự động cài đặt Node.js và
-              dependencies:
-            </li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
+<div class="notices info" ><p>t3.micro đủ cho workshop này. Trong production, chọn instance types dựa trên CPU và memory requirements của ứng dụng.</p>
+</div>
+
+<h3 id="key-pair">Key Pair</h3>
+<ol start="3">
+<li>
+<p>Cấu hình key pair cho SSH access:</p>
+<ul>
+<li><strong>Key pair</strong>: Tạo mới hoặc chọn existing</li>
+<li>Nếu tạo mới: <strong>Key pair name</strong>: <code>caching-workshop-key</code></li>
+</ul>
+</li>
+</ol>
+<p><img src="../../../images/key-pair-config.png" alt="Key Pair Configuration"></p>
+
+<div class="notices tip" ><p>Download và lưu trữ an toàn private key file của bạn. Bạn sẽ cần nó để SSH vào instance.</p>
+</div>
+
+<h2 id="bước-3-cấu-hình-network-settings">Bước 3: Cấu Hình Network Settings</h2>
+<h3 id="vpc-và-subnet">VPC và Subnet</h3>
+<ol>
+<li>
+<p>Cấu hình network settings:</p>
+<ul>
+<li><strong>VPC</strong>: Chọn <code>caching-workshop-vpc</code> của bạn</li>
+<li><strong>Subnet</strong>: Chọn <strong>public subnet</strong> (cho internet access)</li>
+<li><strong>Auto-assign public IP</strong>: Enable</li>
+</ul>
+</li>
+</ol>
+<p><img src="../../../images/network-configuration.png" alt="Network Configuration"></p>
+<h3 id="security-group">Security Group</h3>
+<ol start="2">
+<li>
+<p>Cấu hình security group:</p>
+<ul>
+<li><strong>Security group</strong>: Chọn existing <code>app-sg</code></li>
+<li>Xác minh nó cho phép HTTP (80), custom TCP (3000), và SSH (22)</li>
+</ul>
+</li>
+</ol>
+<h2 id="bước-4-cấu-hình-storage">Bước 4: Cấu Hình Storage</h2>
+<ol>
+<li>
+<p>Cấu hình storage settings:</p>
+<ul>
+<li><strong>Size</strong>: 8 GiB (default)</li>
+<li><strong>Volume type</strong>: gp3</li>
+<li><strong>IOPS</strong>: 3000</li>
+<li><strong>Throughput</strong>: 125 MB/s</li>
+</ul>
+</li>
+</ol>
+<h2 id="bước-5-thêm-user-data-script">Bước 5: Thêm User Data Script</h2>
+<h3 id="advanced-details">Advanced Details</h3>
+<ol>
+<li>Mở rộng phần <strong>Advanced details</strong></li>
+</ol>
+<h3 id="user-data-script">User Data Script</h3>
+<ol start="2">
+<li>Thêm user data script sau để tự động cài đặt Node.js và dependencies:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Update system</span>
 </span></span><span style="display:flex;"><span>yum update -y
@@ -896,235 +1025,142 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Log completion</span>
 </span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;User data script completed at </span><span style="color:#66d9ef">$(</span>date<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> &gt;&gt; /var/log/user-data.log
-</span></span></code></pre>
-          </div>
-          <p>
-            <img
-              src="../../../images/user-data-script.png"
-              alt="User Data Script"
-            />
-          </p>
+</span></span></code></pre></div><p><img src="../../../images/user-data-script.png" alt="User Data Script"></p>
 
-          <div class="notices info">
-            <p>
-              User data script chạy tự động khi instance boot lần đầu. Nó cài
-              đặt Node.js, PM2, và các tools cần thiết khác.
-            </p>
-          </div>
+<div class="notices info" ><p>User data script chạy tự động khi instance boot lần đầu. Nó cài đặt Node.js, PM2, và các tools cần thiết khác.</p>
+</div>
 
-          <h2 id="bước-6-tạo-iam-role-cho-ec2">Bước 6: Tạo IAM Role cho EC2</h2>
-          <h3 id="điều-hướng-đến-iam-console">Điều Hướng Đến IAM Console</h3>
-          <ol>
-            <li>Mở <strong>IAM Console</strong> trong tab mới</li>
-            <li>Nhấp <strong>Roles</strong> → <strong>Create role</strong></li>
-          </ol>
-          <h3 id="cấu-hình-trusted-entity">Cấu Hình Trusted Entity</h3>
-          <ol start="3">
-            <li>
-              Chọn trusted entity:
-              <ul>
-                <li><strong>Trusted entity type</strong>: AWS service</li>
-                <li><strong>Service</strong>: EC2</li>
-              </ul>
-            </li>
-          </ol>
-          <p>
-            <img
-              src="../../../images/ec2-trusted-entity.png"
-              alt="EC2 Trusted Entity"
-            />
-          </p>
-          <ol start="4">
-            <li>Nhấp <strong>Next</strong></li>
-          </ol>
-          <h3 id="attach-permissions">Attach Permissions</h3>
-          <ol start="5">
-            <li>
-              <p>Tìm kiếm và attach các policies sau:</p>
-              <ul>
-                <li><strong>AmazonDynamoDBFullAccess</strong></li>
-                <li><strong>AmazonElastiCacheFullAccess</strong></li>
-                <li><strong>CloudWatchAgentServerPolicy</strong></li>
-              </ul>
-            </li>
-          </ol>
+<h2 id="bước-6-tạo-iam-role-cho-ec2">Bước 6: Tạo IAM Role cho EC2</h2>
+<h3 id="điều-hướng-đến-iam-console">Điều Hướng Đến IAM Console</h3>
+<ol>
+<li>Mở <strong>IAM Console</strong> trong tab mới</li>
+<li>Nhấp <strong>Roles</strong> → <strong>Create role</strong></li>
+</ol>
+<h3 id="cấu-hình-trusted-entity">Cấu Hình Trusted Entity</h3>
+<ol start="3">
+<li>Chọn trusted entity:
+<ul>
+<li><strong>Trusted entity type</strong>: AWS service</li>
+<li><strong>Service</strong>: EC2</li>
+</ul>
+</li>
+</ol>
+<p><img src="../../../images/ec2-trusted-entity.png" alt="EC2 Trusted Entity"></p>
+<ol start="4">
+<li>Nhấp <strong>Next</strong></li>
+</ol>
+<h3 id="attach-permissions">Attach Permissions</h3>
+<ol start="5">
+<li>
+<p>Tìm kiếm và attach các policies sau:</p>
+<ul>
+<li><strong>AmazonDynamoDBFullAccess</strong></li>
+<li><strong>AmazonElastiCacheFullAccess</strong></li>
+<li><strong>CloudWatchAgentServerPolicy</strong></li>
+</ul>
+</li>
+</ol>
 
-          <div class="notices warning">
-            <p>
-              Trong production, sử dụng các policies hạn chế hơn theo nguyên tắc
-              least privilege. Tạo custom policies chỉ cho phép truy cập đến
-              specific resources.
-            </p>
-          </div>
+<div class="notices warning" ><p>Trong production, sử dụng các policies hạn chế hơn theo nguyên tắc least privilege. Tạo custom policies chỉ cho phép truy cập đến specific resources.</p>
+</div>
 
-          <ol>
-            <li>Nhấp <strong>Next</strong></li>
-          </ol>
-          <h3 id="name-và-create-role">Name và Create Role</h3>
-          <ol start="7">
-            <li>
-              Cấu hình role details:
-              <ul>
-                <li><strong>Role name</strong>: <code>CachingAppRole</code></li>
-                <li>
-                  <strong>Description</strong>:
-                  <code>IAM role for caching application server</code>
-                </li>
-              </ul>
-            </li>
-          </ol>
-          <p>
-            <img src="../../../images/iam-role-name.png" alt="IAM Role Name" />
-          </p>
-          <ol start="8">
-            <li>Nhấp <strong>Create role</strong></li>
-          </ol>
-          <p>
-            <img
-              src="../../../images/iam-role-created.png"
-              alt="IAM Role Created"
-            />
-          </p>
-          <h2 id="bước-7-attach-iam-role-đến-instance">
-            Bước 7: Attach IAM Role Đến Instance
-          </h2>
-          <h3 id="modify-iam-role">Modify IAM Role</h3>
-          <ol>
-            <li>Quay lại EC2 launch configuration</li>
-            <li>
-              Trong <strong>Advanced details</strong>, tìm
-              <strong>IAM instance profile</strong>
-            </li>
-            <li>Chọn <code>CachingAppRole</code></li>
-          </ol>
-          <p>
-            <img
-              src="../../../images/iam-instance-profile.png"
-              alt="IAM Instance Profile"
-            />
-          </p>
+<ol>
+<li>Nhấp <strong>Next</strong></li>
+</ol>
+<h3 id="name-và-create-role">Name và Create Role</h3>
+<ol start="7">
+<li>Cấu hình role details:
+<ul>
+<li><strong>Role name</strong>: <code>CachingAppRole</code></li>
+<li><strong>Description</strong>: <code>IAM role for caching application server</code></li>
+</ul>
+</li>
+</ol>
+<p><img src="../../../images/iam-role-name.png" alt="IAM Role Name"></p>
+<ol start="8">
+<li>Nhấp <strong>Create role</strong></li>
+</ol>
+<p><img src="../../../images/iam-role-created.png" alt="IAM Role Created"></p>
+<h2 id="bước-7-attach-iam-role-đến-instance">Bước 7: Attach IAM Role Đến Instance</h2>
+<h3 id="modify-iam-role">Modify IAM Role</h3>
+<ol>
+<li>Quay lại EC2 launch configuration</li>
+<li>Trong <strong>Advanced details</strong>, tìm <strong>IAM instance profile</strong></li>
+<li>Chọn <code>CachingAppRole</code></li>
+</ol>
+<p><img src="../../../images/iam-instance-profile.png" alt="IAM Instance Profile"></p>
 
-          <div class="notices tip">
-            <p>
-              Nếu role không xuất hiện trong dropdown, đợi vài phút để nó
-              propagate, hoặc refresh trang.
-            </p>
-          </div>
+<div class="notices tip" ><p>Nếu role không xuất hiện trong dropdown, đợi vài phút để nó propagate, hoặc refresh trang.</p>
+</div>
 
-          <h2 id="bước-8-review-và-launch">Bước 8: Review và Launch</h2>
-          <h3 id="review-configuration">Review Configuration</h3>
-          <ol>
-            <li>
-              <p>Review tất cả instance settings:</p>
-            </li>
-            <li>
-              <p>Xác minh:</p>
-              <ul>
-                <li>Instance name và AMI</li>
-                <li>Instance type và key pair</li>
-                <li>Network và security configuration</li>
-                <li>Storage settings</li>
-                <li>IAM role attachment</li>
-              </ul>
-            </li>
-          </ol>
-          <h3 id="launch-instance">Launch Instance</h3>
-          <ol start="3">
-            <li>Nhấp <strong>Launch instance</strong></li>
-          </ol>
-          <p>
-            <img
-              src="../../../images/launch-instance-confirmation.png"
-              alt="Launch Instance Confirmation"
-            />
-          </p>
+<h2 id="bước-8-review-và-launch">Bước 8: Review và Launch</h2>
+<h3 id="review-configuration">Review Configuration</h3>
+<ol>
+<li>
+<p>Review tất cả instance settings:</p>
+</li>
+<li>
+<p>Xác minh:</p>
+<ul>
+<li>Instance name và AMI</li>
+<li>Instance type và key pair</li>
+<li>Network và security configuration</li>
+<li>Storage settings</li>
+<li>IAM role attachment</li>
+</ul>
+</li>
+</ol>
+<h3 id="launch-instance">Launch Instance</h3>
+<ol start="3">
+<li>Nhấp <strong>Launch instance</strong></li>
+</ol>
+<p><img src="../../../images/launch-instance-confirmation.png" alt="Launch Instance Confirmation"></p>
 
-          <div class="notices info">
-            <p>
-              Instance launch mất 2-3 phút. User data script sẽ chạy tự động
-              trong first boot, có thể mất thêm 3-5 phút.
-            </p>
-          </div>
+<div class="notices info" ><p>Instance launch mất 2-3 phút. User data script sẽ chạy tự động trong first boot, có thể mất thêm 3-5 phút.</p>
+</div>
 
-          <h2 id="bước-9-giám-sát-instance-launch">
-            Bước 9: Giám Sát Instance Launch
-          </h2>
-          <h3 id="kiểm-tra-instance-status">Kiểm Tra Instance Status</h3>
-          <ol>
-            <li>
-              Điều hướng đến <strong>EC2 Dashboard</strong> →
-              <strong>Instances</strong>
-            </li>
-          </ol>
-          <p>
-            <img
-              src="../../../images/ec2-instances-dashboard.png"
-              alt="EC2 Instances Dashboard"
-            />
-          </p>
-          <ol start="2">
-            <li>
-              Giám sát instance status:
-              <ul>
-                <li><strong>Instance State</strong>: Running</li>
-                <li><strong>Status Checks</strong>: 2/2 checks passed</li>
-              </ul>
-            </li>
-          </ol>
-          <h3 id="xem-instance-details">Xem Instance Details</h3>
-          <ol start="3">
-            <li>
-              <p>Nhấp vào instance để xem details:</p>
-            </li>
-            <li>
-              <p>
-                Ghi lại <strong>Public IPv4 address</strong> và
-                <strong>Private IPv4 address</strong>:
-              </p>
-              <ul>
-                <li><strong>Public IP</strong>: Cho SSH access từ internet</li>
-                <li>
-                  <strong>Private IP</strong>: Cho internal VPC communication
-                </li>
-              </ul>
-            </li>
-          </ol>
-          <h2 id="bước-10-kết-nối-đến-instance">
-            Bước 10: Kết Nối Đến Instance
-          </h2>
+<h2 id="bước-9-giám-sát-instance-launch">Bước 9: Giám Sát Instance Launch</h2>
+<h3 id="kiểm-tra-instance-status">Kiểm Tra Instance Status</h3>
+<ol>
+<li>Điều hướng đến <strong>EC2 Dashboard</strong> → <strong>Instances</strong></li>
+</ol>
+<p><img src="../../../images/ec2-instances-dashboard.png" alt="EC2 Instances Dashboard"></p>
+<ol start="2">
+<li>Giám sát instance status:
+<ul>
+<li><strong>Instance State</strong>: Running</li>
+<li><strong>Status Checks</strong>: 2/2 checks passed</li>
+</ul>
+</li>
+</ol>
+<h3 id="xem-instance-details">Xem Instance Details</h3>
+<ol start="3">
+<li>
+<p>Nhấp vào instance để xem details:</p>
+</li>
+<li>
+<p>Ghi lại <strong>Public IPv4 address</strong> và <strong>Private IPv4 address</strong>:</p>
+<ul>
+<li><strong>Public IP</strong>: Cho SSH access từ internet</li>
+<li><strong>Private IP</strong>: Cho internal VPC communication</li>
+</ul>
+</li>
+</ol>
+<h2 id="bước-10-kết-nối-đến-instance">Bước 10: Kết Nối Đến Instance</h2>
 
-          <div class="notices tip">
-            <p>
-              <strong>Cho Windows users</strong>: Cài đặt MobaXterm để SSH
-              access dễ dàng với built-in file transfer và terminal features.
-            </p>
-            <p>
-              Download MobaXterm:
-              <a href="https://mobaxterm.mobatek.net/download-home-edition.html"
-                >MobaXterm Website</a
-              >
-            </p>
-          </div>
+<div class="notices tip" ><p><strong>Cho Windows users</strong>: Cài đặt MobaXterm để SSH access dễ dàng với built-in file transfer và terminal features.</p>
+<p>Download MobaXterm: <a href="https://mobaxterm.mobatek.net/download-home-edition.html">MobaXterm Website</a></p>
+</div>
 
-          <h3 id="ssh-connection">SSH Connection</h3>
-          <ol>
-            <li>Kết nối đến instance của bạn bằng MobaXterm</li>
-          </ol>
-          <h3 id="xác-minh-installation">Xác Minh Installation</h3>
-          <ol>
-            <li>Kiểm tra Node.js và npm đã được cài đặt:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Check Node.js version</span>
+<h3 id="ssh-connection">SSH Connection</h3>
+<ol>
+<li>Kết nối đến instance của bạn bằng MobaXterm</li>
+</ol>
+<h3 id="xác-minh-installation">Xác Minh Installation</h3>
+<ol>
+<li>Kiểm tra Node.js và npm đã được cài đặt:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Check Node.js version</span>
 </span></span><span style="display:flex;"><span>node --version
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Check npm version</span>
@@ -1135,53 +1171,22 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Check if application directory exists</span>
 </span></span><span style="display:flex;"><span>ls -la /home/ec2-user/caching-app
-</span></span></code></pre>
-          </div>
-          <p>
-            <img
-              src="../../../images/software-verification.png"
-              alt="Software Verification"
-            />
-          </p>
-          <h3 id="kiểm-tra-user-data-logs">Kiểm Tra User Data Logs</h3>
-          <ol start="3">
-            <li>Xác minh user data script hoàn thành thành công:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Check user data logs</span>
+</span></span></code></pre></div><p><img src="../../../images/software-verification.png" alt="Software Verification"></p>
+<h3 id="kiểm-tra-user-data-logs">Kiểm Tra User Data Logs</h3>
+<ol start="3">
+<li>Xác minh user data script hoàn thành thành công:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Check user data logs</span>
 </span></span><span style="display:flex;"><span>sudo cat /var/log/user-data.log
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Check cloud-init logs</span>
 </span></span><span style="display:flex;"><span>sudo cat /var/log/cloud-init-output.log
-</span></span></code></pre>
-          </div>
-          <h2 id="bước-11-cấu-hình-aws-cli-tùy-chọn">
-            Bước 11: Cấu Hình AWS CLI (Tùy chọn)
-          </h2>
-          <h3 id="cài-đặt-aws-cli">Cài Đặt AWS CLI</h3>
-          <ol>
-            <li>Cài đặt AWS CLI v2:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Download AWS CLI</span>
+</span></span></code></pre></div><h2 id="bước-11-cấu-hình-aws-cli-tùy-chọn">Bước 11: Cấu Hình AWS CLI (Tùy chọn)</h2>
+<h3 id="cài-đặt-aws-cli">Cài Đặt AWS CLI</h3>
+<ol>
+<li>Cài đặt AWS CLI v2:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Download AWS CLI</span>
 </span></span><span style="display:flex;"><span>curl <span style="color:#e6db74">&#34;https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip&#34;</span> -o <span style="color:#e6db74">&#34;awscliv2.zip&#34;</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Install unzip if not available</span>
@@ -1193,37 +1198,14 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Verify installation</span>
 </span></span><span style="display:flex;"><span>aws --version
-</span></span></code></pre>
-          </div>
-          <p>
-            <img
-              src="../../../images/aws-cli-installation.png"
-              alt="AWS CLI Installation"
-            />
-            <img
-              src="../../../images/aws-cli-installation-1.png"
-              alt="AWS CLI Installation"
-            />
-            <img
-              src="../../../images/aws-cli-installation-2.png"
-              alt="AWS CLI Installation"
-            />
-          </p>
-          <h3 id="test-aws-permissions">Test AWS Permissions</h3>
-          <ol start="2">
-            <li>Test IAM role đang hoạt động:</li>
-          </ol>
-          <div class="highlight">
-            <pre
-              tabindex="0"
-              style="
-                color: #f8f8f2;
-                background-color: #272822;
-                -moz-tab-size: 4;
-                -o-tab-size: 4;
-                tab-size: 4;
-              "
-            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test DynamoDB access</span>
+</span></span></code></pre></div><p><img src="../../../images/aws-cli-installation.png" alt="AWS CLI Installation">
+<img src="../../../images/aws-cli-installation-1.png" alt="AWS CLI Installation">
+<img src="../../../images/aws-cli-installation-2.png" alt="AWS CLI Installation"></p>
+<h3 id="test-aws-permissions">Test AWS Permissions</h3>
+<ol start="2">
+<li>Test IAM role đang hoạt động:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test DynamoDB access</span>
 </span></span><span style="display:flex;"><span>aws dynamodb list-tables
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Test ElastiCache access</span>
@@ -1231,228 +1213,479 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Check current identity</span>
 </span></span><span style="display:flex;"><span>aws sts get-caller-identity
-</span></span></code></pre>
-          </div>
-          <h2 id="bước-12-ghi-lại-instance-information">
-            Bước 12: Ghi Lại Instance Information
-          </h2>
-          <p>Ghi lại thông tin sau cho application configuration:</p>
-          <h3 id="ec2-instance-information">EC2 Instance Information</h3>
-          <ul>
-            <li>
-              <strong>Instance ID</strong>: <code>i-xxxxxxxxxxxxxxxxx</code>
-            </li>
-            <li><strong>Instance Type</strong>: <code>t3.micro</code></li>
-            <li><strong>Public IP</strong>: <code>xx.xx.xx.xx</code></li>
-            <li><strong>Private IP</strong>: <code>10.0.x.x</code></li>
-            <li><strong>Security Group</strong>: <code>app-sg</code></li>
-            <li><strong>IAM Role</strong>: <code>CachingAppRole</code></li>
-          </ul>
-          <h3 id="network-configuration">Network Configuration</h3>
-          <ul>
-            <li><strong>VPC</strong>: <code>caching-workshop-vpc</code></li>
-            <li><strong>Subnet</strong>: Public subnet</li>
-            <li>
-              <strong>Availability Zone</strong>: <code>us-east-1a</code> (hoặc
-              AZ đã chọn của bạn)
-            </li>
-          </ul>
-          <h2 id="khắc-phục-các-vấn-đề-thường-gặp">
-            Khắc Phục Các Vấn Đề Thường Gặp
-          </h2>
-          <h3 id="vấn-đề-không-thể-ssh-đến-instance">
-            Vấn Đề: Không Thể SSH Đến Instance
-          </h3>
-          <p><strong>Nguyên Nhân Có Thể:</strong></p>
-          <ul>
-            <li>Security group không cho phép SSH</li>
-            <li>Wrong key pair hoặc permissions</li>
-            <li>Instance không ở public subnet</li>
-          </ul>
-          <p><strong>Giải Pháp:</strong></p>
-          <ul>
-            <li>
-              Xác minh security group cho phép SSH (port 22) từ IP của bạn
-            </li>
-            <li>
-              Kiểm tra key pair permissions: <code>chmod 400 your-key.pem</code>
-            </li>
-            <li>Đảm bảo instance ở public subnet với public IP</li>
-          </ul>
-          <h3 id="vấn-đề-user-data-script-thất-bại">
-            Vấn Đề: User Data Script Thất Bại
-          </h3>
-          <p><strong>Nguyên Nhân Có Thể:</strong></p>
-          <ul>
-            <li>Network connectivity issues</li>
-            <li>Package installation failures</li>
-            <li>Insufficient permissions</li>
-          </ul>
-          <p><strong>Giải Pháp:</strong></p>
-          <ul>
-            <li>
-              Kiểm tra <code>/var/log/cloud-init-output.log</code> cho errors
-            </li>
-            <li>Manually chạy installation commands</li>
-            <li>Xác minh internet connectivity từ instance</li>
-          </ul>
-          <h3 id="vấn-đề-aws-cli-commands-thất-bại">
-            Vấn Đề: AWS CLI Commands Thất Bại
-          </h3>
-          <p><strong>Nguyên Nhân Có Thể:</strong></p>
-          <ul>
-            <li>IAM role không attached</li>
-            <li>Insufficient permissions</li>
-            <li>Region configuration issues</li>
-          </ul>
-          <p><strong>Giải Pháp:</strong></p>
-          <ul>
-            <li>Xác minh IAM role được attached đến instance</li>
-            <li>Kiểm tra IAM role có required policies</li>
-            <li>
-              Set AWS region: <code>aws configure set region us-east-1</code>
-            </li>
-          </ul>
-          <h2 id="security-best-practices">Security Best Practices</h2>
-          <h3 id="instance-security">Instance Security</h3>
-          <ul>
-            <li>
-              <strong>SSH Key Management</strong>: Secure private key storage
-            </li>
-            <li>
-              <strong>Security Groups</strong>: Least-privilege access rules
-            </li>
-            <li>
-              <strong>IAM Roles</strong>: Service-specific permissions only
-            </li>
-            <li><strong>System Updates</strong>: Regular security patches</li>
-          </ul>
-          <h3 id="network-security">Network Security</h3>
-          <ul>
-            <li>
-              <strong>Public Subnet</strong>: Chỉ cho instances cần internet
-              access
-            </li>
-            <li>
-              <strong>Private Communication</strong>: Sử dụng private IPs cho
-              internal traffic
-            </li>
-            <li>
-              <strong>Security Groups</strong>: Hoạt động như virtual firewalls
-            </li>
-          </ul>
-          <h2 id="các-bước-tiếp-theo">Các Bước Tiếp Theo</h2>
-          <p>
-            EC2 instance của bạn giờ đã sẵn sàng cho application deployment! Bạn
-            có:
-          </p>
-          <p>
-            ✅ <strong>EC2 Instance</strong> chạy Amazon Linux 2023<br />
-            ✅ <strong>Node.js và npm</strong> installed và configured<br />
-            ✅ <strong>PM2</strong> cho production process management<br />
-            ✅ <strong>IAM Role</strong> với necessary AWS permissions<br />
-            ✅ <strong>Network Configuration</strong> cho multi-layer caching
-            access<br />
-            ✅ <strong>SSH Access</strong> cho management và deployment
-          </p>
-          <h3 id="instance-capabilities">Instance Capabilities:</h3>
-          <ul>
-            <li>
-              <strong>Node.js Runtime</strong>: Sẵn sàng cho application
-              deployment
-            </li>
-            <li>
-              <strong>AWS SDK Access</strong>: Có thể tương tác với DynamoDB,
-              ElastiCache, và DAX
-            </li>
-            <li>
-              <strong>Process Management</strong>: PM2 cho production-grade
-              application hosting
-            </li>
-            <li>
-              <strong>Monitoring</strong>: CloudWatch agent cho metrics và logs
-            </li>
-          </ul>
+</span></span></code></pre></div><h2 id="bước-12-ghi-lại-instance-information">Bước 12: Ghi Lại Instance Information</h2>
+<p>Ghi lại thông tin sau cho application configuration:</p>
+<h3 id="ec2-instance-information">EC2 Instance Information</h3>
+<ul>
+<li><strong>Instance ID</strong>: <code>i-xxxxxxxxxxxxxxxxx</code></li>
+<li><strong>Instance Type</strong>: <code>t3.micro</code></li>
+<li><strong>Public IP</strong>: <code>xx.xx.xx.xx</code></li>
+<li><strong>Private IP</strong>: <code>10.0.x.x</code></li>
+<li><strong>Security Group</strong>: <code>app-sg</code></li>
+<li><strong>IAM Role</strong>: <code>CachingAppRole</code></li>
+</ul>
+<h3 id="network-configuration">Network Configuration</h3>
+<ul>
+<li><strong>VPC</strong>: <code>caching-workshop-vpc</code></li>
+<li><strong>Subnet</strong>: Public subnet</li>
+<li><strong>Availability Zone</strong>: <code>us-east-1a</code> (hoặc AZ đã chọn của bạn)</li>
+</ul>
+<h2 id="khắc-phục-các-vấn-đề-thường-gặp">Khắc Phục Các Vấn Đề Thường Gặp</h2>
+<h3 id="vấn-đề-không-thể-ssh-đến-instance">Vấn Đề: Không Thể SSH Đến Instance</h3>
+<p><strong>Nguyên Nhân Có Thể:</strong></p>
+<ul>
+<li>Security group không cho phép SSH</li>
+<li>Wrong key pair hoặc permissions</li>
+<li>Instance không ở public subnet</li>
+</ul>
+<p><strong>Giải Pháp:</strong></p>
+<ul>
+<li>Xác minh security group cho phép SSH (port 22) từ IP của bạn</li>
+<li>Kiểm tra key pair permissions: <code>chmod 400 your-key.pem</code></li>
+<li>Đảm bảo instance ở public subnet với public IP</li>
+</ul>
+<h3 id="vấn-đề-user-data-script-thất-bại">Vấn Đề: User Data Script Thất Bại</h3>
+<p><strong>Nguyên Nhân Có Thể:</strong></p>
+<ul>
+<li>Network connectivity issues</li>
+<li>Package installation failures</li>
+<li>Insufficient permissions</li>
+</ul>
+<p><strong>Giải Pháp:</strong></p>
+<ul>
+<li>Kiểm tra <code>/var/log/cloud-init-output.log</code> cho errors</li>
+<li>Manually chạy installation commands</li>
+<li>Xác minh internet connectivity từ instance</li>
+</ul>
+<h3 id="vấn-đề-aws-cli-commands-thất-bại">Vấn Đề: AWS CLI Commands Thất Bại</h3>
+<p><strong>Nguyên Nhân Có Thể:</strong></p>
+<ul>
+<li>IAM role không attached</li>
+<li>Insufficient permissions</li>
+<li>Region configuration issues</li>
+</ul>
+<p><strong>Giải Pháp:</strong></p>
+<ul>
+<li>Xác minh IAM role được attached đến instance</li>
+<li>Kiểm tra IAM role có required policies</li>
+<li>Set AWS region: <code>aws configure set region us-east-1</code></li>
+</ul>
+<h2 id="security-best-practices">Security Best Practices</h2>
+<h3 id="instance-security">Instance Security</h3>
+<ul>
+<li><strong>SSH Key Management</strong>: Secure private key storage</li>
+<li><strong>Security Groups</strong>: Least-privilege access rules</li>
+<li><strong>IAM Roles</strong>: Service-specific permissions only</li>
+<li><strong>System Updates</strong>: Regular security patches</li>
+</ul>
+<h3 id="network-security">Network Security</h3>
+<ul>
+<li><strong>Public Subnet</strong>: Chỉ cho instances cần internet access</li>
+<li><strong>Private Communication</strong>: Sử dụng private IPs cho internal traffic</li>
+<li><strong>Security Groups</strong>: Hoạt động như virtual firewalls</li>
+</ul>
+<h2 id="các-bước-tiếp-theo">Các Bước Tiếp Theo</h2>
+<p>EC2 instance của bạn giờ đã sẵn sàng cho application deployment! Bạn có:</p>
+<p>✅ <strong>EC2 Instance</strong> chạy Amazon Linux 2023<br>
+✅ <strong>Node.js và npm</strong> installed và configured<br>
+✅ <strong>PM2</strong> cho production process management<br>
+✅ <strong>IAM Role</strong> với necessary AWS permissions<br>
+✅ <strong>Network Configuration</strong> cho multi-layer caching access<br>
+✅ <strong>SSH Access</strong> cho management và deployment</p>
+<h3 id="instance-capabilities">Instance Capabilities:</h3>
+<ul>
+<li><strong>Node.js Runtime</strong>: Sẵn sàng cho application deployment</li>
+<li><strong>AWS SDK Access</strong>: Có thể tương tác với DynamoDB, ElastiCache, và DAX</li>
+<li><strong>Process Management</strong>: PM2 cho production-grade application hosting</li>
+<li><strong>Monitoring</strong>: CloudWatch agent cho metrics và logs</li>
+</ul>
 
-          <div class="notices tip">
-            <p>
-              Giữ instance của bạn an toàn bằng cách thường xuyên update
-              packages và tuân theo AWS security best practices.
-            </p>
-          </div>
+<div class="notices tip" ><p>Giữ instance của bạn an toàn bằng cách thường xuyên update packages và tuân theo AWS security best practices.</p>
+</div>
 
-          <p>
-            Tiếp theo, chúng ta sẽ deploy ứng dụng multi-layer caching đến
-            instance này.
-          </p>
+<p>Tiếp theo, chúng ta sẽ deploy ứng dụng multi-layer caching đến instance này.</p>
 
-          <footer class="footline"></footer>
+
+
+
+
+<footer class=" footline" >
+	
+</footer>
+
+        
         </div>
+        
+
       </div>
 
-      <div id="navigation">
-        <a
-          class="nav nav-prev"
-          href="/vi/5-setup-application/"
-          title="5. Thiết Lập Application"
-        >
-          <i class="fa fa-chevron-left"></i
-        ></a>
+    <div id="navigation">
+        
+        
 
-        <a
-          class="nav nav-next"
-          href="/vi/5-setup-application/5.2-deploy-app/"
-          title="5.2 Triển Khai Application"
-          style="margin-right: 0px"
-          ><i class="fa fa-chevron-right"></i
-        ></a>
-      </div>
+        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+
+        
+
+
+	 
+	 
+		
+			<a class="nav nav-prev" href="/vi/5-setup-application/" title="5. Thiết Lập Application"> <i class="fa fa-chevron-left"></i></a>
+		
+		
+			<a class="nav nav-next" href="/vi/5-setup-application/5.2-deploy-app/" title="5.2 Triển Khai Application" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
+		
+	
+    </div>
+
     </section>
 
-    <div
-      style="
-        left: -1000px;
-        overflow: scroll;
-        position: absolute;
-        top: -1000px;
-        border: none;
-        box-sizing: content-box;
-        height: 200px;
-        margin: 0px;
-        padding: 0px;
-        width: 200px;
-      "
-    >
-      <div
-        style="
-          border: none;
-          box-sizing: content-box;
-          height: 200px;
-          margin: 0px;
-          padding: 0px;
-          width: 200px;
-        "
-      ></div>
+    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
+      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
     </div>
-    <script src="/js/clipboard.min.js?1754898927"></script>
-    <script src="/js/perfect-scrollbar.min.js?1754898927"></script>
-    <script src="/js/perfect-scrollbar.jquery.min.js?1754898927"></script>
-    <script src="/js/jquery.sticky.js?1754898927"></script>
-    <script src="/js/featherlight.min.js?1754898927"></script>
-    <script src="/js/highlight.pack.js?1754898927"></script>
-    <script>
-      hljs.initHighlightingOnLoad();
-    </script>
-    <script src="/js/modernizr.custom-3.6.0.js?1754898927"></script>
-    <script src="/js/learn.js?1754898927"></script>
-    <script src="/js/hugo-learn.js?1754898927"></script>
-    <script src="/js/language-switcher.js?1754898927"></script>
-    <script src="/js/multilingual.js?1754898927"></script>
+    <script src="/js/clipboard.min.js?1754900055"></script>
+    <script src="/js/perfect-scrollbar.min.js?1754900055"></script>
+    <script src="/js/perfect-scrollbar.jquery.min.js?1754900055"></script>
+    <script src="/js/jquery.sticky.js?1754900055"></script>
+    <script src="/js/featherlight.min.js?1754900055"></script>
+    <script src="/js/highlight.pack.js?1754900055"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="/js/modernizr.custom-3.6.0.js?1754900055"></script>
+    <script src="/js/learn.js?1754900055"></script>
+    <script src="/js/hugo-learn.js?1754900055"></script>
+    <script src="/js/language-switcher.js?1754900055"></script>
+    <script src="/js/multilingual.js?1754900055"></script>
+    
+        
+            <script src="/mermaid/mermaid.js?1754900055"></script>
+        
+        <script>
+            mermaid.initialize({ startOnLoad: true });
+        </script>
+    
+    
 
-    <script src="/mermaid/mermaid.js?1754898927"></script>
-
-    <script>
-      mermaid.initialize({ startOnLoad: true });
-    </script>
   </body>
 </html>

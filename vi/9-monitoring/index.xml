@@ -2,11 +2,11 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>9. Giám Sát và Cảnh Báo on Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</title>
-    <link>/vi/9-monitoring/</link>
+    <link>//localhost:50292/vi/9-monitoring/</link>
     <description>Recent content in 9. Giám Sát và Cảnh Báo on Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</description>
     <generator>Hugo</generator>
     <language>vi-vn</language>
     <lastBuildDate></lastBuildDate>
-    <atom:link href="/vi/9-monitoring/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="//localhost:50292/vi/9-monitoring/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>
