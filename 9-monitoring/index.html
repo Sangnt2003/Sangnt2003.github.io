@@ -1,1101 +1,1008 @@
 <!DOCTYPE html>
 <html lang="en" class="js csstransforms3d">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="generator" content="Hugo 0.147.9">
-    <meta name="description" content="">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content="Hugo 0.147.9" />
+    <meta name="description" content="" />
 
+    <link rel="icon" href="/images/favicon.png" type="image/png" />
 
-    <link rel="icon" href="/images/favicon.png" type="image/png">
+    <title>
+      9. Monitoring and Alerting :: In-Memory Database Caching Architecture
+    </title>
 
-    <title>9. Monitoring and Alerting :: In-Memory Database Caching Architecture</title>
-
-    
-    <link href="/css/nucleus.css?1754898926" rel="stylesheet">
-    <link href="/css/fontawesome-all.min.css?1754898926" rel="stylesheet">
-    <link href="/css/hybrid.css?1754898926" rel="stylesheet">
-    <link href="/css/featherlight.min.css?1754898926" rel="stylesheet">
-    <link href="/css/perfect-scrollbar.min.css?1754898926" rel="stylesheet">
-    <link href="/css/auto-complete.css?1754898926" rel="stylesheet">
-    <link href="/css/atom-one-dark-reasonable.css?1754898926" rel="stylesheet">
-    <link href="/css/theme.css?1754898926" rel="stylesheet">
-    <link href="/css/tabs.css?1754898926" rel="stylesheet">
-    <link href="/css/hugo-theme.css?1754898926" rel="stylesheet">
-    
-    
+    <link href="/css/nucleus.css?1754898926" rel="stylesheet" />
+    <link href="/css/fontawesome-all.min.css?1754898926" rel="stylesheet" />
+    <link href="/css/hybrid.css?1754898926" rel="stylesheet" />
+    <link href="/css/featherlight.min.css?1754898926" rel="stylesheet" />
+    <link href="/css/perfect-scrollbar.min.css?1754898926" rel="stylesheet" />
+    <link href="/css/auto-complete.css?1754898926" rel="stylesheet" />
+    <link
+      href="/css/atom-one-dark-reasonable.css?1754898926"
+      rel="stylesheet"
+    />
+    <link href="/css/theme.css?1754898926" rel="stylesheet" />
+    <link href="/css/tabs.css?1754898926" rel="stylesheet" />
+    <link href="/css/hugo-theme.css?1754898926" rel="stylesheet" />
 
     <script src="/js/jquery-3.3.1.min.js?1754898926"></script>
 
     <style>
-      :root #header + #content > #left > #rlblock_left{
-          display:none !important;
+      :root #header + #content > #left > #rlblock_left {
+        display: none !important;
       }
-      
     </style>
-    
   </head>
   <body class="" data-url="/9-monitoring/">
     <nav id="sidebar" class="">
-
-
-
-  <div id="header-wrapper">
-    <div id="header">
-      <a
-  id="logo"
-  href='/workshop-caching'
->
-  <svg
-    id="Layer_1"
-    data-name="Layer 1"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 60 30"
-    width="30%"
-  >
-    <defs>
-      <style>
-        .cls-1 {
-          fill: #fff;
-        }
-        .cls-2 {
-          fill: #f90;
-          fill-rule: evenodd;
-        }
-      </style>
-    </defs>
-    <title>AWS-Logo_White-Color</title>
-    <path
-      class="cls-1"
-      d="M14.09,10.85a4.7,4.7,0,0,0,.19,1.48,7.73,7.73,0,0,0,.54,1.19.77.77,0,0,1,.12.38.64.64,0,0,1-.32.49l-1,.7a.83.83,0,0,1-.44.15.69.69,0,0,1-.49-.23,3.8,3.8,0,0,1-.6-.77q-.25-.42-.51-1a6.14,6.14,0,0,1-4.89,2.3,4.54,4.54,0,0,1-3.32-1.19,4.27,4.27,0,0,1-1.22-3.2A4.28,4.28,0,0,1,3.61,7.75,6.06,6.06,0,0,1,7.69,6.46a12.47,12.47,0,0,1,1.76.13q.92.13,1.91.36V5.73a3.65,3.65,0,0,0-.79-2.66A3.81,3.81,0,0,0,7.86,2.3a7.71,7.71,0,0,0-1.79.22,12.78,12.78,0,0,0-1.79.57,4.55,4.55,0,0,1-.58.22l-.26,0q-.35,0-.35-.52V2a1.09,1.09,0,0,1,.12-.58,1.2,1.2,0,0,1,.47-.35A10.88,10.88,0,0,1,5.77.32,10.19,10.19,0,0,1,8.36,0a6,6,0,0,1,4.35,1.35,5.49,5.49,0,0,1,1.38,4.09ZM7.34,13.38a5.36,5.36,0,0,0,1.72-.31A3.63,3.63,0,0,0,10.63,12,2.62,2.62,0,0,0,11.19,11a5.63,5.63,0,0,0,.16-1.44v-.7a14.35,14.35,0,0,0-1.53-.28,12.37,12.37,0,0,0-1.56-.1,3.84,3.84,0,0,0-2.47.67A2.34,2.34,0,0,0,5,11a2.35,2.35,0,0,0,.61,1.76A2.4,2.4,0,0,0,7.34,13.38Zm13.35,1.8a1,1,0,0,1-.64-.16,1.3,1.3,0,0,1-.35-.65L15.81,1.51a3,3,0,0,1-.15-.67.36.36,0,0,1,.41-.41H17.7a1,1,0,0,1,.65.16,1.4,1.4,0,0,1,.33.65l2.79,11,2.59-11A1.17,1.17,0,0,1,24.39.6a1.1,1.1,0,0,1,.67-.16H26.4a1.1,1.1,0,0,1,.67.16,1.17,1.17,0,0,1,.32.65L30,12.39,32.88,1.25A1.39,1.39,0,0,1,33.22.6a1,1,0,0,1,.65-.16h1.54a.36.36,0,0,1,.41.41,1.36,1.36,0,0,1,0,.26,3.64,3.64,0,0,1-.12.41l-4,12.86a1.3,1.3,0,0,1-.35.65,1,1,0,0,1-.64.16H29.25a1,1,0,0,1-.67-.17,1.26,1.26,0,0,1-.32-.67L25.67,3.64,23.11,14.34a1.26,1.26,0,0,1-.32.67,1,1,0,0,1-.67.17Zm21.36.44a11.28,11.28,0,0,1-2.56-.29,7.44,7.44,0,0,1-1.92-.67,1,1,0,0,1-.61-.93v-.84q0-.52.38-.52a.9.9,0,0,1,.31.06l.42.17a8.77,8.77,0,0,0,1.83.58,9.78,9.78,0,0,0,2,.2,4.48,4.48,0,0,0,2.43-.55,1.76,1.76,0,0,0,.86-1.57,1.61,1.61,0,0,0-.45-1.16A4.29,4.29,0,0,0,43,9.22l-2.41-.76A5.15,5.15,0,0,1,38,6.78a3.94,3.94,0,0,1-.83-2.41,3.7,3.7,0,0,1,.45-1.85,4.47,4.47,0,0,1,1.19-1.37A5.27,5.27,0,0,1,40.51.29,7.4,7.4,0,0,1,42.6,0a8.87,8.87,0,0,1,1.12.07q.57.07,1.08.19t.95.26a4.27,4.27,0,0,1,.7.29,1.59,1.59,0,0,1,.49.41.94.94,0,0,1,.15.55v.79q0,.52-.38.52a1.76,1.76,0,0,1-.64-.2,7.74,7.74,0,0,0-3.2-.64,4.37,4.37,0,0,0-2.21.47,1.6,1.6,0,0,0-.79,1.48,1.58,1.58,0,0,0,.49,1.18,4.94,4.94,0,0,0,1.83.92L44.55,7a5.08,5.08,0,0,1,2.57,1.6A3.76,3.76,0,0,1,47.9,11a4.21,4.21,0,0,1-.44,1.93,4.4,4.4,0,0,1-1.21,1.47,5.43,5.43,0,0,1-1.85.93A8.25,8.25,0,0,1,42.05,15.62Z"
-    ></path>
-    <path
-      class="cls-2"
-      d="M45.19,23.81C39.72,27.85,31.78,30,25,30A36.64,36.64,0,0,1,.22,20.57c-.51-.46-.06-1.09.56-.74A49.78,49.78,0,0,0,25.53,26.4,49.23,49.23,0,0,0,44.4,22.53C45.32,22.14,46.1,23.14,45.19,23.81Z"
-    ></path>
-    <path
-      class="cls-2"
-      d="M47.47,21.21c-.7-.9-4.63-.42-6.39-.21-.53.06-.62-.4-.14-.74,3.13-2.2,8.27-1.57,8.86-.83s-.16,5.89-3.09,8.35c-.45.38-.88.18-.68-.32C46.69,25.8,48.17,22.11,47.47,21.21Z"
-    ></path>
-  </svg>
-</a>
-
-    </div>
-    
-        <div class="searchbox">
-    <label for="search-by"><i class="fas fa-search"></i></label>
-    <input data-search-input id="search-by" type="search" placeholder="Search...">
-    <span data-search-clear=""><i class="fas fa-times"></i></span>
-</div>
-
-<script type="text/javascript" src="/js/lunr.min.js?1754898926"></script>
-<script type="text/javascript" src="/js/auto-complete.js?1754898926"></script>
-<script type="text/javascript">
-    var baseurl = "\/";
-</script>
-<script type="text/javascript" src="/js/search.js?1754898926"></script>
-
-    
-  </div>
-
-
-    <div class="highlightable">
-    <ul class="topics">
-
-        
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/1-introduction/" title="1. Introduction" class="dd-item
-        
-        
-        
-        ">
-      <a href="/1-introduction/">
-          <b></b>1. Introduction
-          
-      </a>
-      
-      
-        <ul>
-          
-          
-            
-          
-          
-
-        
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/1-introduction/1.1-overview/" title="1.1 Workshop Overview" class="dd-item
-        
-        
-        
-        ">
-      <a href="/1-introduction/1.1-overview/">
-          <b></b>1.1 Workshop Overview
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/1-introduction/1.2-architecture/" title="1.2 Architecture Overview" class="dd-item
-        
-        
-        
-        ">
-      <a href="/1-introduction/1.2-architecture/">
-          <b></b>1.2 Architecture Overview
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-        
-        </ul>
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/2-setup-vpc/" title="2. Setup VPC and Network Infrastructure" class="dd-item
-        
-        
-        
-        ">
-      <a href="/2-setup-vpc/">
-          <b></b>2. Setup VPC and Network Infrastructure
-          
-      </a>
-      
-      
-        <ul>
-          
-          
-            
-          
-          
-
-        
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/2-setup-vpc/2.1-create-vpc/" title="2.1 Create VPC" class="dd-item
-        
-        
-        
-        ">
-      <a href="/2-setup-vpc/2.1-create-vpc/">
-          <b></b>2.1 Create VPC
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/2-setup-vpc/2.2-security-groups/" title="2.2 Create Security Groups" class="dd-item
-        
-        
-        
-        ">
-      <a href="/2-setup-vpc/2.2-security-groups/">
-          <b></b>2.2 Create Security Groups
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-        
-        </ul>
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/3-setup-dynamodb/" title="3. Setup DynamoDB and DAX" class="dd-item
-        
-        
-        
-        ">
-      <a href="/3-setup-dynamodb/">
-          <b></b>3. Setup DynamoDB and DAX
-          
-      </a>
-      
-      
-        <ul>
-          
-          
-            
-          
-          
-
-        
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/3-setup-dynamodb/3.1-create-table/" title="3.1 Create DynamoDB Table" class="dd-item
-        
-        
-        
-        ">
-      <a href="/3-setup-dynamodb/3.1-create-table/">
-          <b></b>3.1 Create DynamoDB Table
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/3-setup-dynamodb/3.2-setup-dax/" title="3.2 Setup DynamoDB DAX" class="dd-item
-        
-        
-        
-        ">
-      <a href="/3-setup-dynamodb/3.2-setup-dax/">
-          <b></b>3.2 Setup DynamoDB DAX
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-        
-        </ul>
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/4-setup-elasticache/" title="4. Setup ElastiCache Redis" class="dd-item
-        
-        
-        
-        ">
-      <a href="/4-setup-elasticache/">
-          <b></b>4. Setup ElastiCache Redis
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/5-setup-application/" title="5. Setup Application" class="dd-item
-        
-        
-        
-        ">
-      <a href="/5-setup-application/">
-          <b></b>5. Setup Application
-          
-      </a>
-      
-      
-        <ul>
-          
-          
-            
-          
-          
-
-        
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/5-setup-application/5.1-launch-ec2/" title="5.1 Launch EC2 Instance" class="dd-item
-        
-        
-        
-        ">
-      <a href="/5-setup-application/5.1-launch-ec2/">
-          <b></b>5.1 Launch EC2 Instance
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/5-setup-application/5.2-deploy-app/" title="5.2 Deploy Application" class="dd-item
-        
-        
-        
-        ">
-      <a href="/5-setup-application/5.2-deploy-app/">
-          <b></b>5.2 Deploy Application
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-        
-        </ul>
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/6-setup-loadbalancer/" title="6. Setup Application Load Balancer" class="dd-item
-        
-        
-        
-        ">
-      <a href="/6-setup-loadbalancer/">
-          <b></b>6. Setup Application Load Balancer
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/7-setup-cloudfront/" title="7. Setup CloudFront CDN" class="dd-item
-        
-        
-        
-        ">
-      <a href="/7-setup-cloudfront/">
-          <b></b>7. Setup CloudFront CDN
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/8-performance-testing/" title="8. Performance Testing" class="dd-item
-        
-        
-        
-        ">
-      <a href="/8-performance-testing/">
-          <b></b>8. Performance Testing
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/9-monitoring/" title="9. Monitoring and Alerting" class="dd-item
-        
-        active
-        
-        ">
-      <a href="/9-monitoring/">
-          <b></b>9. Monitoring and Alerting
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/10-cleanup/" title="10. Resource Cleanup Guide" class="dd-item
-        
-        
-        
-        ">
-      <a href="/10-cleanup/">
-          <b></b>10. Resource Cleanup Guide
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-        
-    </ul>
-
-    
-    
-
-    
-    <section id="prefooter">
-      <hr/>
-      <ul>
-      
-        <li>
-          <a class="padding">
-            <i class="fas fa-language fa-fw"></i>
-          <div class="select-style">
-            <select id="select-language" onchange="location = this.value;">
-          
-          
-          
-              
-              
-                  
-                    
-                    
-                      <option id="en" value="/9-monitoring/" selected>English</option>
-                    
-                  
-              
-                  
-              
-          
-              
-              
-                  
-              
-                  
-                    
-                    
-                      <option id="vi" value="/vi/9-monitoring/">Tiếng Việt</option>
-                    
-                  
-              
-          
-        </select>
-        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-          width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
-          <g>
-            <g id="arrow-drop-down">
-              <polygon points="0,63.75 127.5,191.25 255,63.75 		" />
-            </g>
-          </g>
-        </svg>
+      <div id="header-wrapper">
+        <div id="header">
+          <a id="logo" href="/">
+            <svg
+              id="Layer_1"
+              data-name="Layer 1"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 60 30"
+              width="30%"
+            >
+              <defs>
+                <style>
+                  .cls-1 {
+                    fill: #fff;
+                  }
+                  .cls-2 {
+                    fill: #f90;
+                    fill-rule: evenodd;
+                  }
+                </style>
+              </defs>
+              <title>AWS-Logo_White-Color</title>
+              <path
+                class="cls-1"
+                d="M14.09,10.85a4.7,4.7,0,0,0,.19,1.48,7.73,7.73,0,0,0,.54,1.19.77.77,0,0,1,.12.38.64.64,0,0,1-.32.49l-1,.7a.83.83,0,0,1-.44.15.69.69,0,0,1-.49-.23,3.8,3.8,0,0,1-.6-.77q-.25-.42-.51-1a6.14,6.14,0,0,1-4.89,2.3,4.54,4.54,0,0,1-3.32-1.19,4.27,4.27,0,0,1-1.22-3.2A4.28,4.28,0,0,1,3.61,7.75,6.06,6.06,0,0,1,7.69,6.46a12.47,12.47,0,0,1,1.76.13q.92.13,1.91.36V5.73a3.65,3.65,0,0,0-.79-2.66A3.81,3.81,0,0,0,7.86,2.3a7.71,7.71,0,0,0-1.79.22,12.78,12.78,0,0,0-1.79.57,4.55,4.55,0,0,1-.58.22l-.26,0q-.35,0-.35-.52V2a1.09,1.09,0,0,1,.12-.58,1.2,1.2,0,0,1,.47-.35A10.88,10.88,0,0,1,5.77.32,10.19,10.19,0,0,1,8.36,0a6,6,0,0,1,4.35,1.35,5.49,5.49,0,0,1,1.38,4.09ZM7.34,13.38a5.36,5.36,0,0,0,1.72-.31A3.63,3.63,0,0,0,10.63,12,2.62,2.62,0,0,0,11.19,11a5.63,5.63,0,0,0,.16-1.44v-.7a14.35,14.35,0,0,0-1.53-.28,12.37,12.37,0,0,0-1.56-.1,3.84,3.84,0,0,0-2.47.67A2.34,2.34,0,0,0,5,11a2.35,2.35,0,0,0,.61,1.76A2.4,2.4,0,0,0,7.34,13.38Zm13.35,1.8a1,1,0,0,1-.64-.16,1.3,1.3,0,0,1-.35-.65L15.81,1.51a3,3,0,0,1-.15-.67.36.36,0,0,1,.41-.41H17.7a1,1,0,0,1,.65.16,1.4,1.4,0,0,1,.33.65l2.79,11,2.59-11A1.17,1.17,0,0,1,24.39.6a1.1,1.1,0,0,1,.67-.16H26.4a1.1,1.1,0,0,1,.67.16,1.17,1.17,0,0,1,.32.65L30,12.39,32.88,1.25A1.39,1.39,0,0,1,33.22.6a1,1,0,0,1,.65-.16h1.54a.36.36,0,0,1,.41.41,1.36,1.36,0,0,1,0,.26,3.64,3.64,0,0,1-.12.41l-4,12.86a1.3,1.3,0,0,1-.35.65,1,1,0,0,1-.64.16H29.25a1,1,0,0,1-.67-.17,1.26,1.26,0,0,1-.32-.67L25.67,3.64,23.11,14.34a1.26,1.26,0,0,1-.32.67,1,1,0,0,1-.67.17Zm21.36.44a11.28,11.28,0,0,1-2.56-.29,7.44,7.44,0,0,1-1.92-.67,1,1,0,0,1-.61-.93v-.84q0-.52.38-.52a.9.9,0,0,1,.31.06l.42.17a8.77,8.77,0,0,0,1.83.58,9.78,9.78,0,0,0,2,.2,4.48,4.48,0,0,0,2.43-.55,1.76,1.76,0,0,0,.86-1.57,1.61,1.61,0,0,0-.45-1.16A4.29,4.29,0,0,0,43,9.22l-2.41-.76A5.15,5.15,0,0,1,38,6.78a3.94,3.94,0,0,1-.83-2.41,3.7,3.7,0,0,1,.45-1.85,4.47,4.47,0,0,1,1.19-1.37A5.27,5.27,0,0,1,40.51.29,7.4,7.4,0,0,1,42.6,0a8.87,8.87,0,0,1,1.12.07q.57.07,1.08.19t.95.26a4.27,4.27,0,0,1,.7.29,1.59,1.59,0,0,1,.49.41.94.94,0,0,1,.15.55v.79q0,.52-.38.52a1.76,1.76,0,0,1-.64-.2,7.74,7.74,0,0,0-3.2-.64,4.37,4.37,0,0,0-2.21.47,1.6,1.6,0,0,0-.79,1.48,1.58,1.58,0,0,0,.49,1.18,4.94,4.94,0,0,0,1.83.92L44.55,7a5.08,5.08,0,0,1,2.57,1.6A3.76,3.76,0,0,1,47.9,11a4.21,4.21,0,0,1-.44,1.93,4.4,4.4,0,0,1-1.21,1.47,5.43,5.43,0,0,1-1.85.93A8.25,8.25,0,0,1,42.05,15.62Z"
+              ></path>
+              <path
+                class="cls-2"
+                d="M45.19,23.81C39.72,27.85,31.78,30,25,30A36.64,36.64,0,0,1,.22,20.57c-.51-.46-.06-1.09.56-.74A49.78,49.78,0,0,0,25.53,26.4,49.23,49.23,0,0,0,44.4,22.53C45.32,22.14,46.1,23.14,45.19,23.81Z"
+              ></path>
+              <path
+                class="cls-2"
+                d="M47.47,21.21c-.7-.9-4.63-.42-6.39-.21-.53.06-.62-.4-.14-.74,3.13-2.2,8.27-1.57,8.86-.83s-.16,5.89-3.09,8.35c-.45.38-.88.18-.68-.32C46.69,25.8,48.17,22.11,47.47,21.21Z"
+              ></path>
+            </svg>
+          </a>
         </div>
-        </a>
-        </li>
-      
 
-      
-      </ul>
-    </section>
-    
-    <section id="footer">
-      <section id="shortcuts" style="font-weight: bold;">
-        <h3>More</h3>
-        <ul>
-          
-              <li> 
-                  <a class="padding" href="https://aws.amazon.com/blogs"><i class="fab fa-aws"></i> AWS Study Group - Blog</a>
+        <div class="searchbox">
+          <label for="search-by"><i class="fas fa-search"></i></label>
+          <input
+            data-search-input
+            id="search-by"
+            type="search"
+            placeholder="Search..."
+          />
+          <span data-search-clear=""><i class="fas fa-times"></i></span>
+        </div>
+
+        <script
+          type="text/javascript"
+          src="/js/lunr.min.js?1754898926"
+        ></script>
+        <script
+          type="text/javascript"
+          src="/js/auto-complete.js?1754898926"
+        ></script>
+        <script type="text/javascript">
+          var baseurl = "\/";
+        </script>
+        <script type="text/javascript" src="/js/search.js?1754898926"></script>
+      </div>
+
+      <div class="highlightable">
+        <ul class="topics">
+          <li
+            data-nav-id="/1-introduction/"
+            title="1. Introduction"
+            class="dd-item"
+          >
+            <a href="/1-introduction/"> <b></b>1. Introduction </a>
+
+            <ul>
+              <li
+                data-nav-id="/1-introduction/1.1-overview/"
+                title="1.1 Workshop Overview"
+                class="dd-item"
+              >
+                <a href="/1-introduction/1.1-overview/">
+                  <b></b>1.1 Workshop Overview
+                </a>
               </li>
-          
-              <li> 
-                  <a class="padding" href="https://www.facebook.com/groups/awsstudygroupfcj"><i class="fab fa-facebook"></i> AWS Study Group - FB Group</a>
+
+              <li
+                data-nav-id="/1-introduction/1.2-architecture/"
+                title="1.2 Architecture Overview"
+                class="dd-item"
+              >
+                <a href="/1-introduction/1.2-architecture/">
+                  <b></b>1.2 Architecture Overview
+                </a>
               </li>
-          
+            </ul>
+          </li>
+
+          <li
+            data-nav-id="/2-setup-vpc/"
+            title="2. Setup VPC and Network Infrastructure"
+            class="dd-item"
+          >
+            <a href="/2-setup-vpc/">
+              <b></b>2. Setup VPC and Network Infrastructure
+            </a>
+
+            <ul>
+              <li
+                data-nav-id="/2-setup-vpc/2.1-create-vpc/"
+                title="2.1 Create VPC"
+                class="dd-item"
+              >
+                <a href="/2-setup-vpc/2.1-create-vpc/">
+                  <b></b>2.1 Create VPC
+                </a>
+              </li>
+
+              <li
+                data-nav-id="/2-setup-vpc/2.2-security-groups/"
+                title="2.2 Create Security Groups"
+                class="dd-item"
+              >
+                <a href="/2-setup-vpc/2.2-security-groups/">
+                  <b></b>2.2 Create Security Groups
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <li
+            data-nav-id="/3-setup-dynamodb/"
+            title="3. Setup DynamoDB and DAX"
+            class="dd-item"
+          >
+            <a href="/3-setup-dynamodb/"> <b></b>3. Setup DynamoDB and DAX </a>
+
+            <ul>
+              <li
+                data-nav-id="/3-setup-dynamodb/3.1-create-table/"
+                title="3.1 Create DynamoDB Table"
+                class="dd-item"
+              >
+                <a href="/3-setup-dynamodb/3.1-create-table/">
+                  <b></b>3.1 Create DynamoDB Table
+                </a>
+              </li>
+
+              <li
+                data-nav-id="/3-setup-dynamodb/3.2-setup-dax/"
+                title="3.2 Setup DynamoDB DAX"
+                class="dd-item"
+              >
+                <a href="/3-setup-dynamodb/3.2-setup-dax/">
+                  <b></b>3.2 Setup DynamoDB DAX
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <li
+            data-nav-id="/4-setup-elasticache/"
+            title="4. Setup ElastiCache Redis"
+            class="dd-item"
+          >
+            <a href="/4-setup-elasticache/">
+              <b></b>4. Setup ElastiCache Redis
+            </a>
+          </li>
+
+          <li
+            data-nav-id="/5-setup-application/"
+            title="5. Setup Application"
+            class="dd-item"
+          >
+            <a href="/5-setup-application/"> <b></b>5. Setup Application </a>
+
+            <ul>
+              <li
+                data-nav-id="/5-setup-application/5.1-launch-ec2/"
+                title="5.1 Launch EC2 Instance"
+                class="dd-item"
+              >
+                <a href="/5-setup-application/5.1-launch-ec2/">
+                  <b></b>5.1 Launch EC2 Instance
+                </a>
+              </li>
+
+              <li
+                data-nav-id="/5-setup-application/5.2-deploy-app/"
+                title="5.2 Deploy Application"
+                class="dd-item"
+              >
+                <a href="/5-setup-application/5.2-deploy-app/">
+                  <b></b>5.2 Deploy Application
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <li
+            data-nav-id="/6-setup-loadbalancer/"
+            title="6. Setup Application Load Balancer"
+            class="dd-item"
+          >
+            <a href="/6-setup-loadbalancer/">
+              <b></b>6. Setup Application Load Balancer
+            </a>
+          </li>
+
+          <li
+            data-nav-id="/7-setup-cloudfront/"
+            title="7. Setup CloudFront CDN"
+            class="dd-item"
+          >
+            <a href="/7-setup-cloudfront/"> <b></b>7. Setup CloudFront CDN </a>
+          </li>
+
+          <li
+            data-nav-id="/8-performance-testing/"
+            title="8. Performance Testing"
+            class="dd-item"
+          >
+            <a href="/8-performance-testing/">
+              <b></b>8. Performance Testing
+            </a>
+          </li>
+
+          <li
+            data-nav-id="/9-monitoring/"
+            title="9. Monitoring and Alerting"
+            class="dd-item active"
+          >
+            <a href="/9-monitoring/"> <b></b>9. Monitoring and Alerting </a>
+          </li>
+
+          <li
+            data-nav-id="/10-cleanup/"
+            title="10. Resource Cleanup Guide"
+            class="dd-item"
+          >
+            <a href="/10-cleanup/"> <b></b>10. Resource Cleanup Guide </a>
+          </li>
         </ul>
-      </section>
-      <section id="prefooter">
+
+        <section id="prefooter">
           <hr />
           <ul>
             <li>
               <a class="padding">
                 <i class="fas fa-language fa-fw"></i>
                 <div class="select-style">
-                  <select id="select-language" onchange="changeLanguage()">
-                    
-                      <option value="en" selected>
-                        English
-                      </option>
-                    
-                      <option value="vi" >
-                        Tiếng Việt
-                      </option>
-                    
+                  <select
+                    id="select-language"
+                    onchange="location = this.value;"
+                  >
+                    <option id="en" value="/9-monitoring/" selected>
+                      English
+                    </option>
+
+                    <option id="vi" value="/vi/9-monitoring/">
+                      Tiếng Việt
+                    </option>
                   </select>
-                  <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
+                  <svg
+                    version="1.1"
+                    id="Capa_1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    x="0px"
+                    y="0px"
+                    width="255px"
+                    height="255px"
+                    viewBox="0 0 255 255"
+                    style="enable-background: new 0 0 255 255"
+                    xml:space="preserve"
+                  >
                     <g>
                       <g id="arrow-drop-down">
-                        <polygon points="0,63.75 127.5,191.25 255,63.75" />
+                        <polygon points="0,63.75 127.5,191.25 255,63.75 		" />
                       </g>
                     </g>
                   </svg>
                 </div>
               </a>
             </li>
-            <li>
-              <a class="padding" href="#" data-clear-history-toggle=""><i class="fas fa-history fa-fw"></i> Clear History</a>
-            </li>
           </ul>
         </section>
+
         <section id="footer">
-          <left>
-            <b>Workshop</b><br />
-            <img src="https://hitwebcounter.com/counter/counter.php?page=7831196&style=0038&nbdigits=9&type=page&initCount=0" title="Migrate" alt="web counter" border="0" /><br />
-            <b><a href="https://cloudjourney.awsstudygroup.com/">Cloud Journey</a></b><br />
-            <img src="https://hitwebcounter.com/counter/counter.php?page=7830807&style=0038&nbdigits=9&type=page&initCount=0" title="Total CLoud Journey" alt="web counter" border="0" />
-          </left>
-          <left>
-            <br /><br />
-            <b>Last Updated</b><br />
-            <i><font color="orange">27-7-2025</font></i>
-          </left>
-          <left>
-            <br /><br />
-            <b>Team</b><br />
-            <i><br /><a href="https://www.linkedin.com/in/jotaguy" style="color: orange">Gia Hưng</a><br /></i>
-          </left>
-          <script async defer src="https://buttons.github.io/buttons.js"></script>
+          <section id="shortcuts" style="font-weight: bold">
+            <h3>More</h3>
+            <ul>
+              <li>
+                <a class="padding" href="https://aws.amazon.com/blogs"
+                  ><i class="fab fa-aws"></i> AWS Study Group - Blog</a
+                >
+              </li>
+
+              <li>
+                <a
+                  class="padding"
+                  href="https://www.facebook.com/groups/awsstudygroupfcj"
+                  ><i class="fab fa-facebook"></i> AWS Study Group - FB Group</a
+                >
+              </li>
+            </ul>
+          </section>
+          <section id="prefooter">
+            <hr />
+            <ul>
+              <li>
+                <a class="padding">
+                  <i class="fas fa-language fa-fw"></i>
+                  <div class="select-style">
+                    <select id="select-language" onchange="changeLanguage()">
+                      <option value="en" selected>English</option>
+
+                      <option value="vi">Tiếng Việt</option>
+                    </select>
+                    <svg
+                      version="1.1"
+                      id="Capa_1"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlns:xlink="http://www.w3.org/1999/xlink"
+                      x="0px"
+                      y="0px"
+                      width="255px"
+                      height="255px"
+                      viewBox="0 0 255 255"
+                      style="enable-background: new 0 0 255 255"
+                      xml:space="preserve"
+                    >
+                      <g>
+                        <g id="arrow-drop-down">
+                          <polygon points="0,63.75 127.5,191.25 255,63.75" />
+                        </g>
+                      </g>
+                    </svg>
+                  </div>
+                </a>
+              </li>
+              <li>
+                <a class="padding" href="#" data-clear-history-toggle=""
+                  ><i class="fas fa-history fa-fw"></i> Clear History</a
+                >
+              </li>
+            </ul>
+          </section>
+          <section id="footer">
+            <left>
+              <b>Workshop</b><br />
+              <img
+                src="https://hitwebcounter.com/counter/counter.php?page=7831196&style=0038&nbdigits=9&type=page&initCount=0"
+                title="Migrate"
+                alt="web counter"
+                border="0"
+              /><br />
+              <b
+                ><a href="https://cloudjourney.awsstudygroup.com/"
+                  >Cloud Journey</a
+                ></b
+              ><br />
+              <img
+                src="https://hitwebcounter.com/counter/counter.php?page=7830807&style=0038&nbdigits=9&type=page&initCount=0"
+                title="Total CLoud Journey"
+                alt="web counter"
+                border="0"
+              />
+            </left>
+            <left>
+              <br /><br />
+              <b>Last Updated</b><br />
+              <i><font color="orange">27-7-2025</font></i>
+            </left>
+            <left>
+              <br /><br />
+              <b>Team</b><br />
+              <i
+                ><br /><a
+                  href="https://www.linkedin.com/in/jotaguy"
+                  style="color: orange"
+                  >Gia Hưng</a
+                ><br
+              /></i>
+            </left>
+            <script
+              async
+              defer
+              src="https://buttons.github.io/buttons.js"
+            ></script>
+          </section>
         </section>
+      </div>
+    </nav>
 
-    </section>
-  </div>
-</nav>
+    <section id="body">
+      <div id="overlay"></div>
+      <div class="padding highlightable">
+        <div>
+          <div id="top-bar">
+            <div
+              id="breadcrumbs"
+              itemscope=""
+              itemtype="http://data-vocabulary.org/Breadcrumb"
+            >
+              <span id="sidebar-toggle-span">
+                <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+                  <i class="fas fa-bars"></i>
+                </a>
+              </span>
 
+              <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
 
+              <span class="links">
+                <a href="/">In-Memory Database Caching Architecture Workshop</a>
+                > 9. Monitoring and Alerting
+              </span>
+            </div>
 
-
-        <section id="body">
-        <div id="overlay"></div>
-        <div class="padding highlightable">
-              
-              <div>
-                <div id="top-bar">
-                
-                
-                <div id="breadcrumbs" itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb">
-                    <span id="sidebar-toggle-span">
-                        <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
-                          <i class="fas fa-bars"></i>
-                        </a>
-                    </span>
-                  
-                  <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
-                  
-                  <span class="links">
-                 
-                 
-                    
-          
-          
-            
-            
-          
-          
-            <a href='/'>In-Memory Database Caching Architecture Workshop</a> > 9. Monitoring and Alerting
-          
-        
-          
-        
-                 
-                  </span>
-                </div>
-                
-                    <div class="progress">
-    <div class="wrapper">
-<nav id="TableOfContents">
-  <ul>
-    <li><a href="#step-1-create-cloudwatch-dashboard">Step 1: Create CloudWatch Dashboard</a>
-      <ul>
-        <li><a href="#navigate-to-cloudwatch-console">Navigate to CloudWatch Console</a></li>
-        <li><a href="#configure-dashboard">Configure Dashboard</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-2-add-application-load-balancer-metrics">Step 2: Add Application Load Balancer Metrics</a>
-      <ul>
-        <li><a href="#add-alb-widget">Add ALB Widget</a></li>
-        <li><a href="#add-alb-error-rate-widget">Add ALB Error Rate Widget</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-3-add-elasticache-redis-metrics">Step 3: Add ElastiCache Redis Metrics</a>
-      <ul>
-        <li><a href="#add-redis-performance-widget">Add Redis Performance Widget</a></li>
-        <li><a href="#add-redis-cache-effectiveness-widget">Add Redis Cache Effectiveness Widget</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-4-add-dynamodb-and-dax-metrics">Step 4: Add DynamoDB and DAX Metrics</a>
-      <ul>
-        <li><a href="#add-dynamodb-widget">Add DynamoDB Widget</a></li>
-        <li><a href="#add-dax-widget">Add DAX Widget</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-5-add-cloudfront-metrics">Step 5: Add CloudFront Metrics</a>
-      <ul>
-        <li><a href="#add-cloudfront-performance-widget">Add CloudFront Performance Widget</a></li>
-        <li><a href="#add-cloudfront-error-widget">Add CloudFront Error Widget</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-6-add-custom-application-metrics">Step 6: Add Custom Application Metrics</a>
-      <ul>
-        <li><a href="#create-custom-metrics-script">Create Custom Metrics Script</a></li>
-        <li><a href="#set-up-cron-job">Set Up Cron Job</a></li>
-        <li><a href="#add-custom-metrics-widget">Add Custom Metrics Widget</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-7-create-cloudwatch-alarms">Step 7: Create CloudWatch Alarms</a>
-      <ul>
-        <li><a href="#create-high-response-time-alarm">Create High Response Time Alarm</a></li>
-        <li><a href="#create-low-cache-hit-rate-alarm">Create Low Cache Hit Rate Alarm</a></li>
-        <li><a href="#create-high-error-rate-alarm">Create High Error Rate Alarm</a></li>
-        <li><a href="#create-redis-high-cpu-alarm">Create Redis High CPU Alarm</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-8-configure-log-insights">Step 8: Configure Log Insights</a>
-      <ul>
-        <li><a href="#set-up-log-groups">Set Up Log Groups</a></li>
-        <li><a href="#configure-cloudwatch-agent">Configure CloudWatch Agent</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-9-create-log-insights-queries">Step 9: Create Log Insights Queries</a>
-      <ul>
-        <li><a href="#create-performance-query">Create Performance Query</a></li>
-        <li><a href="#create-error-analysis-query">Create Error Analysis Query</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-10-finalize-dashboard">Step 10: Finalize Dashboard</a>
-      <ul>
-        <li><a href="#arrange-dashboard-widgets">Arrange Dashboard Widgets</a></li>
-        <li><a href="#save-dashboard">Save Dashboard</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-11-test-monitoring-setup">Step 11: Test Monitoring Setup</a>
-      <ul>
-        <li><a href="#generate-test-traffic">Generate Test Traffic</a></li>
-        <li><a href="#verify-metrics">Verify Metrics</a></li>
-        <li><a href="#test-alarms">Test Alarms</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-12-document-monitoring-setup">Step 12: Document Monitoring Setup</a>
-      <ul>
-        <li><a href="#monitoring-configuration-summary">Monitoring Configuration Summary</a></li>
-        <li><a href="#dashboard-information">Dashboard Information</a></li>
-        <li><a href="#alarms-configured">Alarms Configured</a></li>
-        <li><a href="#custom-metrics">Custom Metrics</a></li>
-        <li><a href="#log-configuration">Log Configuration</a></li>
-      </ul>
-    </li>
-    <li><a href="#troubleshooting-monitoring-issues">Troubleshooting Monitoring Issues</a>
-      <ul>
-        <li><a href="#issue-metrics-not-appearing">Issue: Metrics Not Appearing</a></li>
-        <li><a href="#issue-alarms-not-triggering">Issue: Alarms Not Triggering</a></li>
-        <li><a href="#issue-custom-metrics-missing">Issue: Custom Metrics Missing</a></li>
-      </ul>
-    </li>
-    <li><a href="#best-practices-for-production">Best Practices for Production</a>
-      <ul>
-        <li><a href="#monitoring-strategy">Monitoring Strategy</a></li>
-        <li><a href="#alert-management">Alert Management</a></li>
-      </ul>
-    </li>
-    <li><a href="#next-steps">Next Steps</a>
-      <ul>
-        <li><a href="#monitoring-benefits-achieved">Monitoring Benefits Achieved:</a></li>
-      </ul>
-    </li>
-  </ul>
-</nav>
-    </div>
-</div>
-
-                
+            <div class="progress">
+              <div class="wrapper">
+                <nav id="TableOfContents">
+                  <ul>
+                    <li>
+                      <a href="#step-1-create-cloudwatch-dashboard"
+                        >Step 1: Create CloudWatch Dashboard</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#navigate-to-cloudwatch-console"
+                            >Navigate to CloudWatch Console</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#configure-dashboard">Configure Dashboard</a>
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-2-add-application-load-balancer-metrics"
+                        >Step 2: Add Application Load Balancer Metrics</a
+                      >
+                      <ul>
+                        <li><a href="#add-alb-widget">Add ALB Widget</a></li>
+                        <li>
+                          <a href="#add-alb-error-rate-widget"
+                            >Add ALB Error Rate Widget</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-3-add-elasticache-redis-metrics"
+                        >Step 3: Add ElastiCache Redis Metrics</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#add-redis-performance-widget"
+                            >Add Redis Performance Widget</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#add-redis-cache-effectiveness-widget"
+                            >Add Redis Cache Effectiveness Widget</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-4-add-dynamodb-and-dax-metrics"
+                        >Step 4: Add DynamoDB and DAX Metrics</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#add-dynamodb-widget">Add DynamoDB Widget</a>
+                        </li>
+                        <li><a href="#add-dax-widget">Add DAX Widget</a></li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-5-add-cloudfront-metrics"
+                        >Step 5: Add CloudFront Metrics</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#add-cloudfront-performance-widget"
+                            >Add CloudFront Performance Widget</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#add-cloudfront-error-widget"
+                            >Add CloudFront Error Widget</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-6-add-custom-application-metrics"
+                        >Step 6: Add Custom Application Metrics</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#create-custom-metrics-script"
+                            >Create Custom Metrics Script</a
+                          >
+                        </li>
+                        <li><a href="#set-up-cron-job">Set Up Cron Job</a></li>
+                        <li>
+                          <a href="#add-custom-metrics-widget"
+                            >Add Custom Metrics Widget</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-7-create-cloudwatch-alarms"
+                        >Step 7: Create CloudWatch Alarms</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#create-high-response-time-alarm"
+                            >Create High Response Time Alarm</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#create-low-cache-hit-rate-alarm"
+                            >Create Low Cache Hit Rate Alarm</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#create-high-error-rate-alarm"
+                            >Create High Error Rate Alarm</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#create-redis-high-cpu-alarm"
+                            >Create Redis High CPU Alarm</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-8-configure-log-insights"
+                        >Step 8: Configure Log Insights</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#set-up-log-groups">Set Up Log Groups</a>
+                        </li>
+                        <li>
+                          <a href="#configure-cloudwatch-agent"
+                            >Configure CloudWatch Agent</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-9-create-log-insights-queries"
+                        >Step 9: Create Log Insights Queries</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#create-performance-query"
+                            >Create Performance Query</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#create-error-analysis-query"
+                            >Create Error Analysis Query</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-10-finalize-dashboard"
+                        >Step 10: Finalize Dashboard</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#arrange-dashboard-widgets"
+                            >Arrange Dashboard Widgets</a
+                          >
+                        </li>
+                        <li><a href="#save-dashboard">Save Dashboard</a></li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-11-test-monitoring-setup"
+                        >Step 11: Test Monitoring Setup</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#generate-test-traffic"
+                            >Generate Test Traffic</a
+                          >
+                        </li>
+                        <li><a href="#verify-metrics">Verify Metrics</a></li>
+                        <li><a href="#test-alarms">Test Alarms</a></li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-12-document-monitoring-setup"
+                        >Step 12: Document Monitoring Setup</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#monitoring-configuration-summary"
+                            >Monitoring Configuration Summary</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#dashboard-information"
+                            >Dashboard Information</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#alarms-configured">Alarms Configured</a>
+                        </li>
+                        <li><a href="#custom-metrics">Custom Metrics</a></li>
+                        <li>
+                          <a href="#log-configuration">Log Configuration</a>
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#troubleshooting-monitoring-issues"
+                        >Troubleshooting Monitoring Issues</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#issue-metrics-not-appearing"
+                            >Issue: Metrics Not Appearing</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#issue-alarms-not-triggering"
+                            >Issue: Alarms Not Triggering</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#issue-custom-metrics-missing"
+                            >Issue: Custom Metrics Missing</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#best-practices-for-production"
+                        >Best Practices for Production</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#monitoring-strategy">Monitoring Strategy</a>
+                        </li>
+                        <li>
+                          <a href="#alert-management">Alert Management</a>
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#next-steps">Next Steps</a>
+                      <ul>
+                        <li>
+                          <a href="#monitoring-benefits-achieved"
+                            >Monitoring Benefits Achieved:</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </nav>
               </div>
             </div>
-            
-        <div id="head-tags">
-        
+          </div>
         </div>
-        
+
+        <div id="head-tags"></div>
+
         <div id="body-inner">
-          
-            <h1>
-              
-              
-                Monitoring and Alerting
-              
-            </h1>
-          
+          <h1>Monitoring and Alerting</h1>
 
-        
-
-
-
-	<p>In this step, we&rsquo;ll create a comprehensive CloudWatch dashboard to monitor our multi-layer caching architecture and set up automated alerts for proactive issue detection.</p>
-<h2 id="step-1-create-cloudwatch-dashboard">Step 1: Create CloudWatch Dashboard</h2>
-<h3 id="navigate-to-cloudwatch-console">Navigate to CloudWatch Console</h3>
-<ol>
-<li>
-<p>Open the <strong>AWS Management Console</strong></p>
-</li>
-<li>
-<p>Navigate to the <strong>CloudWatch service</strong></p>
-</li>
-<li>
-<p>Click <strong>Dashboards</strong> in the left navigation</p>
-</li>
-<li>
-<p>Click <strong>Create dashboard</strong></p>
-</li>
-</ol>
-<h3 id="configure-dashboard">Configure Dashboard</h3>
-<ol start="5">
-<li>
-<p>Configure dashboard settings:</p>
-<ul>
-<li><strong>Dashboard name</strong>: <code>MultiLayerCachingDashboard</code></li>
-<li><strong>Description</strong>: <code>Monitoring dashboard for multi-layer caching workshop</code></li>
-</ul>
-</li>
-<li>
-<p>Click <strong>Create dashboard</strong></p>
-</li>
-</ol>
-<h2 id="step-2-add-application-load-balancer-metrics">Step 2: Add Application Load Balancer Metrics</h2>
-<h3 id="add-alb-widget">Add ALB Widget</h3>
-<ol>
-<li>
-<p>Click <strong>Add widget</strong></p>
-</li>
-<li>
-<p>Select <strong>Line</strong> chart type</p>
-</li>
-<li>
-<p>Configure ALB metrics:</p>
-<ul>
-<li><strong>Metrics</strong>: AWS/ApplicationELB</li>
-<li><strong>Metric name</strong>: RequestCount, TargetResponseTime</li>
-<li><strong>LoadBalancer</strong>: Select your <code>caching-app-alb</code></li>
-</ul>
-</li>
-<li>
-<p>Configure widget settings:</p>
-<ul>
-<li><strong>Widget title</strong>: <code>Application Load Balancer Performance</code></li>
-<li><strong>Y-axis</strong>: Left axis for RequestCount, Right axis for ResponseTime</li>
-<li><strong>Period</strong>: 5 minutes</li>
-</ul>
-</li>
-<li>
-<p>Click <strong>Create widget</strong></p>
-</li>
-</ol>
-<h3 id="add-alb-error-rate-widget">Add ALB Error Rate Widget</h3>
-<ol start="6">
-<li>
-<p>Add another widget for error rates:</p>
-<ul>
-<li><strong>Widget type</strong>: Line</li>
-<li><strong>Metrics</strong>: HTTPCode_Target_4XX_Count, HTTPCode_Target_5XX_Count</li>
-<li><strong>Title</strong>: <code>Application Error Rates</code></li>
-</ul>
-</li>
-</ol>
-<h2 id="step-3-add-elasticache-redis-metrics">Step 3: Add ElastiCache Redis Metrics</h2>
-<h3 id="add-redis-performance-widget">Add Redis Performance Widget</h3>
-<ol>
-<li>
-<p>Add a new widget for Redis metrics:</p>
-<ul>
-<li><strong>Widget type</strong>: Line</li>
-<li><strong>Metrics</strong>: AWS/ElastiCache</li>
-<li><strong>Metric names</strong>:
-<ul>
-<li>CPUUtilization</li>
-<li>DatabaseMemoryUsagePercentage</li>
-<li>NetworkBytesIn</li>
-<li>NetworkBytesOut</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>Filter by your Redis cluster:</p>
-<ul>
-<li><strong>CacheClusterId</strong>: <code>product-cache-001</code></li>
-</ul>
-</li>
-<li>
-<p>Configure widget:</p>
-<ul>
-<li><strong>Title</strong>: <code>Redis Performance Metrics</code></li>
-<li><strong>Period</strong>: 5 minutes</li>
-</ul>
-</li>
-</ol>
-<h3 id="add-redis-cache-effectiveness-widget">Add Redis Cache Effectiveness Widget</h3>
-<ol start="4">
-<li>
-<p>Add cache hit/miss metrics:</p>
-<ul>
-<li><strong>Widget type</strong>: Line</li>
-<li><strong>Metrics</strong>: CacheHits, CacheMisses, Evictions</li>
-<li><strong>Title</strong>: <code>Redis Cache Effectiveness</code></li>
-</ul>
-</li>
-</ol>
-<h2 id="step-4-add-dynamodb-and-dax-metrics">Step 4: Add DynamoDB and DAX Metrics</h2>
-<h3 id="add-dynamodb-widget">Add DynamoDB Widget</h3>
-<ol>
-<li>
-<p>Add DynamoDB performance metrics:</p>
-<ul>
-<li><strong>Widget type</strong>: Line</li>
-<li><strong>Metrics</strong>: AWS/DynamoDB</li>
-<li><strong>Metric names</strong>:
-<ul>
-<li>ConsumedReadCapacityUnits</li>
-<li>ConsumedWriteCapacityUnits</li>
-<li>ThrottledRequests</li>
-</ul>
-</li>
-<li><strong>TableName</strong>: ProductCatalog</li>
-</ul>
-</li>
-</ol>
-<h3 id="add-dax-widget">Add DAX Widget</h3>
-<ol start="2">
-<li>
-<p>Add DAX performance metrics:</p>
-<ul>
-<li><strong>Widget type</strong>: Line</li>
-<li><strong>Metrics</strong>: AWS/DAX</li>
-<li><strong>Metric names</strong>:
-<ul>
-<li>CPUUtilization</li>
-<li>NetworkPacketsIn</li>
-<li>NetworkPacketsOut</li>
-</ul>
-</li>
-<li><strong>ClusterName</strong>: product-dax-cluster</li>
-</ul>
-</li>
-</ol>
-<h2 id="step-5-add-cloudfront-metrics">Step 5: Add CloudFront Metrics</h2>
-<h3 id="add-cloudfront-performance-widget">Add CloudFront Performance Widget</h3>
-<ol>
-<li>
-<p>Add CloudFront metrics:</p>
-<ul>
-<li><strong>Widget type</strong>: Line</li>
-<li><strong>Metrics</strong>: AWS/CloudFront</li>
-<li><strong>Metric names</strong>:
-<ul>
-<li>Requests</li>
-<li>BytesDownloaded</li>
-<li>CacheHitRate</li>
-<li>OriginLatency</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>Filter by your distribution:</p>
-<ul>
-<li><strong>DistributionId</strong>: Your CloudFront distribution ID</li>
-</ul>
-</li>
-</ol>
-<h3 id="add-cloudfront-error-widget">Add CloudFront Error Widget</h3>
-<ol start="3">
-<li>
-<p>Add CloudFront error metrics:</p>
-<ul>
-<li><strong>Widget type</strong>: Line</li>
-<li><strong>Metrics</strong>: 4xxErrorRate, 5xxErrorRate</li>
-<li><strong>Title</strong>: <code>CloudFront Error Rates</code></li>
-</ul>
-</li>
-</ol>
-<h2 id="step-6-add-custom-application-metrics">Step 6: Add Custom Application Metrics</h2>
-<h3 id="create-custom-metrics-script">Create Custom Metrics Script</h3>
-<ol>
-<li>SSH into your EC2 instance and create a custom metrics script:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>nano send-custom-metrics.sh
-</span></span></code></pre></div><ol start="2">
-<li>Add the custom metrics script:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
+          <p>
+            In this step, we&rsquo;ll create a comprehensive CloudWatch
+            dashboard to monitor our multi-layer caching architecture and set up
+            automated alerts for proactive issue detection.
+          </p>
+          <h2 id="step-1-create-cloudwatch-dashboard">
+            Step 1: Create CloudWatch Dashboard
+          </h2>
+          <h3 id="navigate-to-cloudwatch-console">
+            Navigate to CloudWatch Console
+          </h3>
+          <ol>
+            <li>
+              <p>Open the <strong>AWS Management Console</strong></p>
+            </li>
+            <li>
+              <p>Navigate to the <strong>CloudWatch service</strong></p>
+            </li>
+            <li>
+              <p>Click <strong>Dashboards</strong> in the left navigation</p>
+            </li>
+            <li>
+              <p>Click <strong>Create dashboard</strong></p>
+            </li>
+          </ol>
+          <h3 id="configure-dashboard">Configure Dashboard</h3>
+          <ol start="5">
+            <li>
+              <p>Configure dashboard settings:</p>
+              <ul>
+                <li>
+                  <strong>Dashboard name</strong>:
+                  <code>MultiLayerCachingDashboard</code>
+                </li>
+                <li>
+                  <strong>Description</strong>:
+                  <code
+                    >Monitoring dashboard for multi-layer caching workshop</code
+                  >
+                </li>
+              </ul>
+            </li>
+            <li>
+              <p>Click <strong>Create dashboard</strong></p>
+            </li>
+          </ol>
+          <h2 id="step-2-add-application-load-balancer-metrics">
+            Step 2: Add Application Load Balancer Metrics
+          </h2>
+          <h3 id="add-alb-widget">Add ALB Widget</h3>
+          <ol>
+            <li>
+              <p>Click <strong>Add widget</strong></p>
+            </li>
+            <li>
+              <p>Select <strong>Line</strong> chart type</p>
+            </li>
+            <li>
+              <p>Configure ALB metrics:</p>
+              <ul>
+                <li><strong>Metrics</strong>: AWS/ApplicationELB</li>
+                <li>
+                  <strong>Metric name</strong>: RequestCount, TargetResponseTime
+                </li>
+                <li>
+                  <strong>LoadBalancer</strong>: Select your
+                  <code>caching-app-alb</code>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <p>Configure widget settings:</p>
+              <ul>
+                <li>
+                  <strong>Widget title</strong>:
+                  <code>Application Load Balancer Performance</code>
+                </li>
+                <li>
+                  <strong>Y-axis</strong>: Left axis for RequestCount, Right
+                  axis for ResponseTime
+                </li>
+                <li><strong>Period</strong>: 5 minutes</li>
+              </ul>
+            </li>
+            <li>
+              <p>Click <strong>Create widget</strong></p>
+            </li>
+          </ol>
+          <h3 id="add-alb-error-rate-widget">Add ALB Error Rate Widget</h3>
+          <ol start="6">
+            <li>
+              <p>Add another widget for error rates:</p>
+              <ul>
+                <li><strong>Widget type</strong>: Line</li>
+                <li>
+                  <strong>Metrics</strong>: HTTPCode_Target_4XX_Count,
+                  HTTPCode_Target_5XX_Count
+                </li>
+                <li>
+                  <strong>Title</strong>: <code>Application Error Rates</code>
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <h2 id="step-3-add-elasticache-redis-metrics">
+            Step 3: Add ElastiCache Redis Metrics
+          </h2>
+          <h3 id="add-redis-performance-widget">
+            Add Redis Performance Widget
+          </h3>
+          <ol>
+            <li>
+              <p>Add a new widget for Redis metrics:</p>
+              <ul>
+                <li><strong>Widget type</strong>: Line</li>
+                <li><strong>Metrics</strong>: AWS/ElastiCache</li>
+                <li>
+                  <strong>Metric names</strong>:
+                  <ul>
+                    <li>CPUUtilization</li>
+                    <li>DatabaseMemoryUsagePercentage</li>
+                    <li>NetworkBytesIn</li>
+                    <li>NetworkBytesOut</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <p>Filter by your Redis cluster:</p>
+              <ul>
+                <li>
+                  <strong>CacheClusterId</strong>:
+                  <code>product-cache-001</code>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <p>Configure widget:</p>
+              <ul>
+                <li>
+                  <strong>Title</strong>: <code>Redis Performance Metrics</code>
+                </li>
+                <li><strong>Period</strong>: 5 minutes</li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="add-redis-cache-effectiveness-widget">
+            Add Redis Cache Effectiveness Widget
+          </h3>
+          <ol start="4">
+            <li>
+              <p>Add cache hit/miss metrics:</p>
+              <ul>
+                <li><strong>Widget type</strong>: Line</li>
+                <li>
+                  <strong>Metrics</strong>: CacheHits, CacheMisses, Evictions
+                </li>
+                <li>
+                  <strong>Title</strong>: <code>Redis Cache Effectiveness</code>
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <h2 id="step-4-add-dynamodb-and-dax-metrics">
+            Step 4: Add DynamoDB and DAX Metrics
+          </h2>
+          <h3 id="add-dynamodb-widget">Add DynamoDB Widget</h3>
+          <ol>
+            <li>
+              <p>Add DynamoDB performance metrics:</p>
+              <ul>
+                <li><strong>Widget type</strong>: Line</li>
+                <li><strong>Metrics</strong>: AWS/DynamoDB</li>
+                <li>
+                  <strong>Metric names</strong>:
+                  <ul>
+                    <li>ConsumedReadCapacityUnits</li>
+                    <li>ConsumedWriteCapacityUnits</li>
+                    <li>ThrottledRequests</li>
+                  </ul>
+                </li>
+                <li><strong>TableName</strong>: ProductCatalog</li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="add-dax-widget">Add DAX Widget</h3>
+          <ol start="2">
+            <li>
+              <p>Add DAX performance metrics:</p>
+              <ul>
+                <li><strong>Widget type</strong>: Line</li>
+                <li><strong>Metrics</strong>: AWS/DAX</li>
+                <li>
+                  <strong>Metric names</strong>:
+                  <ul>
+                    <li>CPUUtilization</li>
+                    <li>NetworkPacketsIn</li>
+                    <li>NetworkPacketsOut</li>
+                  </ul>
+                </li>
+                <li><strong>ClusterName</strong>: product-dax-cluster</li>
+              </ul>
+            </li>
+          </ol>
+          <h2 id="step-5-add-cloudfront-metrics">
+            Step 5: Add CloudFront Metrics
+          </h2>
+          <h3 id="add-cloudfront-performance-widget">
+            Add CloudFront Performance Widget
+          </h3>
+          <ol>
+            <li>
+              <p>Add CloudFront metrics:</p>
+              <ul>
+                <li><strong>Widget type</strong>: Line</li>
+                <li><strong>Metrics</strong>: AWS/CloudFront</li>
+                <li>
+                  <strong>Metric names</strong>:
+                  <ul>
+                    <li>Requests</li>
+                    <li>BytesDownloaded</li>
+                    <li>CacheHitRate</li>
+                    <li>OriginLatency</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <p>Filter by your distribution:</p>
+              <ul>
+                <li>
+                  <strong>DistributionId</strong>: Your CloudFront distribution
+                  ID
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="add-cloudfront-error-widget">Add CloudFront Error Widget</h3>
+          <ol start="3">
+            <li>
+              <p>Add CloudFront error metrics:</p>
+              <ul>
+                <li><strong>Widget type</strong>: Line</li>
+                <li><strong>Metrics</strong>: 4xxErrorRate, 5xxErrorRate</li>
+                <li>
+                  <strong>Title</strong>: <code>CloudFront Error Rates</code>
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <h2 id="step-6-add-custom-application-metrics">
+            Step 6: Add Custom Application Metrics
+          </h2>
+          <h3 id="create-custom-metrics-script">
+            Create Custom Metrics Script
+          </h3>
+          <ol>
+            <li>
+              SSH into your EC2 instance and create a custom metrics script:
+            </li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>nano send-custom-metrics.sh
+</span></span></code></pre>
+          </div>
+          <ol start="2">
+            <li>Add the custom metrics script:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Get application statistics</span>
 </span></span><span style="display:flex;"><span>STATS<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>curl -s http://localhost:3000/stats<span style="color:#66d9ef">)</span>
@@ -1129,131 +1036,219 @@
 </span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    MetricName<span style="color:#f92672">=</span>RedisHitRate,Value<span style="color:#f92672">=</span>$REDIS_HIT_RATE,Unit<span style="color:#f92672">=</span>Percent
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;Custom metrics sent to CloudWatch&#34;</span>
-</span></span></code></pre></div><ol start="3">
-<li>Make the script executable:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>chmod +x send-custom-metrics.sh
-</span></span></code></pre></div><h3 id="set-up-cron-job">Set Up Cron Job</h3>
-<ol start="4">
-<li>Set up a cron job to send metrics every minute:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Edit crontab</span>
+</span></span></code></pre>
+          </div>
+          <ol start="3">
+            <li>Make the script executable:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>chmod +x send-custom-metrics.sh
+</span></span></code></pre>
+          </div>
+          <h3 id="set-up-cron-job">Set Up Cron Job</h3>
+          <ol start="4">
+            <li>Set up a cron job to send metrics every minute:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Edit crontab</span>
 </span></span><span style="display:flex;"><span>crontab -e
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Add this line to run every minute</span>
 </span></span><span style="display:flex;"><span>* * * * * /home/ec2-user/caching-app/send-custom-metrics.sh
-</span></span></code></pre></div><h3 id="add-custom-metrics-widget">Add Custom Metrics Widget</h3>
-<ol start="5">
-<li>
-<p>Add custom metrics to dashboard:</p>
-<ul>
-<li><strong>Widget type</strong>: Line</li>
-<li><strong>Metrics</strong>: CachingApp/Performance</li>
-<li><strong>Metric names</strong>: CacheHitRate, RedisHitRate</li>
-<li><strong>Title</strong>: <code>Application Cache Performance</code></li>
-</ul>
-</li>
-</ol>
-<h2 id="step-7-create-cloudwatch-alarms">Step 7: Create CloudWatch Alarms</h2>
-<h3 id="create-high-response-time-alarm">Create High Response Time Alarm</h3>
-<ol>
-<li>
-<p>Navigate to <strong>Alarms</strong> in CloudWatch</p>
-</li>
-<li>
-<p>Click <strong>Create alarm</strong></p>
-</li>
-<li>
-<p>Configure ALB response time alarm:</p>
-<ul>
-<li><strong>Metric</strong>: AWS/ApplicationELB &gt; TargetResponseTime</li>
-<li><strong>LoadBalancer</strong>: caching-app-alb</li>
-<li><strong>Statistic</strong>: Average</li>
-<li><strong>Period</strong>: 5 minutes</li>
-</ul>
-</li>
-<li>
-<p>Set alarm conditions:</p>
-<ul>
-<li><strong>Threshold type</strong>: Static</li>
-<li><strong>Condition</strong>: Greater than 500 (milliseconds)</li>
-<li><strong>Datapoints to alarm</strong>: 2 out of 3</li>
-</ul>
-</li>
-<li>
-<p>Configure alarm actions:</p>
-<ul>
-<li><strong>Alarm state trigger</strong>: In alarm</li>
-<li><strong>SNS topic</strong>: Create new topic <code>caching-alerts</code></li>
-<li><strong>Email</strong>: Your email address</li>
-</ul>
-</li>
-<li>
-<p>Name the alarm:</p>
-<ul>
-<li><strong>Alarm name</strong>: <code>High-Response-Time-ALB</code></li>
-<li><strong>Description</strong>: <code>ALB response time is above 500ms</code></li>
-</ul>
-</li>
-</ol>
-<h3 id="create-low-cache-hit-rate-alarm">Create Low Cache Hit Rate Alarm</h3>
-<ol start="7">
-<li>
-<p>Create alarm for low cache hit rate:</p>
-<ul>
-<li><strong>Metric</strong>: CachingApp/Performance &gt; CacheHitRate</li>
-<li><strong>Condition</strong>: Less than 80 (percent)</li>
-<li><strong>Name</strong>: <code>Low-Cache-Hit-Rate</code></li>
-</ul>
-</li>
-</ol>
-<h3 id="create-high-error-rate-alarm">Create High Error Rate Alarm</h3>
-<ol start="8">
-<li>
-<p>Create alarm for high error rate:</p>
-<ul>
-<li><strong>Metric</strong>: AWS/ApplicationELB &gt; HTTPCode_Target_5XX_Count</li>
-<li><strong>Condition</strong>: Greater than 10 (count)</li>
-<li><strong>Name</strong>: <code>High-Error-Rate-ALB</code></li>
-</ul>
-</li>
-</ol>
-<h3 id="create-redis-high-cpu-alarm">Create Redis High CPU Alarm</h3>
-<ol start="9">
-<li>
-<p>Create alarm for Redis high CPU:</p>
-<ul>
-<li><strong>Metric</strong>: AWS/ElastiCache &gt; CPUUtilization</li>
-<li><strong>CacheClusterId</strong>: product-cache-001</li>
-<li><strong>Condition</strong>: Greater than 80 (percent)</li>
-<li><strong>Name</strong>: <code>Redis-High-CPU</code></li>
-</ul>
-</li>
-</ol>
-<h2 id="step-8-configure-log-insights">Step 8: Configure Log Insights</h2>
-<h3 id="set-up-log-groups">Set Up Log Groups</h3>
-<ol>
-<li>
-<p>Navigate to <strong>Log groups</strong> in CloudWatch</p>
-</li>
-<li>
-<p>Create log group for application logs:</p>
-<ul>
-<li><strong>Log group name</strong>: <code>/aws/ec2/caching-app</code></li>
-<li><strong>Retention</strong>: 7 days</li>
-</ul>
-</li>
-</ol>
-<h3 id="configure-cloudwatch-agent">Configure CloudWatch Agent</h3>
-<ol start="3">
-<li>Install and configure CloudWatch agent on EC2:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Create CloudWatch agent configuration</span>
+</span></span></code></pre>
+          </div>
+          <h3 id="add-custom-metrics-widget">Add Custom Metrics Widget</h3>
+          <ol start="5">
+            <li>
+              <p>Add custom metrics to dashboard:</p>
+              <ul>
+                <li><strong>Widget type</strong>: Line</li>
+                <li><strong>Metrics</strong>: CachingApp/Performance</li>
+                <li>
+                  <strong>Metric names</strong>: CacheHitRate, RedisHitRate
+                </li>
+                <li>
+                  <strong>Title</strong>:
+                  <code>Application Cache Performance</code>
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <h2 id="step-7-create-cloudwatch-alarms">
+            Step 7: Create CloudWatch Alarms
+          </h2>
+          <h3 id="create-high-response-time-alarm">
+            Create High Response Time Alarm
+          </h3>
+          <ol>
+            <li>
+              <p>Navigate to <strong>Alarms</strong> in CloudWatch</p>
+            </li>
+            <li>
+              <p>Click <strong>Create alarm</strong></p>
+            </li>
+            <li>
+              <p>Configure ALB response time alarm:</p>
+              <ul>
+                <li>
+                  <strong>Metric</strong>: AWS/ApplicationELB &gt;
+                  TargetResponseTime
+                </li>
+                <li><strong>LoadBalancer</strong>: caching-app-alb</li>
+                <li><strong>Statistic</strong>: Average</li>
+                <li><strong>Period</strong>: 5 minutes</li>
+              </ul>
+            </li>
+            <li>
+              <p>Set alarm conditions:</p>
+              <ul>
+                <li><strong>Threshold type</strong>: Static</li>
+                <li>
+                  <strong>Condition</strong>: Greater than 500 (milliseconds)
+                </li>
+                <li><strong>Datapoints to alarm</strong>: 2 out of 3</li>
+              </ul>
+            </li>
+            <li>
+              <p>Configure alarm actions:</p>
+              <ul>
+                <li><strong>Alarm state trigger</strong>: In alarm</li>
+                <li>
+                  <strong>SNS topic</strong>: Create new topic
+                  <code>caching-alerts</code>
+                </li>
+                <li><strong>Email</strong>: Your email address</li>
+              </ul>
+            </li>
+            <li>
+              <p>Name the alarm:</p>
+              <ul>
+                <li>
+                  <strong>Alarm name</strong>:
+                  <code>High-Response-Time-ALB</code>
+                </li>
+                <li>
+                  <strong>Description</strong>:
+                  <code>ALB response time is above 500ms</code>
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="create-low-cache-hit-rate-alarm">
+            Create Low Cache Hit Rate Alarm
+          </h3>
+          <ol start="7">
+            <li>
+              <p>Create alarm for low cache hit rate:</p>
+              <ul>
+                <li>
+                  <strong>Metric</strong>: CachingApp/Performance &gt;
+                  CacheHitRate
+                </li>
+                <li><strong>Condition</strong>: Less than 80 (percent)</li>
+                <li><strong>Name</strong>: <code>Low-Cache-Hit-Rate</code></li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="create-high-error-rate-alarm">
+            Create High Error Rate Alarm
+          </h3>
+          <ol start="8">
+            <li>
+              <p>Create alarm for high error rate:</p>
+              <ul>
+                <li>
+                  <strong>Metric</strong>: AWS/ApplicationELB &gt;
+                  HTTPCode_Target_5XX_Count
+                </li>
+                <li><strong>Condition</strong>: Greater than 10 (count)</li>
+                <li><strong>Name</strong>: <code>High-Error-Rate-ALB</code></li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="create-redis-high-cpu-alarm">Create Redis High CPU Alarm</h3>
+          <ol start="9">
+            <li>
+              <p>Create alarm for Redis high CPU:</p>
+              <ul>
+                <li>
+                  <strong>Metric</strong>: AWS/ElastiCache &gt; CPUUtilization
+                </li>
+                <li><strong>CacheClusterId</strong>: product-cache-001</li>
+                <li><strong>Condition</strong>: Greater than 80 (percent)</li>
+                <li><strong>Name</strong>: <code>Redis-High-CPU</code></li>
+              </ul>
+            </li>
+          </ol>
+          <h2 id="step-8-configure-log-insights">
+            Step 8: Configure Log Insights
+          </h2>
+          <h3 id="set-up-log-groups">Set Up Log Groups</h3>
+          <ol>
+            <li>
+              <p>Navigate to <strong>Log groups</strong> in CloudWatch</p>
+            </li>
+            <li>
+              <p>Create log group for application logs:</p>
+              <ul>
+                <li>
+                  <strong>Log group name</strong>:
+                  <code>/aws/ec2/caching-app</code>
+                </li>
+                <li><strong>Retention</strong>: 7 days</li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="configure-cloudwatch-agent">Configure CloudWatch Agent</h3>
+          <ol start="3">
+            <li>Install and configure CloudWatch agent on EC2:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Create CloudWatch agent configuration</span>
 </span></span><span style="display:flex;"><span>sudo nano /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
-</span></span></code></pre></div><ol start="4">
-<li>Add agent configuration:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span></code></pre>
+          </div>
+          <ol start="4">
+            <li>Add agent configuration:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;logs&#34;</span>: {
 </span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;logs_collected&#34;</span>: {
 </span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;files&#34;</span>: {
@@ -1297,545 +1292,381 @@
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><ol start="5">
-<li>Start CloudWatch agent:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Start the agent</span>
+</span></span></code></pre>
+          </div>
+          <ol start="5">
+            <li>Start CloudWatch agent:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Start the agent</span>
 </span></span><span style="display:flex;"><span>sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl <span style="color:#ae81ff">\
 </span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    -a fetch-config <span style="color:#ae81ff">\
 </span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    -m ec2 <span style="color:#ae81ff">\
 </span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <span style="color:#ae81ff">\
 </span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    -s
-</span></span></code></pre></div><h2 id="step-9-create-log-insights-queries">Step 9: Create Log Insights Queries</h2>
-<h3 id="create-performance-query">Create Performance Query</h3>
-<ol>
-<li>
-<p>Navigate to <strong>Log Insights</strong> in CloudWatch</p>
-</li>
-<li>
-<p>Create query for performance analysis:</p>
-</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span>fields <span style="color:#f92672">@</span><span style="color:#66d9ef">timestamp</span>, <span style="color:#f92672">@</span>message
+</span></span></code></pre>
+          </div>
+          <h2 id="step-9-create-log-insights-queries">
+            Step 9: Create Log Insights Queries
+          </h2>
+          <h3 id="create-performance-query">Create Performance Query</h3>
+          <ol>
+            <li>
+              <p>Navigate to <strong>Log Insights</strong> in CloudWatch</p>
+            </li>
+            <li>
+              <p>Create query for performance analysis:</p>
+            </li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-sql" data-lang="sql"><span style="display:flex;"><span>fields <span style="color:#f92672">@</span><span style="color:#66d9ef">timestamp</span>, <span style="color:#f92672">@</span>message
 </span></span><span style="display:flex;"><span><span style="color:#f92672">|</span> filter <span style="color:#f92672">@</span>message <span style="color:#66d9ef">like</span> <span style="color:#f92672">/</span><span style="color:#66d9ef">Cache</span> HIT<span style="color:#f92672">|</span><span style="color:#66d9ef">Cache</span> MISS<span style="color:#f92672">/</span>
 </span></span><span style="display:flex;"><span><span style="color:#f92672">|</span> stats <span style="color:#66d9ef">count</span>() <span style="color:#66d9ef">by</span> bin(<span style="color:#ae81ff">5</span>m)
 </span></span><span style="display:flex;"><span><span style="color:#f92672">|</span> sort <span style="color:#f92672">@</span><span style="color:#66d9ef">timestamp</span> <span style="color:#66d9ef">desc</span>
-</span></span></code></pre></div><h3 id="create-error-analysis-query">Create Error Analysis Query</h3>
-<ol start="3">
-<li>Create query for error analysis:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span>fields <span style="color:#f92672">@</span><span style="color:#66d9ef">timestamp</span>, <span style="color:#f92672">@</span>message
+</span></span></code></pre>
+          </div>
+          <h3 id="create-error-analysis-query">Create Error Analysis Query</h3>
+          <ol start="3">
+            <li>Create query for error analysis:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-sql" data-lang="sql"><span style="display:flex;"><span>fields <span style="color:#f92672">@</span><span style="color:#66d9ef">timestamp</span>, <span style="color:#f92672">@</span>message
 </span></span><span style="display:flex;"><span><span style="color:#f92672">|</span> filter <span style="color:#f92672">@</span>message <span style="color:#66d9ef">like</span> <span style="color:#f92672">/</span>ERROR<span style="color:#f92672">|</span>error<span style="color:#f92672">/</span>
 </span></span><span style="display:flex;"><span><span style="color:#f92672">|</span> stats <span style="color:#66d9ef">count</span>() <span style="color:#66d9ef">by</span> bin(<span style="color:#ae81ff">1</span>h)
 </span></span><span style="display:flex;"><span><span style="color:#f92672">|</span> sort <span style="color:#f92672">@</span><span style="color:#66d9ef">timestamp</span> <span style="color:#66d9ef">desc</span>
-</span></span></code></pre></div><h2 id="step-10-finalize-dashboard">Step 10: Finalize Dashboard</h2>
-<h3 id="arrange-dashboard-widgets">Arrange Dashboard Widgets</h3>
-<ol>
-<li>
-<p>Arrange widgets in logical order:</p>
-<ul>
-<li><strong>Top row</strong>: Overall performance (ALB, CloudFront)</li>
-<li><strong>Middle row</strong>: Cache performance (Redis, DAX)</li>
-<li><strong>Bottom row</strong>: Database and custom metrics</li>
-</ul>
-</li>
-</ol>
-<h3 id="save-dashboard">Save Dashboard</h3>
-<ol start="2">
-<li>
-<p>Save the dashboard:</p>
-<ul>
-<li>Click <strong>Save dashboard</strong></li>
-<li>Verify all widgets are displaying data</li>
-</ul>
-</li>
-</ol>
-<h2 id="step-11-test-monitoring-setup">Step 11: Test Monitoring Setup</h2>
-<h3 id="generate-test-traffic">Generate Test Traffic</h3>
-<ol>
-<li>Generate traffic to populate metrics:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Run load test to generate metrics</span>
+</span></span></code></pre>
+          </div>
+          <h2 id="step-10-finalize-dashboard">Step 10: Finalize Dashboard</h2>
+          <h3 id="arrange-dashboard-widgets">Arrange Dashboard Widgets</h3>
+          <ol>
+            <li>
+              <p>Arrange widgets in logical order:</p>
+              <ul>
+                <li>
+                  <strong>Top row</strong>: Overall performance (ALB,
+                  CloudFront)
+                </li>
+                <li>
+                  <strong>Middle row</strong>: Cache performance (Redis, DAX)
+                </li>
+                <li>
+                  <strong>Bottom row</strong>: Database and custom metrics
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="save-dashboard">Save Dashboard</h3>
+          <ol start="2">
+            <li>
+              <p>Save the dashboard:</p>
+              <ul>
+                <li>Click <strong>Save dashboard</strong></li>
+                <li>Verify all widgets are displaying data</li>
+              </ul>
+            </li>
+          </ol>
+          <h2 id="step-11-test-monitoring-setup">
+            Step 11: Test Monitoring Setup
+          </h2>
+          <h3 id="generate-test-traffic">Generate Test Traffic</h3>
+          <ol>
+            <li>Generate traffic to populate metrics:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Run load test to generate metrics</span>
 </span></span><span style="display:flex;"><span>ab -n <span style="color:#ae81ff">200</span> -c <span style="color:#ae81ff">20</span> <span style="color:#e6db74">&#34;https://d1234567890123.cloudfront.net/product/PROD001?category=Electronics&#34;</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Wait for metrics to appear (5-10 minutes)</span>
-</span></span></code></pre></div><h3 id="verify-metrics">Verify Metrics</h3>
-<ol start="2">
-<li>Check that all metrics are appearing in dashboard:</li>
-</ol>
-<h3 id="test-alarms">Test Alarms</h3>
-<ol start="3">
-<li>Trigger test alarm by stopping application:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Stop application to trigger alarms</span>
+</span></span></code></pre>
+          </div>
+          <h3 id="verify-metrics">Verify Metrics</h3>
+          <ol start="2">
+            <li>Check that all metrics are appearing in dashboard:</li>
+          </ol>
+          <h3 id="test-alarms">Test Alarms</h3>
+          <ol start="3">
+            <li>Trigger test alarm by stopping application:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Stop application to trigger alarms</span>
 </span></span><span style="display:flex;"><span>pm2 stop caching-app
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Wait for alarm to trigger (5-10 minutes)</span>
-</span></span></code></pre></div><ol start="4">
-<li>Restart application:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Restart application</span>
+</span></span></code></pre>
+          </div>
+          <ol start="4">
+            <li>Restart application:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Restart application</span>
 </span></span><span style="display:flex;"><span>pm2 start caching-app
-</span></span></code></pre></div><h2 id="step-12-document-monitoring-setup">Step 12: Document Monitoring Setup</h2>
-<h3 id="monitoring-configuration-summary">Monitoring Configuration Summary</h3>
-<p>Record the following information:</p>
-<h3 id="dashboard-information">Dashboard Information</h3>
-<ul>
-<li><strong>Dashboard Name</strong>: <code>MultiLayerCachingDashboard</code></li>
-<li><strong>Widgets</strong>: 8 widgets covering all services</li>
-<li><strong>Refresh Rate</strong>: Auto-refresh every 5 minutes</li>
-</ul>
-<h3 id="alarms-configured">Alarms Configured</h3>
-<ul>
-<li><strong>High Response Time</strong>: &gt;500ms for 2/3 datapoints</li>
-<li><strong>Low Cache Hit Rate</strong>: &lt;80% cache hit rate</li>
-<li><strong>High Error Rate</strong>: &gt;10 5xx errors</li>
-<li><strong>Redis High CPU</strong>: &gt;80% CPU utilization</li>
-</ul>
-<h3 id="custom-metrics">Custom Metrics</h3>
-<ul>
-<li><strong>Namespace</strong>: CachingApp/Performance</li>
-<li><strong>Metrics</strong>: TotalRequests, CacheHitRate, RedisHitRate</li>
-<li><strong>Frequency</strong>: Every minute via cron job</li>
-</ul>
-<h3 id="log-configuration">Log Configuration</h3>
-<ul>
-<li><strong>Log Group</strong>: /aws/ec2/caching-app</li>
-<li><strong>Retention</strong>: 7 days</li>
-<li><strong>Agent</strong>: CloudWatch agent configured</li>
-</ul>
-<h2 id="troubleshooting-monitoring-issues">Troubleshooting Monitoring Issues</h2>
-<h3 id="issue-metrics-not-appearing">Issue: Metrics Not Appearing</h3>
-<p><strong>Possible Causes:</strong></p>
-<ul>
-<li>IAM permissions insufficient</li>
-<li>CloudWatch agent not running</li>
-<li>Incorrect metric namespace</li>
-</ul>
-<p><strong>Solutions:</strong></p>
-<ul>
-<li>Verify IAM role has CloudWatch permissions</li>
-<li>Check agent status: <code>sudo systemctl status amazon-cloudwatch-agent</code></li>
-<li>Verify metric names and namespaces</li>
-</ul>
-<h3 id="issue-alarms-not-triggering">Issue: Alarms Not Triggering</h3>
-<p><strong>Possible Causes:</strong></p>
-<ul>
-<li>Incorrect threshold values</li>
-<li>Insufficient datapoints</li>
-<li>SNS topic not configured</li>
-</ul>
-<p><strong>Solutions:</strong></p>
-<ul>
-<li>Review alarm configuration and thresholds</li>
-<li>Check alarm history for evaluation details</li>
-<li>Verify SNS topic and email subscription</li>
-</ul>
-<h3 id="issue-custom-metrics-missing">Issue: Custom Metrics Missing</h3>
-<p><strong>Possible Causes:</strong></p>
-<ul>
-<li>Script execution errors</li>
-<li>Cron job not running</li>
-<li>Application endpoint unavailable</li>
-</ul>
-<p><strong>Solutions:</strong></p>
-<ul>
-<li>Test script manually: <code>./send-custom-metrics.sh</code></li>
-<li>Check cron job: <code>crontab -l</code></li>
-<li>Verify application is responding</li>
-</ul>
-<h2 id="best-practices-for-production">Best Practices for Production</h2>
-<h3 id="monitoring-strategy">Monitoring Strategy</h3>
-<ul>
-<li><strong>Proactive alerting</strong>: Set thresholds before issues occur</li>
-<li><strong>Comprehensive coverage</strong>: Monitor all layers of the stack</li>
-<li><strong>Regular review</strong>: Adjust thresholds based on actual performance</li>
-</ul>
-<h3 id="alert-management">Alert Management</h3>
-<ul>
-<li><strong>Escalation procedures</strong>: Define who gets notified when</li>
-<li><strong>Alert fatigue prevention</strong>: Avoid too many false positives</li>
-<li><strong>Documentation</strong>: Maintain runbooks for common issues</li>
-</ul>
-<h2 id="next-steps">Next Steps</h2>
-<p>Your monitoring and alerting setup is complete! You have:</p>
-<p>✅ <strong>Comprehensive dashboard</strong> monitoring all services<br>
-✅ <strong>Automated alerts</strong> for proactive issue detection<br>
-✅ <strong>Custom metrics</strong> for application-specific monitoring<br>
-✅ <strong>Log aggregation</strong> for troubleshooting<br>
-✅ <strong>Performance baselines</strong> established<br>
-✅ <strong>Alert testing</strong> verified and working</p>
-<h3 id="monitoring-benefits-achieved">Monitoring Benefits Achieved:</h3>
-<ul>
-<li><strong>Proactive issue detection</strong> before users are affected</li>
-<li><strong>Performance visibility</strong> across all cache layers</li>
-<li><strong>Automated alerting</strong> for critical thresholds</li>
-<li><strong>Historical data</strong> for capacity planning and optimization</li>
-</ul>
+</span></span></code></pre>
+          </div>
+          <h2 id="step-12-document-monitoring-setup">
+            Step 12: Document Monitoring Setup
+          </h2>
+          <h3 id="monitoring-configuration-summary">
+            Monitoring Configuration Summary
+          </h3>
+          <p>Record the following information:</p>
+          <h3 id="dashboard-information">Dashboard Information</h3>
+          <ul>
+            <li>
+              <strong>Dashboard Name</strong>:
+              <code>MultiLayerCachingDashboard</code>
+            </li>
+            <li><strong>Widgets</strong>: 8 widgets covering all services</li>
+            <li><strong>Refresh Rate</strong>: Auto-refresh every 5 minutes</li>
+          </ul>
+          <h3 id="alarms-configured">Alarms Configured</h3>
+          <ul>
+            <li>
+              <strong>High Response Time</strong>: &gt;500ms for 2/3 datapoints
+            </li>
+            <li><strong>Low Cache Hit Rate</strong>: &lt;80% cache hit rate</li>
+            <li><strong>High Error Rate</strong>: &gt;10 5xx errors</li>
+            <li><strong>Redis High CPU</strong>: &gt;80% CPU utilization</li>
+          </ul>
+          <h3 id="custom-metrics">Custom Metrics</h3>
+          <ul>
+            <li><strong>Namespace</strong>: CachingApp/Performance</li>
+            <li>
+              <strong>Metrics</strong>: TotalRequests, CacheHitRate,
+              RedisHitRate
+            </li>
+            <li><strong>Frequency</strong>: Every minute via cron job</li>
+          </ul>
+          <h3 id="log-configuration">Log Configuration</h3>
+          <ul>
+            <li><strong>Log Group</strong>: /aws/ec2/caching-app</li>
+            <li><strong>Retention</strong>: 7 days</li>
+            <li><strong>Agent</strong>: CloudWatch agent configured</li>
+          </ul>
+          <h2 id="troubleshooting-monitoring-issues">
+            Troubleshooting Monitoring Issues
+          </h2>
+          <h3 id="issue-metrics-not-appearing">Issue: Metrics Not Appearing</h3>
+          <p><strong>Possible Causes:</strong></p>
+          <ul>
+            <li>IAM permissions insufficient</li>
+            <li>CloudWatch agent not running</li>
+            <li>Incorrect metric namespace</li>
+          </ul>
+          <p><strong>Solutions:</strong></p>
+          <ul>
+            <li>Verify IAM role has CloudWatch permissions</li>
+            <li>
+              Check agent status:
+              <code>sudo systemctl status amazon-cloudwatch-agent</code>
+            </li>
+            <li>Verify metric names and namespaces</li>
+          </ul>
+          <h3 id="issue-alarms-not-triggering">Issue: Alarms Not Triggering</h3>
+          <p><strong>Possible Causes:</strong></p>
+          <ul>
+            <li>Incorrect threshold values</li>
+            <li>Insufficient datapoints</li>
+            <li>SNS topic not configured</li>
+          </ul>
+          <p><strong>Solutions:</strong></p>
+          <ul>
+            <li>Review alarm configuration and thresholds</li>
+            <li>Check alarm history for evaluation details</li>
+            <li>Verify SNS topic and email subscription</li>
+          </ul>
+          <h3 id="issue-custom-metrics-missing">
+            Issue: Custom Metrics Missing
+          </h3>
+          <p><strong>Possible Causes:</strong></p>
+          <ul>
+            <li>Script execution errors</li>
+            <li>Cron job not running</li>
+            <li>Application endpoint unavailable</li>
+          </ul>
+          <p><strong>Solutions:</strong></p>
+          <ul>
+            <li>Test script manually: <code>./send-custom-metrics.sh</code></li>
+            <li>Check cron job: <code>crontab -l</code></li>
+            <li>Verify application is responding</li>
+          </ul>
+          <h2 id="best-practices-for-production">
+            Best Practices for Production
+          </h2>
+          <h3 id="monitoring-strategy">Monitoring Strategy</h3>
+          <ul>
+            <li>
+              <strong>Proactive alerting</strong>: Set thresholds before issues
+              occur
+            </li>
+            <li>
+              <strong>Comprehensive coverage</strong>: Monitor all layers of the
+              stack
+            </li>
+            <li>
+              <strong>Regular review</strong>: Adjust thresholds based on actual
+              performance
+            </li>
+          </ul>
+          <h3 id="alert-management">Alert Management</h3>
+          <ul>
+            <li>
+              <strong>Escalation procedures</strong>: Define who gets notified
+              when
+            </li>
+            <li>
+              <strong>Alert fatigue prevention</strong>: Avoid too many false
+              positives
+            </li>
+            <li>
+              <strong>Documentation</strong>: Maintain runbooks for common
+              issues
+            </li>
+          </ul>
+          <h2 id="next-steps">Next Steps</h2>
+          <p>Your monitoring and alerting setup is complete! You have:</p>
+          <p>
+            ✅ <strong>Comprehensive dashboard</strong> monitoring all
+            services<br />
+            ✅ <strong>Automated alerts</strong> for proactive issue
+            detection<br />
+            ✅ <strong>Custom metrics</strong> for application-specific
+            monitoring<br />
+            ✅ <strong>Log aggregation</strong> for troubleshooting<br />
+            ✅ <strong>Performance baselines</strong> established<br />
+            ✅ <strong>Alert testing</strong> verified and working
+          </p>
+          <h3 id="monitoring-benefits-achieved">
+            Monitoring Benefits Achieved:
+          </h3>
+          <ul>
+            <li>
+              <strong>Proactive issue detection</strong> before users are
+              affected
+            </li>
+            <li>
+              <strong>Performance visibility</strong> across all cache layers
+            </li>
+            <li><strong>Automated alerting</strong> for critical thresholds</li>
+            <li>
+              <strong>Historical data</strong> for capacity planning and
+              optimization
+            </li>
+          </ul>
 
-<div class="notices tip" ><p>Regularly review your monitoring setup and adjust thresholds based on actual performance patterns. Consider setting up additional alerts for business-specific metrics.</p>
-</div>
+          <div class="notices tip">
+            <p>
+              Regularly review your monitoring setup and adjust thresholds based
+              on actual performance patterns. Consider setting up additional
+              alerts for business-specific metrics.
+            </p>
+          </div>
 
-<p>Next, we&rsquo;ll clean up all the resources created during this workshop to avoid ongoing charges.</p>
+          <p>
+            Next, we&rsquo;ll clean up all the resources created during this
+            workshop to avoid ongoing charges.
+          </p>
 
-
-
-
-
-<footer class=" footline" >
-	
-</footer>
-
-        
+          <footer class="footline"></footer>
         </div>
-        
-
       </div>
 
-    <div id="navigation">
-        
-        
+      <div id="navigation">
+        <a
+          class="nav nav-prev"
+          href="/8-performance-testing/"
+          title="8. Performance Testing"
+        >
+          <i class="fa fa-chevron-left"></i
+        ></a>
 
-        
-            
-            
-                
-                    
-                    
-                
-                
-
-                    
-                    
-                        
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                        
-                        
-                    
-                
-                
-
-                    
-                    
-                        
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                        
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                        
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                        
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                        
-                        
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-            
-        
-
-        
-
-
-	 
-	 
-		
-			<a class="nav nav-prev" href="/8-performance-testing/" title="8. Performance Testing"> <i class="fa fa-chevron-left"></i></a>
-		
-		
-			<a class="nav nav-next" href="/10-cleanup/" title="10. Resource Cleanup Guide" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
-		
-	
-    </div>
-
+        <a
+          class="nav nav-next"
+          href="/10-cleanup/"
+          title="10. Resource Cleanup Guide"
+          style="margin-right: 0px"
+          ><i class="fa fa-chevron-right"></i
+        ></a>
+      </div>
     </section>
 
-    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
-      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
+    <div
+      style="
+        left: -1000px;
+        overflow: scroll;
+        position: absolute;
+        top: -1000px;
+        border: none;
+        box-sizing: content-box;
+        height: 200px;
+        margin: 0px;
+        padding: 0px;
+        width: 200px;
+      "
+    >
+      <div
+        style="
+          border: none;
+          box-sizing: content-box;
+          height: 200px;
+          margin: 0px;
+          padding: 0px;
+          width: 200px;
+        "
+      ></div>
     </div>
     <script src="/js/clipboard.min.js?1754898926"></script>
     <script src="/js/perfect-scrollbar.min.js?1754898926"></script>
@@ -1843,21 +1674,19 @@
     <script src="/js/jquery.sticky.js?1754898926"></script>
     <script src="/js/featherlight.min.js?1754898926"></script>
     <script src="/js/highlight.pack.js?1754898926"></script>
-    <script>hljs.initHighlightingOnLoad();</script>
+    <script>
+      hljs.initHighlightingOnLoad();
+    </script>
     <script src="/js/modernizr.custom-3.6.0.js?1754898926"></script>
     <script src="/js/learn.js?1754898926"></script>
     <script src="/js/hugo-learn.js?1754898926"></script>
     <script src="/js/language-switcher.js?1754898926"></script>
     <script src="/js/multilingual.js?1754898926"></script>
-    
-        
-            <script src="/mermaid/mermaid.js?1754898926"></script>
-        
-        <script>
-            mermaid.initialize({ startOnLoad: true });
-        </script>
-    
-    
 
+    <script src="/mermaid/mermaid.js?1754898926"></script>
+
+    <script>
+      mermaid.initialize({ startOnLoad: true });
+    </script>
   </body>
 </html>

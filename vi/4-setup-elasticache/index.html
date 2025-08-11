@@ -1,1154 +1,1141 @@
 <!DOCTYPE html>
 <html lang="vi" class="js csstransforms3d">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="generator" content="Hugo 0.147.9">
-    <meta name="description" content="">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content="Hugo 0.147.9" />
+    <meta name="description" content="" />
 
+    <link rel="icon" href="/images/favicon.png" type="image/png" />
 
-    <link rel="icon" href="/images/favicon.png" type="image/png">
+    <title>
+      4. Thiết Lập ElastiCache Redis :: Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ
+      Nhớ
+    </title>
 
-    <title>4. Thiết Lập ElastiCache Redis :: Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</title>
-
-    
-    <link href="/css/nucleus.css?1754898927" rel="stylesheet">
-    <link href="/css/fontawesome-all.min.css?1754898927" rel="stylesheet">
-    <link href="/css/hybrid.css?1754898927" rel="stylesheet">
-    <link href="/css/featherlight.min.css?1754898927" rel="stylesheet">
-    <link href="/css/perfect-scrollbar.min.css?1754898927" rel="stylesheet">
-    <link href="/css/auto-complete.css?1754898927" rel="stylesheet">
-    <link href="/css/atom-one-dark-reasonable.css?1754898927" rel="stylesheet">
-    <link href="/css/theme.css?1754898927" rel="stylesheet">
-    <link href="/css/tabs.css?1754898927" rel="stylesheet">
-    <link href="/css/hugo-theme.css?1754898927" rel="stylesheet">
-    
-    
+    <link href="/css/nucleus.css?1754898927" rel="stylesheet" />
+    <link href="/css/fontawesome-all.min.css?1754898927" rel="stylesheet" />
+    <link href="/css/hybrid.css?1754898927" rel="stylesheet" />
+    <link href="/css/featherlight.min.css?1754898927" rel="stylesheet" />
+    <link href="/css/perfect-scrollbar.min.css?1754898927" rel="stylesheet" />
+    <link href="/css/auto-complete.css?1754898927" rel="stylesheet" />
+    <link
+      href="/css/atom-one-dark-reasonable.css?1754898927"
+      rel="stylesheet"
+    />
+    <link href="/css/theme.css?1754898927" rel="stylesheet" />
+    <link href="/css/tabs.css?1754898927" rel="stylesheet" />
+    <link href="/css/hugo-theme.css?1754898927" rel="stylesheet" />
 
     <script src="/js/jquery-3.3.1.min.js?1754898927"></script>
 
     <style>
-      :root #header + #content > #left > #rlblock_left{
-          display:none !important;
+      :root #header + #content > #left > #rlblock_left {
+        display: none !important;
       }
-      
     </style>
-    
   </head>
   <body class="" data-url="/vi/4-setup-elasticache/">
     <nav id="sidebar" class="">
-
-
-
-  <div id="header-wrapper">
-    <div id="header">
-      <a
-  id="logo"
-  href='/workshop-caching'
->
-  <svg
-    id="Layer_1"
-    data-name="Layer 1"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 60 30"
-    width="30%"
-  >
-    <defs>
-      <style>
-        .cls-1 {
-          fill: #fff;
-        }
-        .cls-2 {
-          fill: #f90;
-          fill-rule: evenodd;
-        }
-      </style>
-    </defs>
-    <title>AWS-Logo_White-Color</title>
-    <path
-      class="cls-1"
-      d="M14.09,10.85a4.7,4.7,0,0,0,.19,1.48,7.73,7.73,0,0,0,.54,1.19.77.77,0,0,1,.12.38.64.64,0,0,1-.32.49l-1,.7a.83.83,0,0,1-.44.15.69.69,0,0,1-.49-.23,3.8,3.8,0,0,1-.6-.77q-.25-.42-.51-1a6.14,6.14,0,0,1-4.89,2.3,4.54,4.54,0,0,1-3.32-1.19,4.27,4.27,0,0,1-1.22-3.2A4.28,4.28,0,0,1,3.61,7.75,6.06,6.06,0,0,1,7.69,6.46a12.47,12.47,0,0,1,1.76.13q.92.13,1.91.36V5.73a3.65,3.65,0,0,0-.79-2.66A3.81,3.81,0,0,0,7.86,2.3a7.71,7.71,0,0,0-1.79.22,12.78,12.78,0,0,0-1.79.57,4.55,4.55,0,0,1-.58.22l-.26,0q-.35,0-.35-.52V2a1.09,1.09,0,0,1,.12-.58,1.2,1.2,0,0,1,.47-.35A10.88,10.88,0,0,1,5.77.32,10.19,10.19,0,0,1,8.36,0a6,6,0,0,1,4.35,1.35,5.49,5.49,0,0,1,1.38,4.09ZM7.34,13.38a5.36,5.36,0,0,0,1.72-.31A3.63,3.63,0,0,0,10.63,12,2.62,2.62,0,0,0,11.19,11a5.63,5.63,0,0,0,.16-1.44v-.7a14.35,14.35,0,0,0-1.53-.28,12.37,12.37,0,0,0-1.56-.1,3.84,3.84,0,0,0-2.47.67A2.34,2.34,0,0,0,5,11a2.35,2.35,0,0,0,.61,1.76A2.4,2.4,0,0,0,7.34,13.38Zm13.35,1.8a1,1,0,0,1-.64-.16,1.3,1.3,0,0,1-.35-.65L15.81,1.51a3,3,0,0,1-.15-.67.36.36,0,0,1,.41-.41H17.7a1,1,0,0,1,.65.16,1.4,1.4,0,0,1,.33.65l2.79,11,2.59-11A1.17,1.17,0,0,1,24.39.6a1.1,1.1,0,0,1,.67-.16H26.4a1.1,1.1,0,0,1,.67.16,1.17,1.17,0,0,1,.32.65L30,12.39,32.88,1.25A1.39,1.39,0,0,1,33.22.6a1,1,0,0,1,.65-.16h1.54a.36.36,0,0,1,.41.41,1.36,1.36,0,0,1,0,.26,3.64,3.64,0,0,1-.12.41l-4,12.86a1.3,1.3,0,0,1-.35.65,1,1,0,0,1-.64.16H29.25a1,1,0,0,1-.67-.17,1.26,1.26,0,0,1-.32-.67L25.67,3.64,23.11,14.34a1.26,1.26,0,0,1-.32.67,1,1,0,0,1-.67.17Zm21.36.44a11.28,11.28,0,0,1-2.56-.29,7.44,7.44,0,0,1-1.92-.67,1,1,0,0,1-.61-.93v-.84q0-.52.38-.52a.9.9,0,0,1,.31.06l.42.17a8.77,8.77,0,0,0,1.83.58,9.78,9.78,0,0,0,2,.2,4.48,4.48,0,0,0,2.43-.55,1.76,1.76,0,0,0,.86-1.57,1.61,1.61,0,0,0-.45-1.16A4.29,4.29,0,0,0,43,9.22l-2.41-.76A5.15,5.15,0,0,1,38,6.78a3.94,3.94,0,0,1-.83-2.41,3.7,3.7,0,0,1,.45-1.85,4.47,4.47,0,0,1,1.19-1.37A5.27,5.27,0,0,1,40.51.29,7.4,7.4,0,0,1,42.6,0a8.87,8.87,0,0,1,1.12.07q.57.07,1.08.19t.95.26a4.27,4.27,0,0,1,.7.29,1.59,1.59,0,0,1,.49.41.94.94,0,0,1,.15.55v.79q0,.52-.38.52a1.76,1.76,0,0,1-.64-.2,7.74,7.74,0,0,0-3.2-.64,4.37,4.37,0,0,0-2.21.47,1.6,1.6,0,0,0-.79,1.48,1.58,1.58,0,0,0,.49,1.18,4.94,4.94,0,0,0,1.83.92L44.55,7a5.08,5.08,0,0,1,2.57,1.6A3.76,3.76,0,0,1,47.9,11a4.21,4.21,0,0,1-.44,1.93,4.4,4.4,0,0,1-1.21,1.47,5.43,5.43,0,0,1-1.85.93A8.25,8.25,0,0,1,42.05,15.62Z"
-    ></path>
-    <path
-      class="cls-2"
-      d="M45.19,23.81C39.72,27.85,31.78,30,25,30A36.64,36.64,0,0,1,.22,20.57c-.51-.46-.06-1.09.56-.74A49.78,49.78,0,0,0,25.53,26.4,49.23,49.23,0,0,0,44.4,22.53C45.32,22.14,46.1,23.14,45.19,23.81Z"
-    ></path>
-    <path
-      class="cls-2"
-      d="M47.47,21.21c-.7-.9-4.63-.42-6.39-.21-.53.06-.62-.4-.14-.74,3.13-2.2,8.27-1.57,8.86-.83s-.16,5.89-3.09,8.35c-.45.38-.88.18-.68-.32C46.69,25.8,48.17,22.11,47.47,21.21Z"
-    ></path>
-  </svg>
-</a>
-
-    </div>
-    
-        <div class="searchbox">
-    <label for="search-by"><i class="fas fa-search"></i></label>
-    <input data-search-input id="search-by" type="search" placeholder="Search...">
-    <span data-search-clear=""><i class="fas fa-times"></i></span>
-</div>
-
-<script type="text/javascript" src="/js/lunr.min.js?1754898927"></script>
-<script type="text/javascript" src="/js/auto-complete.js?1754898927"></script>
-<script type="text/javascript">
-    var baseurl = "\/\/vi";
-</script>
-<script type="text/javascript" src="/js/search.js?1754898927"></script>
-
-    
-  </div>
-
-
-    <div class="highlightable">
-    <ul class="topics">
-
-        
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/1-introduction/" title="1. Giới Thiệu" class="dd-item
-        
-        
-        
-        ">
-      <a href="/vi/1-introduction/">
-          <b></b>1. Giới Thiệu
-          
-      </a>
-      
-      
-        <ul>
-          
-          
-            
-          
-          
-
-        
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/1-introduction/1.1-overview/" title="1.1 Tổng Quan Workshop" class="dd-item
-        
-        
-        
-        ">
-      <a href="/vi/1-introduction/1.1-overview/">
-          <b></b>1.1 Tổng Quan Workshop
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/1-introduction/1.2-architecture/" title="1.2 Tổng Quan Kiến Trúc" class="dd-item
-        
-        
-        
-        ">
-      <a href="/vi/1-introduction/1.2-architecture/">
-          <b></b>1.2 Tổng Quan Kiến Trúc
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-        
-        </ul>
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/2-setup-vpc/" title="2. Thiết Lập VPC và Hạ Tầng Mạng" class="dd-item
-        
-        
-        
-        ">
-      <a href="/vi/2-setup-vpc/">
-          <b></b>2. Thiết Lập VPC và Hạ Tầng Mạng
-          
-      </a>
-      
-      
-        <ul>
-          
-          
-            
-          
-          
-
-        
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/2-setup-vpc/2.1-create-vpc/" title="2.1 Tạo VPC" class="dd-item
-        
-        
-        
-        ">
-      <a href="/vi/2-setup-vpc/2.1-create-vpc/">
-          <b></b>2.1 Tạo VPC
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/2-setup-vpc/2.2-security-groups/" title="2.2 Tạo Security Groups" class="dd-item
-        
-        
-        
-        ">
-      <a href="/vi/2-setup-vpc/2.2-security-groups/">
-          <b></b>2.2 Tạo Security Groups
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-        
-        </ul>
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/3-setup-dynamodb/" title="3. Thiết Lập DynamoDB và DAX" class="dd-item
-        
-        
-        
-        ">
-      <a href="/vi/3-setup-dynamodb/">
-          <b></b>3. Thiết Lập DynamoDB và DAX
-          
-      </a>
-      
-      
-        <ul>
-          
-          
-            
-          
-          
-
-        
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/3-setup-dynamodb/3.1-create-table/" title="3.1 Tạo DynamoDB Table" class="dd-item
-        
-        
-        
-        ">
-      <a href="/vi/3-setup-dynamodb/3.1-create-table/">
-          <b></b>3.1 Tạo DynamoDB Table
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/3-setup-dynamodb/3.2-setup-dax/" title="3.2 Thiết Lập DynamoDB DAX" class="dd-item
-        
-        
-        
-        ">
-      <a href="/vi/3-setup-dynamodb/3.2-setup-dax/">
-          <b></b>3.2 Thiết Lập DynamoDB DAX
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-        
-        </ul>
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/4-setup-elasticache/" title="4. Thiết Lập ElastiCache Redis" class="dd-item
-        
-        active
-        
-        ">
-      <a href="/vi/4-setup-elasticache/">
-          <b></b>4. Thiết Lập ElastiCache Redis
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/5-setup-application/" title="5. Thiết Lập Application" class="dd-item
-        
-        
-        
-        ">
-      <a href="/vi/5-setup-application/">
-          <b></b>5. Thiết Lập Application
-          
-      </a>
-      
-      
-        <ul>
-          
-          
-            
-          
-          
-
-        
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/5-setup-application/5.1-launch-ec2/" title="5.1 Khởi Chạy EC2 Instance" class="dd-item
-        
-        
-        
-        ">
-      <a href="/vi/5-setup-application/5.1-launch-ec2/">
-          <b></b>5.1 Khởi Chạy EC2 Instance
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/5-setup-application/5.2-deploy-app/" title="5.2 Triển Khai Application" class="dd-item
-        
-        
-        
-        ">
-      <a href="/vi/5-setup-application/5.2-deploy-app/">
-          <b></b>5.2 Triển Khai Application
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-        
-        </ul>
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/6-setup-loadbalancer/" title="6. Thiết Lập Application Load Balancer" class="dd-item
-        
-        
-        
-        ">
-      <a href="/vi/6-setup-loadbalancer/">
-          <b></b>6. Thiết Lập Application Load Balancer
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/7-setup-cloudfront/" title="7. Thiết Lập CloudFront CDN" class="dd-item
-        
-        
-        
-        ">
-      <a href="/vi/7-setup-cloudfront/">
-          <b></b>7. Thiết Lập CloudFront CDN
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/8-performance-testing/" title="8. Kiểm Tra Hiệu Suất" class="dd-item
-        
-        
-        
-        ">
-      <a href="/vi/8-performance-testing/">
-          <b></b>8. Kiểm Tra Hiệu Suất
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/9-monitoring/" title="9. Giám Sát và Cảnh Báo" class="dd-item
-        
-        
-        
-        ">
-      <a href="/vi/9-monitoring/">
-          <b></b>9. Giám Sát và Cảnh Báo
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/vi/10-cleanup/" title="10. Hướng Dẫn Dọn Dẹp Tài Nguyên" class="dd-item
-        
-        
-        
-        ">
-      <a href="/vi/10-cleanup/">
-          <b></b>10. Hướng Dẫn Dọn Dẹp Tài Nguyên
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-        
-    </ul>
-
-    
-    
-
-    
-    <section id="prefooter">
-      <hr/>
-      <ul>
-      
-        <li>
-          <a class="padding">
-            <i class="fas fa-language fa-fw"></i>
-          <div class="select-style">
-            <select id="select-language" onchange="location = this.value;">
-          
-          
-          
-              
-              
-                  
-                    
-                    
-                      <option id="en" value="/4-setup-elasticache/">English</option>
-                    
-                  
-              
-                  
-              
-          
-              
-              
-                  
-              
-                  
-                    
-                    
-                      <option id="vi" value="/vi/4-setup-elasticache/" selected>Tiếng Việt</option>
-                    
-                  
-              
-          
-        </select>
-        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-          width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
-          <g>
-            <g id="arrow-drop-down">
-              <polygon points="0,63.75 127.5,191.25 255,63.75 		" />
-            </g>
-          </g>
-        </svg>
+      <div id="header-wrapper">
+        <div id="header">
+          <a id="logo" href="/">
+            <svg
+              id="Layer_1"
+              data-name="Layer 1"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 60 30"
+              width="30%"
+            >
+              <defs>
+                <style>
+                  .cls-1 {
+                    fill: #fff;
+                  }
+                  .cls-2 {
+                    fill: #f90;
+                    fill-rule: evenodd;
+                  }
+                </style>
+              </defs>
+              <title>AWS-Logo_White-Color</title>
+              <path
+                class="cls-1"
+                d="M14.09,10.85a4.7,4.7,0,0,0,.19,1.48,7.73,7.73,0,0,0,.54,1.19.77.77,0,0,1,.12.38.64.64,0,0,1-.32.49l-1,.7a.83.83,0,0,1-.44.15.69.69,0,0,1-.49-.23,3.8,3.8,0,0,1-.6-.77q-.25-.42-.51-1a6.14,6.14,0,0,1-4.89,2.3,4.54,4.54,0,0,1-3.32-1.19,4.27,4.27,0,0,1-1.22-3.2A4.28,4.28,0,0,1,3.61,7.75,6.06,6.06,0,0,1,7.69,6.46a12.47,12.47,0,0,1,1.76.13q.92.13,1.91.36V5.73a3.65,3.65,0,0,0-.79-2.66A3.81,3.81,0,0,0,7.86,2.3a7.71,7.71,0,0,0-1.79.22,12.78,12.78,0,0,0-1.79.57,4.55,4.55,0,0,1-.58.22l-.26,0q-.35,0-.35-.52V2a1.09,1.09,0,0,1,.12-.58,1.2,1.2,0,0,1,.47-.35A10.88,10.88,0,0,1,5.77.32,10.19,10.19,0,0,1,8.36,0a6,6,0,0,1,4.35,1.35,5.49,5.49,0,0,1,1.38,4.09ZM7.34,13.38a5.36,5.36,0,0,0,1.72-.31A3.63,3.63,0,0,0,10.63,12,2.62,2.62,0,0,0,11.19,11a5.63,5.63,0,0,0,.16-1.44v-.7a14.35,14.35,0,0,0-1.53-.28,12.37,12.37,0,0,0-1.56-.1,3.84,3.84,0,0,0-2.47.67A2.34,2.34,0,0,0,5,11a2.35,2.35,0,0,0,.61,1.76A2.4,2.4,0,0,0,7.34,13.38Zm13.35,1.8a1,1,0,0,1-.64-.16,1.3,1.3,0,0,1-.35-.65L15.81,1.51a3,3,0,0,1-.15-.67.36.36,0,0,1,.41-.41H17.7a1,1,0,0,1,.65.16,1.4,1.4,0,0,1,.33.65l2.79,11,2.59-11A1.17,1.17,0,0,1,24.39.6a1.1,1.1,0,0,1,.67-.16H26.4a1.1,1.1,0,0,1,.67.16,1.17,1.17,0,0,1,.32.65L30,12.39,32.88,1.25A1.39,1.39,0,0,1,33.22.6a1,1,0,0,1,.65-.16h1.54a.36.36,0,0,1,.41.41,1.36,1.36,0,0,1,0,.26,3.64,3.64,0,0,1-.12.41l-4,12.86a1.3,1.3,0,0,1-.35.65,1,1,0,0,1-.64.16H29.25a1,1,0,0,1-.67-.17,1.26,1.26,0,0,1-.32-.67L25.67,3.64,23.11,14.34a1.26,1.26,0,0,1-.32.67,1,1,0,0,1-.67.17Zm21.36.44a11.28,11.28,0,0,1-2.56-.29,7.44,7.44,0,0,1-1.92-.67,1,1,0,0,1-.61-.93v-.84q0-.52.38-.52a.9.9,0,0,1,.31.06l.42.17a8.77,8.77,0,0,0,1.83.58,9.78,9.78,0,0,0,2,.2,4.48,4.48,0,0,0,2.43-.55,1.76,1.76,0,0,0,.86-1.57,1.61,1.61,0,0,0-.45-1.16A4.29,4.29,0,0,0,43,9.22l-2.41-.76A5.15,5.15,0,0,1,38,6.78a3.94,3.94,0,0,1-.83-2.41,3.7,3.7,0,0,1,.45-1.85,4.47,4.47,0,0,1,1.19-1.37A5.27,5.27,0,0,1,40.51.29,7.4,7.4,0,0,1,42.6,0a8.87,8.87,0,0,1,1.12.07q.57.07,1.08.19t.95.26a4.27,4.27,0,0,1,.7.29,1.59,1.59,0,0,1,.49.41.94.94,0,0,1,.15.55v.79q0,.52-.38.52a1.76,1.76,0,0,1-.64-.2,7.74,7.74,0,0,0-3.2-.64,4.37,4.37,0,0,0-2.21.47,1.6,1.6,0,0,0-.79,1.48,1.58,1.58,0,0,0,.49,1.18,4.94,4.94,0,0,0,1.83.92L44.55,7a5.08,5.08,0,0,1,2.57,1.6A3.76,3.76,0,0,1,47.9,11a4.21,4.21,0,0,1-.44,1.93,4.4,4.4,0,0,1-1.21,1.47,5.43,5.43,0,0,1-1.85.93A8.25,8.25,0,0,1,42.05,15.62Z"
+              ></path>
+              <path
+                class="cls-2"
+                d="M45.19,23.81C39.72,27.85,31.78,30,25,30A36.64,36.64,0,0,1,.22,20.57c-.51-.46-.06-1.09.56-.74A49.78,49.78,0,0,0,25.53,26.4,49.23,49.23,0,0,0,44.4,22.53C45.32,22.14,46.1,23.14,45.19,23.81Z"
+              ></path>
+              <path
+                class="cls-2"
+                d="M47.47,21.21c-.7-.9-4.63-.42-6.39-.21-.53.06-.62-.4-.14-.74,3.13-2.2,8.27-1.57,8.86-.83s-.16,5.89-3.09,8.35c-.45.38-.88.18-.68-.32C46.69,25.8,48.17,22.11,47.47,21.21Z"
+              ></path>
+            </svg>
+          </a>
         </div>
-        </a>
-        </li>
-      
 
-      
-      </ul>
-    </section>
-    
-    <section id="footer">
-      <section id="shortcuts" style="font-weight: bold;">
-        <h3>More</h3>
-        <ul>
-          
-              <li> 
-                  <a class="padding" href="https://aws.amazon.com/blogs"><i class="fab fa-aws"></i> AWS Study Group - Blog</a>
+        <div class="searchbox">
+          <label for="search-by"><i class="fas fa-search"></i></label>
+          <input
+            data-search-input
+            id="search-by"
+            type="search"
+            placeholder="Search..."
+          />
+          <span data-search-clear=""><i class="fas fa-times"></i></span>
+        </div>
+
+        <script
+          type="text/javascript"
+          src="/js/lunr.min.js?1754898927"
+        ></script>
+        <script
+          type="text/javascript"
+          src="/js/auto-complete.js?1754898927"
+        ></script>
+        <script type="text/javascript">
+          var baseurl = "\/\/vi";
+        </script>
+        <script type="text/javascript" src="/js/search.js?1754898927"></script>
+      </div>
+
+      <div class="highlightable">
+        <ul class="topics">
+          <li
+            data-nav-id="/vi/1-introduction/"
+            title="1. Giới Thiệu"
+            class="dd-item"
+          >
+            <a href="/vi/1-introduction/"> <b></b>1. Giới Thiệu </a>
+
+            <ul>
+              <li
+                data-nav-id="/vi/1-introduction/1.1-overview/"
+                title="1.1 Tổng Quan Workshop"
+                class="dd-item"
+              >
+                <a href="/vi/1-introduction/1.1-overview/">
+                  <b></b>1.1 Tổng Quan Workshop
+                </a>
               </li>
-          
-              <li> 
-                  <a class="padding" href="https://www.facebook.com/groups/awsstudygroupfcj"><i class="fab fa-facebook"></i> AWS Study Group - FB Group</a>
+
+              <li
+                data-nav-id="/vi/1-introduction/1.2-architecture/"
+                title="1.2 Tổng Quan Kiến Trúc"
+                class="dd-item"
+              >
+                <a href="/vi/1-introduction/1.2-architecture/">
+                  <b></b>1.2 Tổng Quan Kiến Trúc
+                </a>
               </li>
-          
+            </ul>
+          </li>
+
+          <li
+            data-nav-id="/vi/2-setup-vpc/"
+            title="2. Thiết Lập VPC và Hạ Tầng Mạng"
+            class="dd-item"
+          >
+            <a href="/vi/2-setup-vpc/">
+              <b></b>2. Thiết Lập VPC và Hạ Tầng Mạng
+            </a>
+
+            <ul>
+              <li
+                data-nav-id="/vi/2-setup-vpc/2.1-create-vpc/"
+                title="2.1 Tạo VPC"
+                class="dd-item"
+              >
+                <a href="/vi/2-setup-vpc/2.1-create-vpc/">
+                  <b></b>2.1 Tạo VPC
+                </a>
+              </li>
+
+              <li
+                data-nav-id="/vi/2-setup-vpc/2.2-security-groups/"
+                title="2.2 Tạo Security Groups"
+                class="dd-item"
+              >
+                <a href="/vi/2-setup-vpc/2.2-security-groups/">
+                  <b></b>2.2 Tạo Security Groups
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <li
+            data-nav-id="/vi/3-setup-dynamodb/"
+            title="3. Thiết Lập DynamoDB và DAX"
+            class="dd-item"
+          >
+            <a href="/vi/3-setup-dynamodb/">
+              <b></b>3. Thiết Lập DynamoDB và DAX
+            </a>
+
+            <ul>
+              <li
+                data-nav-id="/vi/3-setup-dynamodb/3.1-create-table/"
+                title="3.1 Tạo DynamoDB Table"
+                class="dd-item"
+              >
+                <a href="/vi/3-setup-dynamodb/3.1-create-table/">
+                  <b></b>3.1 Tạo DynamoDB Table
+                </a>
+              </li>
+
+              <li
+                data-nav-id="/vi/3-setup-dynamodb/3.2-setup-dax/"
+                title="3.2 Thiết Lập DynamoDB DAX"
+                class="dd-item"
+              >
+                <a href="/vi/3-setup-dynamodb/3.2-setup-dax/">
+                  <b></b>3.2 Thiết Lập DynamoDB DAX
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <li
+            data-nav-id="/vi/4-setup-elasticache/"
+            title="4. Thiết Lập ElastiCache Redis"
+            class="dd-item active"
+          >
+            <a href="/vi/4-setup-elasticache/">
+              <b></b>4. Thiết Lập ElastiCache Redis
+            </a>
+          </li>
+
+          <li
+            data-nav-id="/vi/5-setup-application/"
+            title="5. Thiết Lập Application"
+            class="dd-item"
+          >
+            <a href="/vi/5-setup-application/">
+              <b></b>5. Thiết Lập Application
+            </a>
+
+            <ul>
+              <li
+                data-nav-id="/vi/5-setup-application/5.1-launch-ec2/"
+                title="5.1 Khởi Chạy EC2 Instance"
+                class="dd-item"
+              >
+                <a href="/vi/5-setup-application/5.1-launch-ec2/">
+                  <b></b>5.1 Khởi Chạy EC2 Instance
+                </a>
+              </li>
+
+              <li
+                data-nav-id="/vi/5-setup-application/5.2-deploy-app/"
+                title="5.2 Triển Khai Application"
+                class="dd-item"
+              >
+                <a href="/vi/5-setup-application/5.2-deploy-app/">
+                  <b></b>5.2 Triển Khai Application
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <li
+            data-nav-id="/vi/6-setup-loadbalancer/"
+            title="6. Thiết Lập Application Load Balancer"
+            class="dd-item"
+          >
+            <a href="/vi/6-setup-loadbalancer/">
+              <b></b>6. Thiết Lập Application Load Balancer
+            </a>
+          </li>
+
+          <li
+            data-nav-id="/vi/7-setup-cloudfront/"
+            title="7. Thiết Lập CloudFront CDN"
+            class="dd-item"
+          >
+            <a href="/vi/7-setup-cloudfront/">
+              <b></b>7. Thiết Lập CloudFront CDN
+            </a>
+          </li>
+
+          <li
+            data-nav-id="/vi/8-performance-testing/"
+            title="8. Kiểm Tra Hiệu Suất"
+            class="dd-item"
+          >
+            <a href="/vi/8-performance-testing/">
+              <b></b>8. Kiểm Tra Hiệu Suất
+            </a>
+          </li>
+
+          <li
+            data-nav-id="/vi/9-monitoring/"
+            title="9. Giám Sát và Cảnh Báo"
+            class="dd-item"
+          >
+            <a href="/vi/9-monitoring/"> <b></b>9. Giám Sát và Cảnh Báo </a>
+          </li>
+
+          <li
+            data-nav-id="/vi/10-cleanup/"
+            title="10. Hướng Dẫn Dọn Dẹp Tài Nguyên"
+            class="dd-item"
+          >
+            <a href="/vi/10-cleanup/">
+              <b></b>10. Hướng Dẫn Dọn Dẹp Tài Nguyên
+            </a>
+          </li>
         </ul>
-      </section>
-      <section id="prefooter">
+
+        <section id="prefooter">
           <hr />
           <ul>
             <li>
               <a class="padding">
                 <i class="fas fa-language fa-fw"></i>
                 <div class="select-style">
-                  <select id="select-language" onchange="changeLanguage()">
-                    
-                      <option value="en" >
-                        English
-                      </option>
-                    
-                      <option value="vi" selected>
-                        Tiếng Việt
-                      </option>
-                    
+                  <select
+                    id="select-language"
+                    onchange="location = this.value;"
+                  >
+                    <option id="en" value="/4-setup-elasticache/">
+                      English
+                    </option>
+
+                    <option id="vi" value="/vi/4-setup-elasticache/" selected>
+                      Tiếng Việt
+                    </option>
                   </select>
-                  <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
+                  <svg
+                    version="1.1"
+                    id="Capa_1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    x="0px"
+                    y="0px"
+                    width="255px"
+                    height="255px"
+                    viewBox="0 0 255 255"
+                    style="enable-background: new 0 0 255 255"
+                    xml:space="preserve"
+                  >
                     <g>
                       <g id="arrow-drop-down">
-                        <polygon points="0,63.75 127.5,191.25 255,63.75" />
+                        <polygon points="0,63.75 127.5,191.25 255,63.75 		" />
                       </g>
                     </g>
                   </svg>
                 </div>
               </a>
             </li>
-            <li>
-              <a class="padding" href="#" data-clear-history-toggle=""><i class="fas fa-history fa-fw"></i> Clear History</a>
-            </li>
           </ul>
         </section>
+
         <section id="footer">
-          <left>
-            <b>Workshop</b><br />
-            <img src="https://hitwebcounter.com/counter/counter.php?page=7831196&style=0038&nbdigits=9&type=page&initCount=0" title="Migrate" alt="web counter" border="0" /><br />
-            <b><a href="https://cloudjourney.awsstudygroup.com/">Cloud Journey</a></b><br />
-            <img src="https://hitwebcounter.com/counter/counter.php?page=7830807&style=0038&nbdigits=9&type=page&initCount=0" title="Total CLoud Journey" alt="web counter" border="0" />
-          </left>
-          <left>
-            <br /><br />
-            <b>Last Updated</b><br />
-            <i><font color="orange">27-7-2025</font></i>
-          </left>
-          <left>
-            <br /><br />
-            <b>Team</b><br />
-            <i><br /><a href="https://www.linkedin.com/in/jotaguy" style="color: orange">Gia Hưng</a><br /></i>
-          </left>
-          <script async defer src="https://buttons.github.io/buttons.js"></script>
+          <section id="shortcuts" style="font-weight: bold">
+            <h3>More</h3>
+            <ul>
+              <li>
+                <a class="padding" href="https://aws.amazon.com/blogs"
+                  ><i class="fab fa-aws"></i> AWS Study Group - Blog</a
+                >
+              </li>
+
+              <li>
+                <a
+                  class="padding"
+                  href="https://www.facebook.com/groups/awsstudygroupfcj"
+                  ><i class="fab fa-facebook"></i> AWS Study Group - FB Group</a
+                >
+              </li>
+            </ul>
+          </section>
+          <section id="prefooter">
+            <hr />
+            <ul>
+              <li>
+                <a class="padding">
+                  <i class="fas fa-language fa-fw"></i>
+                  <div class="select-style">
+                    <select id="select-language" onchange="changeLanguage()">
+                      <option value="en">English</option>
+
+                      <option value="vi" selected>Tiếng Việt</option>
+                    </select>
+                    <svg
+                      version="1.1"
+                      id="Capa_1"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlns:xlink="http://www.w3.org/1999/xlink"
+                      x="0px"
+                      y="0px"
+                      width="255px"
+                      height="255px"
+                      viewBox="0 0 255 255"
+                      style="enable-background: new 0 0 255 255"
+                      xml:space="preserve"
+                    >
+                      <g>
+                        <g id="arrow-drop-down">
+                          <polygon points="0,63.75 127.5,191.25 255,63.75" />
+                        </g>
+                      </g>
+                    </svg>
+                  </div>
+                </a>
+              </li>
+              <li>
+                <a class="padding" href="#" data-clear-history-toggle=""
+                  ><i class="fas fa-history fa-fw"></i> Clear History</a
+                >
+              </li>
+            </ul>
+          </section>
+          <section id="footer">
+            <left>
+              <b>Workshop</b><br />
+              <img
+                src="https://hitwebcounter.com/counter/counter.php?page=7831196&style=0038&nbdigits=9&type=page&initCount=0"
+                title="Migrate"
+                alt="web counter"
+                border="0"
+              /><br />
+              <b
+                ><a href="https://cloudjourney.awsstudygroup.com/"
+                  >Cloud Journey</a
+                ></b
+              ><br />
+              <img
+                src="https://hitwebcounter.com/counter/counter.php?page=7830807&style=0038&nbdigits=9&type=page&initCount=0"
+                title="Total CLoud Journey"
+                alt="web counter"
+                border="0"
+              />
+            </left>
+            <left>
+              <br /><br />
+              <b>Last Updated</b><br />
+              <i><font color="orange">27-7-2025</font></i>
+            </left>
+            <left>
+              <br /><br />
+              <b>Team</b><br />
+              <i
+                ><br /><a
+                  href="https://www.linkedin.com/in/jotaguy"
+                  style="color: orange"
+                  >Gia Hưng</a
+                ><br
+              /></i>
+            </left>
+            <script
+              async
+              defer
+              src="https://buttons.github.io/buttons.js"
+            ></script>
+          </section>
         </section>
+      </div>
+    </nav>
 
-    </section>
-  </div>
-</nav>
+    <section id="body">
+      <div id="overlay"></div>
+      <div class="padding highlightable">
+        <div>
+          <div id="top-bar">
+            <div
+              id="breadcrumbs"
+              itemscope=""
+              itemtype="http://data-vocabulary.org/Breadcrumb"
+            >
+              <span id="sidebar-toggle-span">
+                <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+                  <i class="fas fa-bars"></i>
+                </a>
+              </span>
 
+              <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
 
+              <span class="links">
+                <a href="/vi/"
+                  >Workshop Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</a
+                >
+                > 4. Thiết Lập ElastiCache Redis
+              </span>
+            </div>
 
-
-        <section id="body">
-        <div id="overlay"></div>
-        <div class="padding highlightable">
-              
-              <div>
-                <div id="top-bar">
-                
-                
-                <div id="breadcrumbs" itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb">
-                    <span id="sidebar-toggle-span">
-                        <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
-                          <i class="fas fa-bars"></i>
-                        </a>
-                    </span>
-                  
-                  <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
-                  
-                  <span class="links">
-                 
-                 
-                    
-          
-          
-            
-            
-          
-          
-            <a href='/vi/'>Workshop Kiến Trúc Caching Cơ Sở Dữ Liệu Trong Bộ Nhớ</a> > 4. Thiết Lập ElastiCache Redis
-          
-        
-          
-        
-                 
-                  </span>
-                </div>
-                
-                    <div class="progress">
-    <div class="wrapper">
-<nav id="TableOfContents">
-  <ul>
-    <li><a href="#bước-1-điều-hướng-đến-elasticache-console">Bước 1: Điều Hướng Đến ElastiCache Console</a></li>
-    <li><a href="#bước-2-tạo-subnet-group">Bước 2: Tạo Subnet Group</a>
-      <ul>
-        <li><a href="#điều-hướng-đến-subnet-groups">Điều Hướng Đến Subnet Groups</a></li>
-        <li><a href="#cấu-hình-subnet-group">Cấu Hình Subnet Group</a></li>
-      </ul>
-    </li>
-    <li><a href="#bước-3-tạo-redis-oss-cache">Bước 3: Tạo Redis OSS Cache</a>
-      <ul>
-        <li><a href="#điều-hướng-đến-redis-oss-caches">Điều Hướng Đến Redis OSS Caches</a></li>
-        <li><a href="#chọn-engine">Chọn Engine</a></li>
-        <li><a href="#chọn-deployment-option">Chọn Deployment Option</a></li>
-        <li><a href="#chọn-creation-method">Chọn Creation Method</a></li>
-        <li><a href="#cấu-hình-cache-settings">Cấu Hình Cache Settings</a></li>
-        <li><a href="#cấu-hình-default-settings">Cấu Hình Default Settings</a></li>
-      </ul>
-    </li>
-    <li><a href="#bước-4-cấu-hình-connectivity">Bước 4: Cấu Hình Connectivity</a>
-      <ul>
-        <li><a href="#network-settings">Network Settings</a></li>
-        <li><a href="#security-settings">Security Settings</a></li>
-      </ul>
-    </li>
-    <li><a href="#bước-5-cấu-hình-advanced-settings">Bước 5: Cấu Hình Advanced Settings</a>
-      <ul>
-        <li><a href="#backup-settings">Backup Settings</a></li>
-        <li><a href="#maintenance-settings">Maintenance Settings</a></li>
-        <li><a href="#log-settings">Log Settings</a></li>
-      </ul>
-    </li>
-    <li><a href="#bước-6-review-và-create">Bước 6: Review và Create</a>
-      <ul>
-        <li><a href="#review-configuration">Review Configuration</a></li>
-      </ul>
-    </li>
-    <li><a href="#bước-7-giám-sát-cache-creation">Bước 7: Giám Sát Cache Creation</a>
-      <ul>
-        <li><a href="#kiểm-tra-creation-progress">Kiểm Tra Creation Progress</a></li>
-        <li><a href="#xác-minh-cache-available">Xác Minh Cache Available</a></li>
-      </ul>
-    </li>
-    <li><a href="#bước-8-ghi-lại-cache-endpoints">Bước 8: Ghi Lại Cache Endpoints</a>
-      <ul>
-        <li><a href="#primary-endpoint">Primary Endpoint</a></li>
-        <li><a href="#reader-endpoint">Reader Endpoint</a></li>
-      </ul>
-    </li>
-    <li><a href="#bước-9-test-redis-connectivity">Bước 9: Test Redis Connectivity</a>
-      <ul>
-        <li><a href="#launch-test-instance">Launch Test Instance</a></li>
-        <li><a href="#install-redis-cli">Install Redis CLI</a></li>
-        <li><a href="#test-redis-connection">Test Redis Connection</a></li>
-      </ul>
-    </li>
-    <li><a href="#bước-10-cấu-hình-redis-cho-application-use">Bước 10: Cấu Hình Redis cho Application Use</a>
-      <ul>
-        <li><a href="#set-memory-policy">Set Memory Policy</a></li>
-        <li><a href="#test-cache-functionality">Test Cache Functionality</a></li>
-      </ul>
-    </li>
-    <li><a href="#bước-11-giám-sát-redis-performance">Bước 11: Giám Sát Redis Performance</a>
-      <ul>
-        <li><a href="#enable-cloudwatch-metrics">Enable CloudWatch Metrics</a></li>
-      </ul>
-    </li>
-    <li><a href="#bước-12-ghi-lại-redis-configuration">Bước 12: Ghi Lại Redis Configuration</a>
-      <ul>
-        <li><a href="#redis-cache-information">Redis Cache Information</a></li>
-        <li><a href="#performance-characteristics">Performance Characteristics</a></li>
-      </ul>
-    </li>
-    <li><a href="#khắc-phục-các-vấn-đề-thường-gặp">Khắc Phục Các Vấn Đề Thường Gặp</a>
-      <ul>
-        <li><a href="#vấn-đề-không-thể-kết-nối-với-redis">Vấn Đề: Không Thể Kết Nối Với Redis</a></li>
-        <li><a href="#vấn-đề-memory-usage-cao">Vấn Đề: Memory Usage Cao</a></li>
-      </ul>
-    </li>
-    <li><a href="#các-bước-tiếp-theo">Các Bước Tiếp Theo</a>
-      <ul>
-        <li><a href="#lợi-ích-redis-đã-đạt-được">Lợi Ích Redis Đã Đạt Được:</a></li>
-      </ul>
-    </li>
-  </ul>
-</nav>
-    </div>
-</div>
-
-                
+            <div class="progress">
+              <div class="wrapper">
+                <nav id="TableOfContents">
+                  <ul>
+                    <li>
+                      <a href="#bước-1-điều-hướng-đến-elasticache-console"
+                        >Bước 1: Điều Hướng Đến ElastiCache Console</a
+                      >
+                    </li>
+                    <li>
+                      <a href="#bước-2-tạo-subnet-group"
+                        >Bước 2: Tạo Subnet Group</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#điều-hướng-đến-subnet-groups"
+                            >Điều Hướng Đến Subnet Groups</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#cấu-hình-subnet-group"
+                            >Cấu Hình Subnet Group</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#bước-3-tạo-redis-oss-cache"
+                        >Bước 3: Tạo Redis OSS Cache</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#điều-hướng-đến-redis-oss-caches"
+                            >Điều Hướng Đến Redis OSS Caches</a
+                          >
+                        </li>
+                        <li><a href="#chọn-engine">Chọn Engine</a></li>
+                        <li>
+                          <a href="#chọn-deployment-option"
+                            >Chọn Deployment Option</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#chọn-creation-method"
+                            >Chọn Creation Method</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#cấu-hình-cache-settings"
+                            >Cấu Hình Cache Settings</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#cấu-hình-default-settings"
+                            >Cấu Hình Default Settings</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#bước-4-cấu-hình-connectivity"
+                        >Bước 4: Cấu Hình Connectivity</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#network-settings">Network Settings</a>
+                        </li>
+                        <li>
+                          <a href="#security-settings">Security Settings</a>
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#bước-5-cấu-hình-advanced-settings"
+                        >Bước 5: Cấu Hình Advanced Settings</a
+                      >
+                      <ul>
+                        <li><a href="#backup-settings">Backup Settings</a></li>
+                        <li>
+                          <a href="#maintenance-settings"
+                            >Maintenance Settings</a
+                          >
+                        </li>
+                        <li><a href="#log-settings">Log Settings</a></li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#bước-6-review-và-create"
+                        >Bước 6: Review và Create</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#review-configuration"
+                            >Review Configuration</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#bước-7-giám-sát-cache-creation"
+                        >Bước 7: Giám Sát Cache Creation</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#kiểm-tra-creation-progress"
+                            >Kiểm Tra Creation Progress</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#xác-minh-cache-available"
+                            >Xác Minh Cache Available</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#bước-8-ghi-lại-cache-endpoints"
+                        >Bước 8: Ghi Lại Cache Endpoints</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#primary-endpoint">Primary Endpoint</a>
+                        </li>
+                        <li><a href="#reader-endpoint">Reader Endpoint</a></li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#bước-9-test-redis-connectivity"
+                        >Bước 9: Test Redis Connectivity</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#launch-test-instance"
+                            >Launch Test Instance</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#install-redis-cli">Install Redis CLI</a>
+                        </li>
+                        <li>
+                          <a href="#test-redis-connection"
+                            >Test Redis Connection</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#bước-10-cấu-hình-redis-cho-application-use"
+                        >Bước 10: Cấu Hình Redis cho Application Use</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#set-memory-policy">Set Memory Policy</a>
+                        </li>
+                        <li>
+                          <a href="#test-cache-functionality"
+                            >Test Cache Functionality</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#bước-11-giám-sát-redis-performance"
+                        >Bước 11: Giám Sát Redis Performance</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#enable-cloudwatch-metrics"
+                            >Enable CloudWatch Metrics</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#bước-12-ghi-lại-redis-configuration"
+                        >Bước 12: Ghi Lại Redis Configuration</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#redis-cache-information"
+                            >Redis Cache Information</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#performance-characteristics"
+                            >Performance Characteristics</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#khắc-phục-các-vấn-đề-thường-gặp"
+                        >Khắc Phục Các Vấn Đề Thường Gặp</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#vấn-đề-không-thể-kết-nối-với-redis"
+                            >Vấn Đề: Không Thể Kết Nối Với Redis</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#vấn-đề-memory-usage-cao"
+                            >Vấn Đề: Memory Usage Cao</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#các-bước-tiếp-theo">Các Bước Tiếp Theo</a>
+                      <ul>
+                        <li>
+                          <a href="#lợi-ích-redis-đã-đạt-được"
+                            >Lợi Ích Redis Đã Đạt Được:</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </nav>
               </div>
             </div>
-            
-        <div id="head-tags">
-        
+          </div>
         </div>
-        
+
+        <div id="head-tags"></div>
+
         <div id="body-inner">
-          
-            <h1>
-              
-              
-                4. Thiết Lập ElastiCache Redis
-              
-            </h1>
-          
+          <h1>4. Thiết Lập ElastiCache Redis</h1>
 
-        
+          <p>
+            Trong bước này, chúng ta sẽ tạo một ElastiCache Redis cluster sẽ
+            phục vụ như application-level cache. Đây sẽ là tầng caching đầu tiên
+            mà ứng dụng của chúng ta kiểm tra trước khi fallback về DAX và
+            DynamoDB.
+          </p>
+          <h2 id="bước-1-điều-hướng-đến-elasticache-console">
+            Bước 1: Điều Hướng Đến ElastiCache Console
+          </h2>
+          <ol>
+            <li>Mở <strong>AWS Management Console</strong></li>
+            <li>Điều hướng đến <strong>ElastiCache service</strong></li>
+          </ol>
+          <p>
+            <img
+              src="../../images/elasticache-console.png"
+              alt="ElastiCache Console"
+            />
+          </p>
+          <ol start="3">
+            <li>
+              Nhấp <strong>Get started</strong> hoặc <strong>Create</strong> nếu
+              đây là lần đầu tiên
+            </li>
+          </ol>
+          <h2 id="bước-2-tạo-subnet-group">Bước 2: Tạo Subnet Group</h2>
+          <h3 id="điều-hướng-đến-subnet-groups">
+            Điều Hướng Đến Subnet Groups
+          </h3>
+          <ol>
+            <li>
+              <p>Nhấp <strong>Subnet groups</strong> ở navigation bên trái</p>
+            </li>
+            <li>
+              <p>Nhấp <strong>Create subnet group</strong></p>
+            </li>
+          </ol>
+          <p>
+            <img
+              src="../../images/create-subnet-group.png"
+              alt="Create Subnet Group"
+            />
+          </p>
+          <h3 id="cấu-hình-subnet-group">Cấu Hình Subnet Group</h3>
+          <ol start="3">
+            <li>
+              <p>Nhập chi tiết subnet group:</p>
+              <ul>
+                <li><strong>Name</strong>: <code>redis-subnet-group</code></li>
+                <li>
+                  <strong>Description</strong>:
+                  <code>Subnet group for Redis cluster</code>
+                </li>
+                <li>
+                  <strong>VPC ID</strong>: Chọn
+                  <code>caching-workshop-vpc</code> của bạn
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <p>
+            <img
+              src="../../images/subnet-group-config.png"
+              alt="Subnet Group Configuration"
+            />
+          </p>
+          <ol start="4">
+            <li>
+              <p>Chọn availability zones và subnets:</p>
+              <ul>
+                <li>
+                  Chọn cả hai <strong>private subnets</strong> từ các AZ khác
+                  nhau
+                </li>
+                <li>Điều này đảm bảo tính khả dụng cao cho Redis cluster</li>
+              </ul>
+            </li>
+            <li>
+              <p>Nhấp <strong>Create</strong></p>
+            </li>
+          </ol>
+          <h2 id="bước-3-tạo-redis-oss-cache">Bước 3: Tạo Redis OSS Cache</h2>
+          <h3 id="điều-hướng-đến-redis-oss-caches">
+            Điều Hướng Đến Redis OSS Caches
+          </h3>
+          <ol>
+            <li>
+              Nhấp <strong>Redis OSS caches</strong> ở navigation bên trái
+            </li>
+          </ol>
+          <p>
+            <img
+              src="../../images/redis-oss-nav.png"
+              alt="Redis OSS Caches Navigation"
+            />
+          </p>
+          <ol start="2">
+            <li>Nhấp <strong>Create Redis OSS cache</strong></li>
+          </ol>
+          <h3 id="chọn-engine">Chọn Engine</h3>
+          <ol start="3">
+            <li>
+              Chọn caching engine:
+              <ul>
+                <li><strong>Engine</strong>: Redis OSS (giữ mặc định)</li>
+                <li>
+                  Lưu ý: Valkey được khuyến nghị để tiết kiệm chi phí, nhưng
+                  chúng ta sẽ sử dụng Redis OSS cho workshop này
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <p>
+            <img
+              src="../../images/engine-selection.png"
+              alt="Engine Selection"
+            />
+          </p>
 
+          <div class="notices info">
+            <p>
+              Valkey cung cấp giá và hiệu suất nâng cao (tiết kiệm lên đến 33%
+              với Serverless, 20% với node-based) và hoàn toàn tương thích với
+              Redis OSS v7.0. Đối với production workloads, hãy cân nhắc Valkey
+              như một drop-in replacement.
+            </p>
+          </div>
 
+          <h3 id="chọn-deployment-option">Chọn Deployment Option</h3>
+          <ol start="4">
+            <li>
+              Chọn deployment option:
+              <ul>
+                <li>
+                  <strong>Deployment option</strong>: Design your own cache
+                </li>
+                <li>
+                  Điều này cho phép chúng ta chọn các loại node và cấu hình cụ
+                  thể
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <p>
+            <img
+              src="../../images/deployment-option.png"
+              alt="Deployment Option"
+            />
+            <img
+              src="../../images/deployment-configuration.png"
+              alt="Deployment Option"
+            />
+            <img
+              src="../../images/deployment-subnet.png"
+              alt="Deployment Option"
+            />
+          </p>
 
-	<p>Trong bước này, chúng ta sẽ tạo một ElastiCache Redis cluster sẽ phục vụ như application-level cache. Đây sẽ là tầng caching đầu tiên mà ứng dụng của chúng ta kiểm tra trước khi fallback về DAX và DynamoDB.</p>
-<h2 id="bước-1-điều-hướng-đến-elasticache-console">Bước 1: Điều Hướng Đến ElastiCache Console</h2>
-<ol>
-<li>Mở <strong>AWS Management Console</strong></li>
-<li>Điều hướng đến <strong>ElastiCache service</strong></li>
-</ol>
-<p><img src="../../images/elasticache-console.png" alt="ElastiCache Console"></p>
-<ol start="3">
-<li>Nhấp <strong>Get started</strong> hoặc <strong>Create</strong> nếu đây là lần đầu tiên</li>
-</ol>
-<h2 id="bước-2-tạo-subnet-group">Bước 2: Tạo Subnet Group</h2>
-<h3 id="điều-hướng-đến-subnet-groups">Điều Hướng Đến Subnet Groups</h3>
-<ol>
-<li>
-<p>Nhấp <strong>Subnet groups</strong> ở navigation bên trái</p>
-</li>
-<li>
-<p>Nhấp <strong>Create subnet group</strong></p>
-</li>
-</ol>
-<p><img src="../../images/create-subnet-group.png" alt="Create Subnet Group"></p>
-<h3 id="cấu-hình-subnet-group">Cấu Hình Subnet Group</h3>
-<ol start="3">
-<li>
-<p>Nhập chi tiết subnet group:</p>
-<ul>
-<li><strong>Name</strong>: <code>redis-subnet-group</code></li>
-<li><strong>Description</strong>: <code>Subnet group for Redis cluster</code></li>
-<li><strong>VPC ID</strong>: Chọn <code>caching-workshop-vpc</code> của bạn</li>
-</ul>
-</li>
-</ol>
-<p><img src="../../images/subnet-group-config.png" alt="Subnet Group Configuration"></p>
-<ol start="4">
-<li>
-<p>Chọn availability zones và subnets:</p>
-<ul>
-<li>Chọn cả hai <strong>private subnets</strong> từ các AZ khác nhau</li>
-<li>Điều này đảm bảo tính khả dụng cao cho Redis cluster</li>
-</ul>
-</li>
-<li>
-<p>Nhấp <strong>Create</strong></p>
-</li>
-</ol>
-<h2 id="bước-3-tạo-redis-oss-cache">Bước 3: Tạo Redis OSS Cache</h2>
-<h3 id="điều-hướng-đến-redis-oss-caches">Điều Hướng Đến Redis OSS Caches</h3>
-<ol>
-<li>Nhấp <strong>Redis OSS caches</strong> ở navigation bên trái</li>
-</ol>
-<p><img src="../../images/redis-oss-nav.png" alt="Redis OSS Caches Navigation"></p>
-<ol start="2">
-<li>Nhấp <strong>Create Redis OSS cache</strong></li>
-</ol>
-<h3 id="chọn-engine">Chọn Engine</h3>
-<ol start="3">
-<li>Chọn caching engine:
-<ul>
-<li><strong>Engine</strong>: Redis OSS (giữ mặc định)</li>
-<li>Lưu ý: Valkey được khuyến nghị để tiết kiệm chi phí, nhưng chúng ta sẽ sử dụng Redis OSS cho workshop này</li>
-</ul>
-</li>
-</ol>
-<p><img src="../../images/engine-selection.png" alt="Engine Selection"></p>
+          <div class="notices tip">
+            <p>
+              Tùy chọn Serverless tự động scale nhưng &ldquo;Design your own
+              cache&rdquo; cho chúng ta nhiều quyền kiểm soát hơn về loại node
+              và chi phí cho workshop này.
+            </p>
+          </div>
 
-<div class="notices info" ><p>Valkey cung cấp giá và hiệu suất nâng cao (tiết kiệm lên đến 33% với Serverless, 20% với node-based) và hoàn toàn tương thích với Redis OSS v7.0. Đối với production workloads, hãy cân nhắc Valkey như một drop-in replacement.</p>
-</div>
+          <h3 id="chọn-creation-method">Chọn Creation Method</h3>
+          <ol start="5">
+            <li>
+              Chọn creation method:
+              <ul>
+                <li><strong>Creation method</strong>: New cache</li>
+                <li>
+                  <strong>Restore from backup</strong>: Không chọn (chúng ta
+                  đang tạo cache trống mới)
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="cấu-hình-cache-settings">Cấu Hình Cache Settings</h3>
+          <ol start="6">
+            <li>
+              <p>Cấu hình thông tin cache cơ bản:</p>
+              <ul>
+                <li><strong>Name</strong>: <code>product-cache</code></li>
+                <li>
+                  <strong>Description</strong>:
+                  <code>Redis cache for product catalog caching</code>
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="cấu-hình-default-settings">Cấu Hình Default Settings</h3>
+          <ol start="7">
+            <li>
+              Cấu hình cache specifications:
+              <ul>
+                <li>
+                  <strong>Use default settings</strong>: Bỏ chọn để tùy chỉnh
+                </li>
+                <li><strong>Engine version</strong>: 7.2 (stable mới nhất)</li>
+                <li><strong>Port</strong>: 6379</li>
+                <li><strong>Node type</strong>: <code>cache.t3.micro</code></li>
+                <li><strong>Multi-AZ</strong>: Enabled</li>
+                <li><strong>Replicas</strong>: 1</li>
+              </ul>
+            </li>
+          </ol>
 
-<h3 id="chọn-deployment-option">Chọn Deployment Option</h3>
-<ol start="4">
-<li>Chọn deployment option:
-<ul>
-<li><strong>Deployment option</strong>: Design your own cache</li>
-<li>Điều này cho phép chúng ta chọn các loại node và cấu hình cụ thể</li>
-</ul>
-</li>
-</ol>
-<p><img src="../../images/deployment-option.png" alt="Deployment Option">
-<img src="../../images/deployment-configuration.png" alt="Deployment Option">
-<img src="../../images/deployment-subnet.png" alt="Deployment Option"></p>
+          <div class="notices tip">
+            <p>
+              Multi-AZ với replicas cung cấp tính khả dụng cao và khả năng
+              automatic failover.
+            </p>
+          </div>
 
-<div class="notices tip" ><p>Tùy chọn Serverless tự động scale nhưng &ldquo;Design your own cache&rdquo; cho chúng ta nhiều quyền kiểm soát hơn về loại node và chi phí cho workshop này.</p>
-</div>
+          <h2 id="bước-4-cấu-hình-connectivity">
+            Bước 4: Cấu Hình Connectivity
+          </h2>
+          <h3 id="network-settings">Network Settings</h3>
+          <ol start="5">
+            <li>
+              <p>Cấu hình network settings:</p>
+              <ul>
+                <li><strong>Network type</strong>: IPv4</li>
+                <li>
+                  <strong>Subnet group</strong>: <code>redis-subnet-group</code>
+                </li>
+                <li>
+                  <strong>Preferred availability zones</strong>: No preference
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="security-settings">Security Settings</h3>
+          <ol start="6">
+            <li>
+              <p>Cấu hình security:</p>
+              <ul>
+                <li>
+                  <strong>Security groups</strong>: Chọn
+                  <code>redis-sg</code> (xóa default)
+                </li>
+                <li>
+                  <strong>Encryption at rest</strong>: Disabled (cho workshop)
+                </li>
+                <li>
+                  <strong>Encryption in transit</strong>: Disabled (cho
+                  workshop)
+                </li>
+              </ul>
+            </li>
+          </ol>
 
-<h3 id="chọn-creation-method">Chọn Creation Method</h3>
-<ol start="5">
-<li>Chọn creation method:
-<ul>
-<li><strong>Creation method</strong>: New cache</li>
-<li><strong>Restore from backup</strong>: Không chọn (chúng ta đang tạo cache trống mới)</li>
-</ul>
-</li>
-</ol>
-<h3 id="cấu-hình-cache-settings">Cấu Hình Cache Settings</h3>
-<ol start="6">
-<li>
-<p>Cấu hình thông tin cache cơ bản:</p>
-<ul>
-<li><strong>Name</strong>: <code>product-cache</code></li>
-<li><strong>Description</strong>: <code>Redis cache for product catalog caching</code></li>
-</ul>
-</li>
-</ol>
-<h3 id="cấu-hình-default-settings">Cấu Hình Default Settings</h3>
-<ol start="7">
-<li>Cấu hình cache specifications:
-<ul>
-<li><strong>Use default settings</strong>: Bỏ chọn để tùy chỉnh</li>
-<li><strong>Engine version</strong>: 7.2 (stable mới nhất)</li>
-<li><strong>Port</strong>: 6379</li>
-<li><strong>Node type</strong>: <code>cache.t3.micro</code></li>
-<li><strong>Multi-AZ</strong>: Enabled</li>
-<li><strong>Replicas</strong>: 1</li>
-</ul>
-</li>
-</ol>
+          <div class="notices warning">
+            <p>
+              Trong môi trường production, luôn bật encryption at rest và in
+              transit để tuân thủ bảo mật.
+            </p>
+          </div>
 
-<div class="notices tip" ><p>Multi-AZ với replicas cung cấp tính khả dụng cao và khả năng automatic failover.</p>
-</div>
+          <h2 id="bước-5-cấu-hình-advanced-settings">
+            Bước 5: Cấu Hình Advanced Settings
+          </h2>
+          <h3 id="backup-settings">Backup Settings</h3>
+          <ol start="7">
+            <li>
+              <p>Cấu hình backup options:</p>
+              <ul>
+                <li><strong>Enable automatic backups</strong>: Yes</li>
+                <li><strong>Backup retention period</strong>: 1 day</li>
+                <li><strong>Backup window</strong>: No preference</li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="maintenance-settings">Maintenance Settings</h3>
+          <ol start="8">
+            <li>
+              <p>Cấu hình maintenance:</p>
+              <ul>
+                <li><strong>Maintenance window</strong>: No preference</li>
+                <li>
+                  <strong>Topic for SNS notification</strong>: None (cho
+                  workshop)
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="log-settings">Log Settings</h3>
+          <ol start="9">
+            <li>
+              <p>Cấu hình logging (tùy chọn):</p>
+              <ul>
+                <li><strong>Log format</strong>: Text</li>
+                <li><strong>Log destination</strong>: None (cho workshop)</li>
+              </ul>
+            </li>
+          </ol>
+          <h2 id="bước-6-review-và-create">Bước 6: Review và Create</h2>
+          <h3 id="review-configuration">Review Configuration</h3>
+          <ol start="10">
+            <li>
+              <p>Review tất cả settings</p>
+            </li>
+            <li>
+              <p>Xác minh:</p>
+              <ul>
+                <li>Cache name và description</li>
+                <li>Engine version và node type</li>
+                <li>Network và security configuration</li>
+                <li>Backup và maintenance settings</li>
+              </ul>
+            </li>
+            <li>
+              <p>Nhấp <strong>Create Redis OSS cache</strong></p>
+            </li>
+          </ol>
 
-<h2 id="bước-4-cấu-hình-connectivity">Bước 4: Cấu Hình Connectivity</h2>
-<h3 id="network-settings">Network Settings</h3>
-<ol start="5">
-<li>
-<p>Cấu hình network settings:</p>
-<ul>
-<li><strong>Network type</strong>: IPv4</li>
-<li><strong>Subnet group</strong>: <code>redis-subnet-group</code></li>
-<li><strong>Preferred availability zones</strong>: No preference</li>
-</ul>
-</li>
-</ol>
-<h3 id="security-settings">Security Settings</h3>
-<ol start="6">
-<li>
-<p>Cấu hình security:</p>
-<ul>
-<li><strong>Security groups</strong>: Chọn <code>redis-sg</code> (xóa default)</li>
-<li><strong>Encryption at rest</strong>: Disabled (cho workshop)</li>
-<li><strong>Encryption in transit</strong>: Disabled (cho workshop)</li>
-</ul>
-</li>
-</ol>
+          <div class="notices info">
+            <p>
+              Việc tạo Redis cache mất 10-15 phút. Cache sẽ hiển thị trạng thái
+              &ldquo;Creating&rdquo; trong thời gian này.
+            </p>
+          </div>
 
-<div class="notices warning" ><p>Trong môi trường production, luôn bật encryption at rest và in transit để tuân thủ bảo mật.</p>
-</div>
-
-<h2 id="bước-5-cấu-hình-advanced-settings">Bước 5: Cấu Hình Advanced Settings</h2>
-<h3 id="backup-settings">Backup Settings</h3>
-<ol start="7">
-<li>
-<p>Cấu hình backup options:</p>
-<ul>
-<li><strong>Enable automatic backups</strong>: Yes</li>
-<li><strong>Backup retention period</strong>: 1 day</li>
-<li><strong>Backup window</strong>: No preference</li>
-</ul>
-</li>
-</ol>
-<h3 id="maintenance-settings">Maintenance Settings</h3>
-<ol start="8">
-<li>
-<p>Cấu hình maintenance:</p>
-<ul>
-<li><strong>Maintenance window</strong>: No preference</li>
-<li><strong>Topic for SNS notification</strong>: None (cho workshop)</li>
-</ul>
-</li>
-</ol>
-<h3 id="log-settings">Log Settings</h3>
-<ol start="9">
-<li>
-<p>Cấu hình logging (tùy chọn):</p>
-<ul>
-<li><strong>Log format</strong>: Text</li>
-<li><strong>Log destination</strong>: None (cho workshop)</li>
-</ul>
-</li>
-</ol>
-<h2 id="bước-6-review-và-create">Bước 6: Review và Create</h2>
-<h3 id="review-configuration">Review Configuration</h3>
-<ol start="10">
-<li>
-<p>Review tất cả settings</p>
-</li>
-<li>
-<p>Xác minh:</p>
-<ul>
-<li>Cache name và description</li>
-<li>Engine version và node type</li>
-<li>Network và security configuration</li>
-<li>Backup và maintenance settings</li>
-</ul>
-</li>
-<li>
-<p>Nhấp <strong>Create Redis OSS cache</strong></p>
-</li>
-</ol>
-
-<div class="notices info" ><p>Việc tạo Redis cache mất 10-15 phút. Cache sẽ hiển thị trạng thái &ldquo;Creating&rdquo; trong thời gian này.</p>
-</div>
-
-<h2 id="bước-7-giám-sát-cache-creation">Bước 7: Giám Sát Cache Creation</h2>
-<h3 id="kiểm-tra-creation-progress">Kiểm Tra Creation Progress</h3>
-<ol>
-<li>
-<p>Giám sát tiến trình tạo cache</p>
-</li>
-<li>
-<p>Bạn có thể thấy các node riêng lẻ đang được tạo</p>
-</li>
-</ol>
-<h3 id="xác-minh-cache-available">Xác Minh Cache Available</h3>
-<ol start="3">
-<li>
-<p>Sau khi tạo xong, trạng thái cache sẽ hiển thị &ldquo;Available&rdquo;</p>
-</li>
-<li>
-<p>Nhấp vào tên cache để xem chi tiết</p>
-</li>
-</ol>
-<h2 id="bước-8-ghi-lại-cache-endpoints">Bước 8: Ghi Lại Cache Endpoints</h2>
-<h3 id="primary-endpoint">Primary Endpoint</h3>
-<ol>
-<li>Ghi lại <strong>Primary endpoint</strong> cho write operations:</li>
-</ol>
-<pre tabindex="0"><code>product-cache.xxxxxx.cache.amazonaws.com:6379
-</code></pre><h3 id="reader-endpoint">Reader Endpoint</h3>
-<ol start="2">
-<li>Ghi lại <strong>Reader endpoint</strong> cho read operations:</li>
-</ol>
-<pre tabindex="0"><code>product-cache-ro.xxxxxx.cache.amazonaws.com:6379
-</code></pre><h2 id="bước-9-test-redis-connectivity">Bước 9: Test Redis Connectivity</h2>
-<h3 id="launch-test-instance">Launch Test Instance</h3>
-<ol>
-<li>
-<p>Sử dụng cùng test EC2 instance từ DAX testing, hoặc khởi chạy instance mới:</p>
-<ul>
-<li><strong>AMI</strong>: Amazon Linux 2023</li>
-<li><strong>Instance type</strong>: t3.micro</li>
-<li><strong>Subnet</strong>: Một trong các private subnets của bạn</li>
-<li><strong>Security group</strong>: <code>app-sg</code></li>
-</ul>
-</li>
-</ol>
-<h3 id="install-redis-cli">Install Redis CLI</h3>
-<ol start="2">
-<li>Kết nối đến test instance và cài đặt Redis CLI:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Update system</span>
+          <h2 id="bước-7-giám-sát-cache-creation">
+            Bước 7: Giám Sát Cache Creation
+          </h2>
+          <h3 id="kiểm-tra-creation-progress">Kiểm Tra Creation Progress</h3>
+          <ol>
+            <li>
+              <p>Giám sát tiến trình tạo cache</p>
+            </li>
+            <li>
+              <p>Bạn có thể thấy các node riêng lẻ đang được tạo</p>
+            </li>
+          </ol>
+          <h3 id="xác-minh-cache-available">Xác Minh Cache Available</h3>
+          <ol start="3">
+            <li>
+              <p>
+                Sau khi tạo xong, trạng thái cache sẽ hiển thị
+                &ldquo;Available&rdquo;
+              </p>
+            </li>
+            <li>
+              <p>Nhấp vào tên cache để xem chi tiết</p>
+            </li>
+          </ol>
+          <h2 id="bước-8-ghi-lại-cache-endpoints">
+            Bước 8: Ghi Lại Cache Endpoints
+          </h2>
+          <h3 id="primary-endpoint">Primary Endpoint</h3>
+          <ol>
+            <li>
+              Ghi lại <strong>Primary endpoint</strong> cho write operations:
+            </li>
+          </ol>
+          <pre tabindex="0"><code>product-cache.xxxxxx.cache.amazonaws.com:6379
+</code></pre>
+          <h3 id="reader-endpoint">Reader Endpoint</h3>
+          <ol start="2">
+            <li>
+              Ghi lại <strong>Reader endpoint</strong> cho read operations:
+            </li>
+          </ol>
+          <pre
+            tabindex="0"
+          ><code>product-cache-ro.xxxxxx.cache.amazonaws.com:6379
+</code></pre>
+          <h2 id="bước-9-test-redis-connectivity">
+            Bước 9: Test Redis Connectivity
+          </h2>
+          <h3 id="launch-test-instance">Launch Test Instance</h3>
+          <ol>
+            <li>
+              <p>
+                Sử dụng cùng test EC2 instance từ DAX testing, hoặc khởi chạy
+                instance mới:
+              </p>
+              <ul>
+                <li><strong>AMI</strong>: Amazon Linux 2023</li>
+                <li><strong>Instance type</strong>: t3.micro</li>
+                <li>
+                  <strong>Subnet</strong>: Một trong các private subnets của bạn
+                </li>
+                <li><strong>Security group</strong>: <code>app-sg</code></li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="install-redis-cli">Install Redis CLI</h3>
+          <ol start="2">
+            <li>Kết nối đến test instance và cài đặt Redis CLI:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Update system</span>
 </span></span><span style="display:flex;"><span>sudo yum update -y
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Install Redis CLI</span>
 </span></span><span style="display:flex;"><span>sudo yum install -y redis6
-</span></span></code></pre></div><h3 id="test-redis-connection">Test Redis Connection</h3>
-<ol start="3">
-<li>Kết nối đến Redis cache của bạn:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Connect to primary endpoint</span>
+</span></span></code></pre>
+          </div>
+          <h3 id="test-redis-connection">Test Redis Connection</h3>
+          <ol start="3">
+            <li>Kết nối đến Redis cache của bạn:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Connect to primary endpoint</span>
 </span></span><span style="display:flex;"><span>redis-cli -h product-cache.xxxxxx.cache.amazonaws.com -p <span style="color:#ae81ff">6379</span>
-</span></span></code></pre></div><ol>
-<li>Test các Redis operations cơ bản:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test connection</span>
+</span></span></code></pre>
+          </div>
+          <ol>
+            <li>Test các Redis operations cơ bản:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test connection</span>
 </span></span><span style="display:flex;"><span>PING
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Set a test key</span>
@@ -1168,12 +1155,26 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Check Redis info</span>
 </span></span><span style="display:flex;"><span>INFO server
-</span></span></code></pre></div><h2 id="bước-10-cấu-hình-redis-cho-application-use">Bước 10: Cấu Hình Redis cho Application Use</h2>
-<h3 id="set-memory-policy">Set Memory Policy</h3>
-<ol>
-<li>Cấu hình memory eviction policy:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Connect to primary endpoint</span>
+</span></span></code></pre>
+          </div>
+          <h2 id="bước-10-cấu-hình-redis-cho-application-use">
+            Bước 10: Cấu Hình Redis cho Application Use
+          </h2>
+          <h3 id="set-memory-policy">Set Memory Policy</h3>
+          <ol>
+            <li>Cấu hình memory eviction policy:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Connect to primary endpoint</span>
 </span></span><span style="display:flex;"><span>redis-cli -h product-cache.xxxxxx.cache.amazonaws.com -p <span style="color:#ae81ff">6379</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Set LRU eviction policy</span>
@@ -1181,11 +1182,23 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Verify configuration</span>
 </span></span><span style="display:flex;"><span>CONFIG GET maxmemory-policy
-</span></span></code></pre></div><h3 id="test-cache-functionality">Test Cache Functionality</h3>
-<ol start="2">
-<li>Test cache behavior với TTL:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Set multiple products with different TTLs</span>
+</span></span></code></pre>
+          </div>
+          <h3 id="test-cache-functionality">Test Cache Functionality</h3>
+          <ol start="2">
+            <li>Test cache behavior với TTL:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Set multiple products with different TTLs</span>
 </span></span><span style="display:flex;"><span>SETEX product:PROD001 <span style="color:#ae81ff">300</span> <span style="color:#e6db74">&#39;{&#34;id&#34;:&#34;PROD001&#34;,&#34;name&#34;:&#34;Laptop Pro&#34;,&#34;price&#34;:999.99,&#34;category&#34;:&#34;Electronics&#34;}&#39;</span>
 </span></span><span style="display:flex;"><span>SETEX product:PROD002 <span style="color:#ae81ff">600</span> <span style="color:#e6db74">&#39;{&#34;id&#34;:&#34;PROD002&#34;,&#34;name&#34;:&#34;Smartphone X&#34;,&#34;price&#34;:699.99,&#34;category&#34;:&#34;Electronics&#34;}&#39;</span>
 </span></span><span style="display:flex;"><span>SETEX product:PROD003 <span style="color:#ae81ff">900</span> <span style="color:#e6db74">&#39;{&#34;id&#34;:&#34;PROD003&#34;,&#34;name&#34;:&#34;Cloud Guide&#34;,&#34;price&#34;:49.99,&#34;category&#34;:&#34;Books&#34;}&#39;</span>
@@ -1200,450 +1213,188 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Get cached data</span>
 </span></span><span style="display:flex;"><span>GET product:PROD001
-</span></span></code></pre></div><h2 id="bước-11-giám-sát-redis-performance">Bước 11: Giám Sát Redis Performance</h2>
-<h3 id="enable-cloudwatch-metrics">Enable CloudWatch Metrics</h3>
-<ol>
-<li>
-<p>Trong ElastiCache console, đi đến tab <strong>Monitoring</strong></p>
-</li>
-<li>
-<p>Các metrics chính cần giám sát:</p>
-<ul>
-<li><strong>CPUUtilization</strong>: CPU usage qua các nodes</li>
-<li><strong>DatabaseMemoryUsagePercentage</strong>: Memory utilization</li>
-<li><strong>CacheHits/CacheMisses</strong>: Cache effectiveness</li>
-<li><strong>NetworkBytesIn/Out</strong>: Network traffic</li>
-<li><strong>Evictions</strong>: Số lượng keys bị evicted</li>
-</ul>
-</li>
-</ol>
-<h2 id="bước-12-ghi-lại-redis-configuration">Bước 12: Ghi Lại Redis Configuration</h2>
-<p>Ghi lại thông tin sau cho cấu hình ứng dụng:</p>
-<h3 id="redis-cache-information">Redis Cache Information</h3>
-<ul>
-<li><strong>Cache Name</strong>: <code>product-cache</code></li>
-<li><strong>Primary Endpoint</strong>: <code>product-cache.xxxxxx.cache.amazonaws.com:6379</code></li>
-<li><strong>Reader Endpoint</strong>: <code>product-cache-ro.xxxxxx.cache.amazonaws.com:6379</code></li>
-<li><strong>Node Type</strong>: <code>cache.t3.micro</code></li>
-<li><strong>Replica Count</strong>: 1</li>
-<li><strong>Security Group</strong>: <code>redis-sg</code></li>
-<li><strong>Subnet Group</strong>: <code>redis-subnet-group</code></li>
-</ul>
-<h3 id="performance-characteristics">Performance Characteristics</h3>
-<ul>
-<li><strong>Latency</strong>: Sub-millisecond cho cached data</li>
-<li><strong>Throughput</strong>: ~100,000 operations mỗi giây</li>
-<li><strong>Memory</strong>: ~555 MB available (t3.micro)</li>
-<li><strong>Eviction Policy</strong>: allkeys-lru</li>
-</ul>
-<h2 id="khắc-phục-các-vấn-đề-thường-gặp">Khắc Phục Các Vấn Đề Thường Gặp</h2>
-<h3 id="vấn-đề-không-thể-kết-nối-với-redis">Vấn Đề: Không Thể Kết Nối Với Redis</h3>
-<p><strong>Nguyên Nhân Có Thể:</strong></p>
-<ul>
-<li>Security group chặn traffic</li>
-<li>Cấu hình endpoint không đúng</li>
-<li>Vấn đề kết nối mạng</li>
-</ul>
-<p><strong>Giải Pháp:</strong></p>
-<ul>
-<li>Xác minh security group cho phép inbound traffic trên port 6379</li>
-<li>Kiểm tra Redis endpoint URL và port</li>
-<li>Đảm bảo client ở cùng VPC với Redis cache</li>
-</ul>
-<h3 id="vấn-đề-memory-usage-cao">Vấn Đề: Memory Usage Cao</h3>
-<p><strong>Nguyên Nhân Có Thể:</strong></p>
-<ul>
-<li>Quá nhiều dữ liệu được cached</li>
-<li>Không có TTL được set trên keys</li>
-<li>Memory leak trong ứng dụng</li>
-</ul>
-<p><strong>Giải Pháp:</strong></p>
-<ul>
-<li>Giám sát memory usage trong CloudWatch</li>
-<li>Set các giá trị TTL phù hợp</li>
-<li>Sử dụng các cấu trúc dữ liệu tiết kiệm memory</li>
-<li>Cân nhắc các loại node lớn hơn</li>
-</ul>
-<h2 id="các-bước-tiếp-theo">Các Bước Tiếp Theo</h2>
-<p>Thiết lập ElastiCache Redis của bạn giờ đã hoàn thành! Bạn có:</p>
-<p>✅ <strong>Redis OSS Cache</strong> với primary và replica nodes<br>
-✅ <strong>Multi-AZ deployment</strong> cho tính khả dụng cao<br>
-✅ <strong>Subnet Group</strong> được cấu hình cho private network access<br>
-✅ <strong>Security Group</strong> cho phép application access<br>
-✅ <strong>Automatic backups</strong> được bật<br>
-✅ <strong>CloudWatch monitoring</strong> được cấu hình<br>
-✅ <strong>Connection tested</strong> và xác minh</p>
-<h3 id="lợi-ích-redis-đã-đạt-được">Lợi Ích Redis Đã Đạt Được:</h3>
-<ul>
-<li><strong>Sub-millisecond latency</strong> cho cached application data</li>
-<li><strong>High throughput</strong> với 100K+ operations mỗi giây</li>
-<li><strong>Automatic failover</strong> với Multi-AZ deployment</li>
-<li><strong>Flexible data structures</strong> cho các tình huống caching phức tạp</li>
-</ul>
+</span></span></code></pre>
+          </div>
+          <h2 id="bước-11-giám-sát-redis-performance">
+            Bước 11: Giám Sát Redis Performance
+          </h2>
+          <h3 id="enable-cloudwatch-metrics">Enable CloudWatch Metrics</h3>
+          <ol>
+            <li>
+              <p>
+                Trong ElastiCache console, đi đến tab
+                <strong>Monitoring</strong>
+              </p>
+            </li>
+            <li>
+              <p>Các metrics chính cần giám sát:</p>
+              <ul>
+                <li>
+                  <strong>CPUUtilization</strong>: CPU usage qua các nodes
+                </li>
+                <li>
+                  <strong>DatabaseMemoryUsagePercentage</strong>: Memory
+                  utilization
+                </li>
+                <li>
+                  <strong>CacheHits/CacheMisses</strong>: Cache effectiveness
+                </li>
+                <li><strong>NetworkBytesIn/Out</strong>: Network traffic</li>
+                <li><strong>Evictions</strong>: Số lượng keys bị evicted</li>
+              </ul>
+            </li>
+          </ol>
+          <h2 id="bước-12-ghi-lại-redis-configuration">
+            Bước 12: Ghi Lại Redis Configuration
+          </h2>
+          <p>Ghi lại thông tin sau cho cấu hình ứng dụng:</p>
+          <h3 id="redis-cache-information">Redis Cache Information</h3>
+          <ul>
+            <li><strong>Cache Name</strong>: <code>product-cache</code></li>
+            <li>
+              <strong>Primary Endpoint</strong>:
+              <code>product-cache.xxxxxx.cache.amazonaws.com:6379</code>
+            </li>
+            <li>
+              <strong>Reader Endpoint</strong>:
+              <code>product-cache-ro.xxxxxx.cache.amazonaws.com:6379</code>
+            </li>
+            <li><strong>Node Type</strong>: <code>cache.t3.micro</code></li>
+            <li><strong>Replica Count</strong>: 1</li>
+            <li><strong>Security Group</strong>: <code>redis-sg</code></li>
+            <li>
+              <strong>Subnet Group</strong>: <code>redis-subnet-group</code>
+            </li>
+          </ul>
+          <h3 id="performance-characteristics">Performance Characteristics</h3>
+          <ul>
+            <li><strong>Latency</strong>: Sub-millisecond cho cached data</li>
+            <li><strong>Throughput</strong>: ~100,000 operations mỗi giây</li>
+            <li><strong>Memory</strong>: ~555 MB available (t3.micro)</li>
+            <li><strong>Eviction Policy</strong>: allkeys-lru</li>
+          </ul>
+          <h2 id="khắc-phục-các-vấn-đề-thường-gặp">
+            Khắc Phục Các Vấn Đề Thường Gặp
+          </h2>
+          <h3 id="vấn-đề-không-thể-kết-nối-với-redis">
+            Vấn Đề: Không Thể Kết Nối Với Redis
+          </h3>
+          <p><strong>Nguyên Nhân Có Thể:</strong></p>
+          <ul>
+            <li>Security group chặn traffic</li>
+            <li>Cấu hình endpoint không đúng</li>
+            <li>Vấn đề kết nối mạng</li>
+          </ul>
+          <p><strong>Giải Pháp:</strong></p>
+          <ul>
+            <li>
+              Xác minh security group cho phép inbound traffic trên port 6379
+            </li>
+            <li>Kiểm tra Redis endpoint URL và port</li>
+            <li>Đảm bảo client ở cùng VPC với Redis cache</li>
+          </ul>
+          <h3 id="vấn-đề-memory-usage-cao">Vấn Đề: Memory Usage Cao</h3>
+          <p><strong>Nguyên Nhân Có Thể:</strong></p>
+          <ul>
+            <li>Quá nhiều dữ liệu được cached</li>
+            <li>Không có TTL được set trên keys</li>
+            <li>Memory leak trong ứng dụng</li>
+          </ul>
+          <p><strong>Giải Pháp:</strong></p>
+          <ul>
+            <li>Giám sát memory usage trong CloudWatch</li>
+            <li>Set các giá trị TTL phù hợp</li>
+            <li>Sử dụng các cấu trúc dữ liệu tiết kiệm memory</li>
+            <li>Cân nhắc các loại node lớn hơn</li>
+          </ul>
+          <h2 id="các-bước-tiếp-theo">Các Bước Tiếp Theo</h2>
+          <p>Thiết lập ElastiCache Redis của bạn giờ đã hoàn thành! Bạn có:</p>
+          <p>
+            ✅ <strong>Redis OSS Cache</strong> với primary và replica nodes<br />
+            ✅ <strong>Multi-AZ deployment</strong> cho tính khả dụng cao<br />
+            ✅ <strong>Subnet Group</strong> được cấu hình cho private network
+            access<br />
+            ✅ <strong>Security Group</strong> cho phép application access<br />
+            ✅ <strong>Automatic backups</strong> được bật<br />
+            ✅ <strong>CloudWatch monitoring</strong> được cấu hình<br />
+            ✅ <strong>Connection tested</strong> và xác minh
+          </p>
+          <h3 id="lợi-ích-redis-đã-đạt-được">Lợi Ích Redis Đã Đạt Được:</h3>
+          <ul>
+            <li>
+              <strong>Sub-millisecond latency</strong> cho cached application
+              data
+            </li>
+            <li>
+              <strong>High throughput</strong> với 100K+ operations mỗi giây
+            </li>
+            <li><strong>Automatic failover</strong> với Multi-AZ deployment</li>
+            <li>
+              <strong>Flexible data structures</strong> cho các tình huống
+              caching phức tạp
+            </li>
+          </ul>
 
-<div class="notices tip" ><p>Sử dụng primary endpoint cho read/write operations và reader endpoint cho read-only operations để phân phối tải và cải thiện hiệu suất.</p>
-</div>
+          <div class="notices tip">
+            <p>
+              Sử dụng primary endpoint cho read/write operations và reader
+              endpoint cho read-only operations để phân phối tải và cải thiện
+              hiệu suất.
+            </p>
+          </div>
 
-<p>Tiếp theo, chúng ta sẽ triển khai ứng dụng Node.js sẽ sử dụng cả Redis và DAX cho multi-layer caching.</p>
+          <p>
+            Tiếp theo, chúng ta sẽ triển khai ứng dụng Node.js sẽ sử dụng cả
+            Redis và DAX cho multi-layer caching.
+          </p>
 
-
-
-
-
-<footer class=" footline" >
-	
-</footer>
-
-        
+          <footer class="footline"></footer>
         </div>
-        
-
       </div>
 
-    <div id="navigation">
-        
-        
+      <div id="navigation">
+        <a
+          class="nav nav-prev"
+          href="/vi/3-setup-dynamodb/3.2-setup-dax/"
+          title="3.2 Thiết Lập DynamoDB DAX"
+        >
+          <i class="fa fa-chevron-left"></i
+        ></a>
 
-        
-            
-            
-                
-                    
-                    
-                
-                
-
-                    
-                    
-                        
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                        
-                        
-                    
-                
-                
-
-                    
-                    
-                        
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                        
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                        
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                        
-                        
-                    
-                
-                
-
-                    
-                    
-                        
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-            
-        
-
-        
-
-
-	 
-	 
-		
-			<a class="nav nav-prev" href="/vi/3-setup-dynamodb/3.2-setup-dax/" title="3.2 Thiết Lập DynamoDB DAX"> <i class="fa fa-chevron-left"></i></a>
-		
-		
-			<a class="nav nav-next" href="/vi/5-setup-application/" title="5. Thiết Lập Application" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
-		
-	
-    </div>
-
+        <a
+          class="nav nav-next"
+          href="/vi/5-setup-application/"
+          title="5. Thiết Lập Application"
+          style="margin-right: 0px"
+          ><i class="fa fa-chevron-right"></i
+        ></a>
+      </div>
     </section>
 
-    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
-      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
+    <div
+      style="
+        left: -1000px;
+        overflow: scroll;
+        position: absolute;
+        top: -1000px;
+        border: none;
+        box-sizing: content-box;
+        height: 200px;
+        margin: 0px;
+        padding: 0px;
+        width: 200px;
+      "
+    >
+      <div
+        style="
+          border: none;
+          box-sizing: content-box;
+          height: 200px;
+          margin: 0px;
+          padding: 0px;
+          width: 200px;
+        "
+      ></div>
     </div>
     <script src="/js/clipboard.min.js?1754898927"></script>
     <script src="/js/perfect-scrollbar.min.js?1754898927"></script>
@@ -1651,21 +1402,19 @@
     <script src="/js/jquery.sticky.js?1754898927"></script>
     <script src="/js/featherlight.min.js?1754898927"></script>
     <script src="/js/highlight.pack.js?1754898927"></script>
-    <script>hljs.initHighlightingOnLoad();</script>
+    <script>
+      hljs.initHighlightingOnLoad();
+    </script>
     <script src="/js/modernizr.custom-3.6.0.js?1754898927"></script>
     <script src="/js/learn.js?1754898927"></script>
     <script src="/js/hugo-learn.js?1754898927"></script>
     <script src="/js/language-switcher.js?1754898927"></script>
     <script src="/js/multilingual.js?1754898927"></script>
-    
-        
-            <script src="/mermaid/mermaid.js?1754898927"></script>
-        
-        <script>
-            mermaid.initialize({ startOnLoad: true });
-        </script>
-    
-    
 
+    <script src="/mermaid/mermaid.js?1754898927"></script>
+
+    <script>
+      mermaid.initialize({ startOnLoad: true });
+    </script>
   </body>
 </html>

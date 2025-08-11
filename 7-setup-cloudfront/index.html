@@ -1,1081 +1,994 @@
 <!DOCTYPE html>
 <html lang="en" class="js csstransforms3d">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="generator" content="Hugo 0.147.9">
-    <meta name="description" content="">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content="Hugo 0.147.9" />
+    <meta name="description" content="" />
 
+    <link rel="icon" href="/images/favicon.png" type="image/png" />
 
-    <link rel="icon" href="/images/favicon.png" type="image/png">
+    <title>
+      7. Setup CloudFront CDN :: In-Memory Database Caching Architecture
+    </title>
 
-    <title>7. Setup CloudFront CDN :: In-Memory Database Caching Architecture</title>
-
-    
-    <link href="/css/nucleus.css?1754898926" rel="stylesheet">
-    <link href="/css/fontawesome-all.min.css?1754898926" rel="stylesheet">
-    <link href="/css/hybrid.css?1754898926" rel="stylesheet">
-    <link href="/css/featherlight.min.css?1754898926" rel="stylesheet">
-    <link href="/css/perfect-scrollbar.min.css?1754898926" rel="stylesheet">
-    <link href="/css/auto-complete.css?1754898926" rel="stylesheet">
-    <link href="/css/atom-one-dark-reasonable.css?1754898926" rel="stylesheet">
-    <link href="/css/theme.css?1754898926" rel="stylesheet">
-    <link href="/css/tabs.css?1754898926" rel="stylesheet">
-    <link href="/css/hugo-theme.css?1754898926" rel="stylesheet">
-    
-    
+    <link href="/css/nucleus.css?1754898926" rel="stylesheet" />
+    <link href="/css/fontawesome-all.min.css?1754898926" rel="stylesheet" />
+    <link href="/css/hybrid.css?1754898926" rel="stylesheet" />
+    <link href="/css/featherlight.min.css?1754898926" rel="stylesheet" />
+    <link href="/css/perfect-scrollbar.min.css?1754898926" rel="stylesheet" />
+    <link href="/css/auto-complete.css?1754898926" rel="stylesheet" />
+    <link
+      href="/css/atom-one-dark-reasonable.css?1754898926"
+      rel="stylesheet"
+    />
+    <link href="/css/theme.css?1754898926" rel="stylesheet" />
+    <link href="/css/tabs.css?1754898926" rel="stylesheet" />
+    <link href="/css/hugo-theme.css?1754898926" rel="stylesheet" />
 
     <script src="/js/jquery-3.3.1.min.js?1754898926"></script>
 
     <style>
-      :root #header + #content > #left > #rlblock_left{
-          display:none !important;
+      :root #header + #content > #left > #rlblock_left {
+        display: none !important;
       }
-      
     </style>
-    
   </head>
   <body class="" data-url="/7-setup-cloudfront/">
     <nav id="sidebar" class="">
-
-
-
-  <div id="header-wrapper">
-    <div id="header">
-      <a
-  id="logo"
-  href='/workshop-caching'
->
-  <svg
-    id="Layer_1"
-    data-name="Layer 1"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 60 30"
-    width="30%"
-  >
-    <defs>
-      <style>
-        .cls-1 {
-          fill: #fff;
-        }
-        .cls-2 {
-          fill: #f90;
-          fill-rule: evenodd;
-        }
-      </style>
-    </defs>
-    <title>AWS-Logo_White-Color</title>
-    <path
-      class="cls-1"
-      d="M14.09,10.85a4.7,4.7,0,0,0,.19,1.48,7.73,7.73,0,0,0,.54,1.19.77.77,0,0,1,.12.38.64.64,0,0,1-.32.49l-1,.7a.83.83,0,0,1-.44.15.69.69,0,0,1-.49-.23,3.8,3.8,0,0,1-.6-.77q-.25-.42-.51-1a6.14,6.14,0,0,1-4.89,2.3,4.54,4.54,0,0,1-3.32-1.19,4.27,4.27,0,0,1-1.22-3.2A4.28,4.28,0,0,1,3.61,7.75,6.06,6.06,0,0,1,7.69,6.46a12.47,12.47,0,0,1,1.76.13q.92.13,1.91.36V5.73a3.65,3.65,0,0,0-.79-2.66A3.81,3.81,0,0,0,7.86,2.3a7.71,7.71,0,0,0-1.79.22,12.78,12.78,0,0,0-1.79.57,4.55,4.55,0,0,1-.58.22l-.26,0q-.35,0-.35-.52V2a1.09,1.09,0,0,1,.12-.58,1.2,1.2,0,0,1,.47-.35A10.88,10.88,0,0,1,5.77.32,10.19,10.19,0,0,1,8.36,0a6,6,0,0,1,4.35,1.35,5.49,5.49,0,0,1,1.38,4.09ZM7.34,13.38a5.36,5.36,0,0,0,1.72-.31A3.63,3.63,0,0,0,10.63,12,2.62,2.62,0,0,0,11.19,11a5.63,5.63,0,0,0,.16-1.44v-.7a14.35,14.35,0,0,0-1.53-.28,12.37,12.37,0,0,0-1.56-.1,3.84,3.84,0,0,0-2.47.67A2.34,2.34,0,0,0,5,11a2.35,2.35,0,0,0,.61,1.76A2.4,2.4,0,0,0,7.34,13.38Zm13.35,1.8a1,1,0,0,1-.64-.16,1.3,1.3,0,0,1-.35-.65L15.81,1.51a3,3,0,0,1-.15-.67.36.36,0,0,1,.41-.41H17.7a1,1,0,0,1,.65.16,1.4,1.4,0,0,1,.33.65l2.79,11,2.59-11A1.17,1.17,0,0,1,24.39.6a1.1,1.1,0,0,1,.67-.16H26.4a1.1,1.1,0,0,1,.67.16,1.17,1.17,0,0,1,.32.65L30,12.39,32.88,1.25A1.39,1.39,0,0,1,33.22.6a1,1,0,0,1,.65-.16h1.54a.36.36,0,0,1,.41.41,1.36,1.36,0,0,1,0,.26,3.64,3.64,0,0,1-.12.41l-4,12.86a1.3,1.3,0,0,1-.35.65,1,1,0,0,1-.64.16H29.25a1,1,0,0,1-.67-.17,1.26,1.26,0,0,1-.32-.67L25.67,3.64,23.11,14.34a1.26,1.26,0,0,1-.32.67,1,1,0,0,1-.67.17Zm21.36.44a11.28,11.28,0,0,1-2.56-.29,7.44,7.44,0,0,1-1.92-.67,1,1,0,0,1-.61-.93v-.84q0-.52.38-.52a.9.9,0,0,1,.31.06l.42.17a8.77,8.77,0,0,0,1.83.58,9.78,9.78,0,0,0,2,.2,4.48,4.48,0,0,0,2.43-.55,1.76,1.76,0,0,0,.86-1.57,1.61,1.61,0,0,0-.45-1.16A4.29,4.29,0,0,0,43,9.22l-2.41-.76A5.15,5.15,0,0,1,38,6.78a3.94,3.94,0,0,1-.83-2.41,3.7,3.7,0,0,1,.45-1.85,4.47,4.47,0,0,1,1.19-1.37A5.27,5.27,0,0,1,40.51.29,7.4,7.4,0,0,1,42.6,0a8.87,8.87,0,0,1,1.12.07q.57.07,1.08.19t.95.26a4.27,4.27,0,0,1,.7.29,1.59,1.59,0,0,1,.49.41.94.94,0,0,1,.15.55v.79q0,.52-.38.52a1.76,1.76,0,0,1-.64-.2,7.74,7.74,0,0,0-3.2-.64,4.37,4.37,0,0,0-2.21.47,1.6,1.6,0,0,0-.79,1.48,1.58,1.58,0,0,0,.49,1.18,4.94,4.94,0,0,0,1.83.92L44.55,7a5.08,5.08,0,0,1,2.57,1.6A3.76,3.76,0,0,1,47.9,11a4.21,4.21,0,0,1-.44,1.93,4.4,4.4,0,0,1-1.21,1.47,5.43,5.43,0,0,1-1.85.93A8.25,8.25,0,0,1,42.05,15.62Z"
-    ></path>
-    <path
-      class="cls-2"
-      d="M45.19,23.81C39.72,27.85,31.78,30,25,30A36.64,36.64,0,0,1,.22,20.57c-.51-.46-.06-1.09.56-.74A49.78,49.78,0,0,0,25.53,26.4,49.23,49.23,0,0,0,44.4,22.53C45.32,22.14,46.1,23.14,45.19,23.81Z"
-    ></path>
-    <path
-      class="cls-2"
-      d="M47.47,21.21c-.7-.9-4.63-.42-6.39-.21-.53.06-.62-.4-.14-.74,3.13-2.2,8.27-1.57,8.86-.83s-.16,5.89-3.09,8.35c-.45.38-.88.18-.68-.32C46.69,25.8,48.17,22.11,47.47,21.21Z"
-    ></path>
-  </svg>
-</a>
-
-    </div>
-    
-        <div class="searchbox">
-    <label for="search-by"><i class="fas fa-search"></i></label>
-    <input data-search-input id="search-by" type="search" placeholder="Search...">
-    <span data-search-clear=""><i class="fas fa-times"></i></span>
-</div>
-
-<script type="text/javascript" src="/js/lunr.min.js?1754898926"></script>
-<script type="text/javascript" src="/js/auto-complete.js?1754898926"></script>
-<script type="text/javascript">
-    var baseurl = "\/";
-</script>
-<script type="text/javascript" src="/js/search.js?1754898926"></script>
-
-    
-  </div>
-
-
-    <div class="highlightable">
-    <ul class="topics">
-
-        
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/1-introduction/" title="1. Introduction" class="dd-item
-        
-        
-        
-        ">
-      <a href="/1-introduction/">
-          <b></b>1. Introduction
-          
-      </a>
-      
-      
-        <ul>
-          
-          
-            
-          
-          
-
-        
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/1-introduction/1.1-overview/" title="1.1 Workshop Overview" class="dd-item
-        
-        
-        
-        ">
-      <a href="/1-introduction/1.1-overview/">
-          <b></b>1.1 Workshop Overview
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/1-introduction/1.2-architecture/" title="1.2 Architecture Overview" class="dd-item
-        
-        
-        
-        ">
-      <a href="/1-introduction/1.2-architecture/">
-          <b></b>1.2 Architecture Overview
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-        
-        </ul>
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/2-setup-vpc/" title="2. Setup VPC and Network Infrastructure" class="dd-item
-        
-        
-        
-        ">
-      <a href="/2-setup-vpc/">
-          <b></b>2. Setup VPC and Network Infrastructure
-          
-      </a>
-      
-      
-        <ul>
-          
-          
-            
-          
-          
-
-        
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/2-setup-vpc/2.1-create-vpc/" title="2.1 Create VPC" class="dd-item
-        
-        
-        
-        ">
-      <a href="/2-setup-vpc/2.1-create-vpc/">
-          <b></b>2.1 Create VPC
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/2-setup-vpc/2.2-security-groups/" title="2.2 Create Security Groups" class="dd-item
-        
-        
-        
-        ">
-      <a href="/2-setup-vpc/2.2-security-groups/">
-          <b></b>2.2 Create Security Groups
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-        
-        </ul>
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/3-setup-dynamodb/" title="3. Setup DynamoDB and DAX" class="dd-item
-        
-        
-        
-        ">
-      <a href="/3-setup-dynamodb/">
-          <b></b>3. Setup DynamoDB and DAX
-          
-      </a>
-      
-      
-        <ul>
-          
-          
-            
-          
-          
-
-        
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/3-setup-dynamodb/3.1-create-table/" title="3.1 Create DynamoDB Table" class="dd-item
-        
-        
-        
-        ">
-      <a href="/3-setup-dynamodb/3.1-create-table/">
-          <b></b>3.1 Create DynamoDB Table
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/3-setup-dynamodb/3.2-setup-dax/" title="3.2 Setup DynamoDB DAX" class="dd-item
-        
-        
-        
-        ">
-      <a href="/3-setup-dynamodb/3.2-setup-dax/">
-          <b></b>3.2 Setup DynamoDB DAX
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-        
-        </ul>
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/4-setup-elasticache/" title="4. Setup ElastiCache Redis" class="dd-item
-        
-        
-        
-        ">
-      <a href="/4-setup-elasticache/">
-          <b></b>4. Setup ElastiCache Redis
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/5-setup-application/" title="5. Setup Application" class="dd-item
-        
-        
-        
-        ">
-      <a href="/5-setup-application/">
-          <b></b>5. Setup Application
-          
-      </a>
-      
-      
-        <ul>
-          
-          
-            
-          
-          
-
-        
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/5-setup-application/5.1-launch-ec2/" title="5.1 Launch EC2 Instance" class="dd-item
-        
-        
-        
-        ">
-      <a href="/5-setup-application/5.1-launch-ec2/">
-          <b></b>5.1 Launch EC2 Instance
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-            
-            
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/5-setup-application/5.2-deploy-app/" title="5.2 Deploy Application" class="dd-item
-        
-        
-        
-        ">
-      <a href="/5-setup-application/5.2-deploy-app/">
-          <b></b>5.2 Deploy Application
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-            
-          
-        
-        </ul>
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/6-setup-loadbalancer/" title="6. Setup Application Load Balancer" class="dd-item
-        
-        
-        
-        ">
-      <a href="/6-setup-loadbalancer/">
-          <b></b>6. Setup Application Load Balancer
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/7-setup-cloudfront/" title="7. Setup CloudFront CDN" class="dd-item
-        
-        active
-        
-        ">
-      <a href="/7-setup-cloudfront/">
-          <b></b>7. Setup CloudFront CDN
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/8-performance-testing/" title="8. Performance Testing" class="dd-item
-        
-        
-        
-        ">
-      <a href="/8-performance-testing/">
-          <b></b>8. Performance Testing
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/9-monitoring/" title="9. Monitoring and Alerting" class="dd-item
-        
-        
-        
-        ">
-      <a href="/9-monitoring/">
-          <b></b>9. Monitoring and Alerting
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-          
-
-
-
-
- 
-  
-    
-    <li data-nav-id="/10-cleanup/" title="10. Resource Cleanup Guide" class="dd-item
-        
-        
-        
-        ">
-      <a href="/10-cleanup/">
-          <b></b>10. Resource Cleanup Guide
-          
-      </a>
-      
-      
-    </li>
-  
- 
-
-          
-        
-    </ul>
-
-    
-    
-
-    
-    <section id="prefooter">
-      <hr/>
-      <ul>
-      
-        <li>
-          <a class="padding">
-            <i class="fas fa-language fa-fw"></i>
-          <div class="select-style">
-            <select id="select-language" onchange="location = this.value;">
-          
-          
-          
-              
-              
-                  
-                    
-                    
-                      <option id="en" value="/7-setup-cloudfront/" selected>English</option>
-                    
-                  
-              
-                  
-              
-          
-              
-              
-                  
-              
-                  
-                    
-                    
-                      <option id="vi" value="/vi/7-setup-cloudfront/">Tiếng Việt</option>
-                    
-                  
-              
-          
-        </select>
-        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-          width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
-          <g>
-            <g id="arrow-drop-down">
-              <polygon points="0,63.75 127.5,191.25 255,63.75 		" />
-            </g>
-          </g>
-        </svg>
+      <div id="header-wrapper">
+        <div id="header">
+          <a id="logo" href="/">
+            <svg
+              id="Layer_1"
+              data-name="Layer 1"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 60 30"
+              width="30%"
+            >
+              <defs>
+                <style>
+                  .cls-1 {
+                    fill: #fff;
+                  }
+                  .cls-2 {
+                    fill: #f90;
+                    fill-rule: evenodd;
+                  }
+                </style>
+              </defs>
+              <title>AWS-Logo_White-Color</title>
+              <path
+                class="cls-1"
+                d="M14.09,10.85a4.7,4.7,0,0,0,.19,1.48,7.73,7.73,0,0,0,.54,1.19.77.77,0,0,1,.12.38.64.64,0,0,1-.32.49l-1,.7a.83.83,0,0,1-.44.15.69.69,0,0,1-.49-.23,3.8,3.8,0,0,1-.6-.77q-.25-.42-.51-1a6.14,6.14,0,0,1-4.89,2.3,4.54,4.54,0,0,1-3.32-1.19,4.27,4.27,0,0,1-1.22-3.2A4.28,4.28,0,0,1,3.61,7.75,6.06,6.06,0,0,1,7.69,6.46a12.47,12.47,0,0,1,1.76.13q.92.13,1.91.36V5.73a3.65,3.65,0,0,0-.79-2.66A3.81,3.81,0,0,0,7.86,2.3a7.71,7.71,0,0,0-1.79.22,12.78,12.78,0,0,0-1.79.57,4.55,4.55,0,0,1-.58.22l-.26,0q-.35,0-.35-.52V2a1.09,1.09,0,0,1,.12-.58,1.2,1.2,0,0,1,.47-.35A10.88,10.88,0,0,1,5.77.32,10.19,10.19,0,0,1,8.36,0a6,6,0,0,1,4.35,1.35,5.49,5.49,0,0,1,1.38,4.09ZM7.34,13.38a5.36,5.36,0,0,0,1.72-.31A3.63,3.63,0,0,0,10.63,12,2.62,2.62,0,0,0,11.19,11a5.63,5.63,0,0,0,.16-1.44v-.7a14.35,14.35,0,0,0-1.53-.28,12.37,12.37,0,0,0-1.56-.1,3.84,3.84,0,0,0-2.47.67A2.34,2.34,0,0,0,5,11a2.35,2.35,0,0,0,.61,1.76A2.4,2.4,0,0,0,7.34,13.38Zm13.35,1.8a1,1,0,0,1-.64-.16,1.3,1.3,0,0,1-.35-.65L15.81,1.51a3,3,0,0,1-.15-.67.36.36,0,0,1,.41-.41H17.7a1,1,0,0,1,.65.16,1.4,1.4,0,0,1,.33.65l2.79,11,2.59-11A1.17,1.17,0,0,1,24.39.6a1.1,1.1,0,0,1,.67-.16H26.4a1.1,1.1,0,0,1,.67.16,1.17,1.17,0,0,1,.32.65L30,12.39,32.88,1.25A1.39,1.39,0,0,1,33.22.6a1,1,0,0,1,.65-.16h1.54a.36.36,0,0,1,.41.41,1.36,1.36,0,0,1,0,.26,3.64,3.64,0,0,1-.12.41l-4,12.86a1.3,1.3,0,0,1-.35.65,1,1,0,0,1-.64.16H29.25a1,1,0,0,1-.67-.17,1.26,1.26,0,0,1-.32-.67L25.67,3.64,23.11,14.34a1.26,1.26,0,0,1-.32.67,1,1,0,0,1-.67.17Zm21.36.44a11.28,11.28,0,0,1-2.56-.29,7.44,7.44,0,0,1-1.92-.67,1,1,0,0,1-.61-.93v-.84q0-.52.38-.52a.9.9,0,0,1,.31.06l.42.17a8.77,8.77,0,0,0,1.83.58,9.78,9.78,0,0,0,2,.2,4.48,4.48,0,0,0,2.43-.55,1.76,1.76,0,0,0,.86-1.57,1.61,1.61,0,0,0-.45-1.16A4.29,4.29,0,0,0,43,9.22l-2.41-.76A5.15,5.15,0,0,1,38,6.78a3.94,3.94,0,0,1-.83-2.41,3.7,3.7,0,0,1,.45-1.85,4.47,4.47,0,0,1,1.19-1.37A5.27,5.27,0,0,1,40.51.29,7.4,7.4,0,0,1,42.6,0a8.87,8.87,0,0,1,1.12.07q.57.07,1.08.19t.95.26a4.27,4.27,0,0,1,.7.29,1.59,1.59,0,0,1,.49.41.94.94,0,0,1,.15.55v.79q0,.52-.38.52a1.76,1.76,0,0,1-.64-.2,7.74,7.74,0,0,0-3.2-.64,4.37,4.37,0,0,0-2.21.47,1.6,1.6,0,0,0-.79,1.48,1.58,1.58,0,0,0,.49,1.18,4.94,4.94,0,0,0,1.83.92L44.55,7a5.08,5.08,0,0,1,2.57,1.6A3.76,3.76,0,0,1,47.9,11a4.21,4.21,0,0,1-.44,1.93,4.4,4.4,0,0,1-1.21,1.47,5.43,5.43,0,0,1-1.85.93A8.25,8.25,0,0,1,42.05,15.62Z"
+              ></path>
+              <path
+                class="cls-2"
+                d="M45.19,23.81C39.72,27.85,31.78,30,25,30A36.64,36.64,0,0,1,.22,20.57c-.51-.46-.06-1.09.56-.74A49.78,49.78,0,0,0,25.53,26.4,49.23,49.23,0,0,0,44.4,22.53C45.32,22.14,46.1,23.14,45.19,23.81Z"
+              ></path>
+              <path
+                class="cls-2"
+                d="M47.47,21.21c-.7-.9-4.63-.42-6.39-.21-.53.06-.62-.4-.14-.74,3.13-2.2,8.27-1.57,8.86-.83s-.16,5.89-3.09,8.35c-.45.38-.88.18-.68-.32C46.69,25.8,48.17,22.11,47.47,21.21Z"
+              ></path>
+            </svg>
+          </a>
         </div>
-        </a>
-        </li>
-      
 
-      
-      </ul>
-    </section>
-    
-    <section id="footer">
-      <section id="shortcuts" style="font-weight: bold;">
-        <h3>More</h3>
-        <ul>
-          
-              <li> 
-                  <a class="padding" href="https://aws.amazon.com/blogs"><i class="fab fa-aws"></i> AWS Study Group - Blog</a>
+        <div class="searchbox">
+          <label for="search-by"><i class="fas fa-search"></i></label>
+          <input
+            data-search-input
+            id="search-by"
+            type="search"
+            placeholder="Search..."
+          />
+          <span data-search-clear=""><i class="fas fa-times"></i></span>
+        </div>
+
+        <script
+          type="text/javascript"
+          src="/js/lunr.min.js?1754898926"
+        ></script>
+        <script
+          type="text/javascript"
+          src="/js/auto-complete.js?1754898926"
+        ></script>
+        <script type="text/javascript">
+          var baseurl = "\/";
+        </script>
+        <script type="text/javascript" src="/js/search.js?1754898926"></script>
+      </div>
+
+      <div class="highlightable">
+        <ul class="topics">
+          <li
+            data-nav-id="/1-introduction/"
+            title="1. Introduction"
+            class="dd-item"
+          >
+            <a href="/1-introduction/"> <b></b>1. Introduction </a>
+
+            <ul>
+              <li
+                data-nav-id="/1-introduction/1.1-overview/"
+                title="1.1 Workshop Overview"
+                class="dd-item"
+              >
+                <a href="/1-introduction/1.1-overview/">
+                  <b></b>1.1 Workshop Overview
+                </a>
               </li>
-          
-              <li> 
-                  <a class="padding" href="https://www.facebook.com/groups/awsstudygroupfcj"><i class="fab fa-facebook"></i> AWS Study Group - FB Group</a>
+
+              <li
+                data-nav-id="/1-introduction/1.2-architecture/"
+                title="1.2 Architecture Overview"
+                class="dd-item"
+              >
+                <a href="/1-introduction/1.2-architecture/">
+                  <b></b>1.2 Architecture Overview
+                </a>
               </li>
-          
+            </ul>
+          </li>
+
+          <li
+            data-nav-id="/2-setup-vpc/"
+            title="2. Setup VPC and Network Infrastructure"
+            class="dd-item"
+          >
+            <a href="/2-setup-vpc/">
+              <b></b>2. Setup VPC and Network Infrastructure
+            </a>
+
+            <ul>
+              <li
+                data-nav-id="/2-setup-vpc/2.1-create-vpc/"
+                title="2.1 Create VPC"
+                class="dd-item"
+              >
+                <a href="/2-setup-vpc/2.1-create-vpc/">
+                  <b></b>2.1 Create VPC
+                </a>
+              </li>
+
+              <li
+                data-nav-id="/2-setup-vpc/2.2-security-groups/"
+                title="2.2 Create Security Groups"
+                class="dd-item"
+              >
+                <a href="/2-setup-vpc/2.2-security-groups/">
+                  <b></b>2.2 Create Security Groups
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <li
+            data-nav-id="/3-setup-dynamodb/"
+            title="3. Setup DynamoDB and DAX"
+            class="dd-item"
+          >
+            <a href="/3-setup-dynamodb/"> <b></b>3. Setup DynamoDB and DAX </a>
+
+            <ul>
+              <li
+                data-nav-id="/3-setup-dynamodb/3.1-create-table/"
+                title="3.1 Create DynamoDB Table"
+                class="dd-item"
+              >
+                <a href="/3-setup-dynamodb/3.1-create-table/">
+                  <b></b>3.1 Create DynamoDB Table
+                </a>
+              </li>
+
+              <li
+                data-nav-id="/3-setup-dynamodb/3.2-setup-dax/"
+                title="3.2 Setup DynamoDB DAX"
+                class="dd-item"
+              >
+                <a href="/3-setup-dynamodb/3.2-setup-dax/">
+                  <b></b>3.2 Setup DynamoDB DAX
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <li
+            data-nav-id="/4-setup-elasticache/"
+            title="4. Setup ElastiCache Redis"
+            class="dd-item"
+          >
+            <a href="/4-setup-elasticache/">
+              <b></b>4. Setup ElastiCache Redis
+            </a>
+          </li>
+
+          <li
+            data-nav-id="/5-setup-application/"
+            title="5. Setup Application"
+            class="dd-item"
+          >
+            <a href="/5-setup-application/"> <b></b>5. Setup Application </a>
+
+            <ul>
+              <li
+                data-nav-id="/5-setup-application/5.1-launch-ec2/"
+                title="5.1 Launch EC2 Instance"
+                class="dd-item"
+              >
+                <a href="/5-setup-application/5.1-launch-ec2/">
+                  <b></b>5.1 Launch EC2 Instance
+                </a>
+              </li>
+
+              <li
+                data-nav-id="/5-setup-application/5.2-deploy-app/"
+                title="5.2 Deploy Application"
+                class="dd-item"
+              >
+                <a href="/5-setup-application/5.2-deploy-app/">
+                  <b></b>5.2 Deploy Application
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <li
+            data-nav-id="/6-setup-loadbalancer/"
+            title="6. Setup Application Load Balancer"
+            class="dd-item"
+          >
+            <a href="/6-setup-loadbalancer/">
+              <b></b>6. Setup Application Load Balancer
+            </a>
+          </li>
+
+          <li
+            data-nav-id="/7-setup-cloudfront/"
+            title="7. Setup CloudFront CDN"
+            class="dd-item active"
+          >
+            <a href="/7-setup-cloudfront/"> <b></b>7. Setup CloudFront CDN </a>
+          </li>
+
+          <li
+            data-nav-id="/8-performance-testing/"
+            title="8. Performance Testing"
+            class="dd-item"
+          >
+            <a href="/8-performance-testing/">
+              <b></b>8. Performance Testing
+            </a>
+          </li>
+
+          <li
+            data-nav-id="/9-monitoring/"
+            title="9. Monitoring and Alerting"
+            class="dd-item"
+          >
+            <a href="/9-monitoring/"> <b></b>9. Monitoring and Alerting </a>
+          </li>
+
+          <li
+            data-nav-id="/10-cleanup/"
+            title="10. Resource Cleanup Guide"
+            class="dd-item"
+          >
+            <a href="/10-cleanup/"> <b></b>10. Resource Cleanup Guide </a>
+          </li>
         </ul>
-      </section>
-      <section id="prefooter">
+
+        <section id="prefooter">
           <hr />
           <ul>
             <li>
               <a class="padding">
                 <i class="fas fa-language fa-fw"></i>
                 <div class="select-style">
-                  <select id="select-language" onchange="changeLanguage()">
-                    
-                      <option value="en" selected>
-                        English
-                      </option>
-                    
-                      <option value="vi" >
-                        Tiếng Việt
-                      </option>
-                    
+                  <select
+                    id="select-language"
+                    onchange="location = this.value;"
+                  >
+                    <option id="en" value="/7-setup-cloudfront/" selected>
+                      English
+                    </option>
+
+                    <option id="vi" value="/vi/7-setup-cloudfront/">
+                      Tiếng Việt
+                    </option>
                   </select>
-                  <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="255px" height="255px" viewBox="0 0 255 255" style="enable-background:new 0 0 255 255;" xml:space="preserve">
+                  <svg
+                    version="1.1"
+                    id="Capa_1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    x="0px"
+                    y="0px"
+                    width="255px"
+                    height="255px"
+                    viewBox="0 0 255 255"
+                    style="enable-background: new 0 0 255 255"
+                    xml:space="preserve"
+                  >
                     <g>
                       <g id="arrow-drop-down">
-                        <polygon points="0,63.75 127.5,191.25 255,63.75" />
+                        <polygon points="0,63.75 127.5,191.25 255,63.75 		" />
                       </g>
                     </g>
                   </svg>
                 </div>
               </a>
             </li>
-            <li>
-              <a class="padding" href="#" data-clear-history-toggle=""><i class="fas fa-history fa-fw"></i> Clear History</a>
-            </li>
           </ul>
         </section>
+
         <section id="footer">
-          <left>
-            <b>Workshop</b><br />
-            <img src="https://hitwebcounter.com/counter/counter.php?page=7831196&style=0038&nbdigits=9&type=page&initCount=0" title="Migrate" alt="web counter" border="0" /><br />
-            <b><a href="https://cloudjourney.awsstudygroup.com/">Cloud Journey</a></b><br />
-            <img src="https://hitwebcounter.com/counter/counter.php?page=7830807&style=0038&nbdigits=9&type=page&initCount=0" title="Total CLoud Journey" alt="web counter" border="0" />
-          </left>
-          <left>
-            <br /><br />
-            <b>Last Updated</b><br />
-            <i><font color="orange">27-7-2025</font></i>
-          </left>
-          <left>
-            <br /><br />
-            <b>Team</b><br />
-            <i><br /><a href="https://www.linkedin.com/in/jotaguy" style="color: orange">Gia Hưng</a><br /></i>
-          </left>
-          <script async defer src="https://buttons.github.io/buttons.js"></script>
+          <section id="shortcuts" style="font-weight: bold">
+            <h3>More</h3>
+            <ul>
+              <li>
+                <a class="padding" href="https://aws.amazon.com/blogs"
+                  ><i class="fab fa-aws"></i> AWS Study Group - Blog</a
+                >
+              </li>
+
+              <li>
+                <a
+                  class="padding"
+                  href="https://www.facebook.com/groups/awsstudygroupfcj"
+                  ><i class="fab fa-facebook"></i> AWS Study Group - FB Group</a
+                >
+              </li>
+            </ul>
+          </section>
+          <section id="prefooter">
+            <hr />
+            <ul>
+              <li>
+                <a class="padding">
+                  <i class="fas fa-language fa-fw"></i>
+                  <div class="select-style">
+                    <select id="select-language" onchange="changeLanguage()">
+                      <option value="en" selected>English</option>
+
+                      <option value="vi">Tiếng Việt</option>
+                    </select>
+                    <svg
+                      version="1.1"
+                      id="Capa_1"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlns:xlink="http://www.w3.org/1999/xlink"
+                      x="0px"
+                      y="0px"
+                      width="255px"
+                      height="255px"
+                      viewBox="0 0 255 255"
+                      style="enable-background: new 0 0 255 255"
+                      xml:space="preserve"
+                    >
+                      <g>
+                        <g id="arrow-drop-down">
+                          <polygon points="0,63.75 127.5,191.25 255,63.75" />
+                        </g>
+                      </g>
+                    </svg>
+                  </div>
+                </a>
+              </li>
+              <li>
+                <a class="padding" href="#" data-clear-history-toggle=""
+                  ><i class="fas fa-history fa-fw"></i> Clear History</a
+                >
+              </li>
+            </ul>
+          </section>
+          <section id="footer">
+            <left>
+              <b>Workshop</b><br />
+              <img
+                src="https://hitwebcounter.com/counter/counter.php?page=7831196&style=0038&nbdigits=9&type=page&initCount=0"
+                title="Migrate"
+                alt="web counter"
+                border="0"
+              /><br />
+              <b
+                ><a href="https://cloudjourney.awsstudygroup.com/"
+                  >Cloud Journey</a
+                ></b
+              ><br />
+              <img
+                src="https://hitwebcounter.com/counter/counter.php?page=7830807&style=0038&nbdigits=9&type=page&initCount=0"
+                title="Total CLoud Journey"
+                alt="web counter"
+                border="0"
+              />
+            </left>
+            <left>
+              <br /><br />
+              <b>Last Updated</b><br />
+              <i><font color="orange">27-7-2025</font></i>
+            </left>
+            <left>
+              <br /><br />
+              <b>Team</b><br />
+              <i
+                ><br /><a
+                  href="https://www.linkedin.com/in/jotaguy"
+                  style="color: orange"
+                  >Gia Hưng</a
+                ><br
+              /></i>
+            </left>
+            <script
+              async
+              defer
+              src="https://buttons.github.io/buttons.js"
+            ></script>
+          </section>
         </section>
+      </div>
+    </nav>
 
-    </section>
-  </div>
-</nav>
+    <section id="body">
+      <div id="overlay"></div>
+      <div class="padding highlightable">
+        <div>
+          <div id="top-bar">
+            <div
+              id="breadcrumbs"
+              itemscope=""
+              itemtype="http://data-vocabulary.org/Breadcrumb"
+            >
+              <span id="sidebar-toggle-span">
+                <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+                  <i class="fas fa-bars"></i>
+                </a>
+              </span>
 
+              <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
 
+              <span class="links">
+                <a href="/">In-Memory Database Caching Architecture Workshop</a>
+                > 7. Setup CloudFront CDN
+              </span>
+            </div>
 
-
-        <section id="body">
-        <div id="overlay"></div>
-        <div class="padding highlightable">
-              
-              <div>
-                <div id="top-bar">
-                
-                
-                <div id="breadcrumbs" itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb">
-                    <span id="sidebar-toggle-span">
-                        <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
-                          <i class="fas fa-bars"></i>
-                        </a>
-                    </span>
-                  
-                  <span id="toc-menu"><i class="fas fa-list-alt"></i></span>
-                  
-                  <span class="links">
-                 
-                 
-                    
-          
-          
-            
-            
-          
-          
-            <a href='/'>In-Memory Database Caching Architecture Workshop</a> > 7. Setup CloudFront CDN
-          
-        
-          
-        
-                 
-                  </span>
-                </div>
-                
-                    <div class="progress">
-    <div class="wrapper">
-<nav id="TableOfContents">
-  <ul>
-    <li><a href="#step-1-navigate-to-cloudfront-console">Step 1: Navigate to CloudFront Console</a></li>
-    <li><a href="#step-2-configure-origin-settings">Step 2: Configure Origin Settings</a>
-      <ul>
-        <li><a href="#origin-domain">Origin Domain</a></li>
-        <li><a href="#origin-path">Origin Path</a></li>
-        <li><a href="#additional-origin-settings">Additional Origin Settings</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-3-configure-default-cache-behavior">Step 3: Configure Default Cache Behavior</a>
-      <ul>
-        <li><a href="#path-pattern">Path Pattern</a></li>
-        <li><a href="#viewer-protocol-policy">Viewer Protocol Policy</a></li>
-        <li><a href="#cache-key-and-origin-requests">Cache Key and Origin Requests</a></li>
-        <li><a href="#create-custom-cache-policy">Create Custom Cache Policy</a></li>
-        <li><a href="#cache-key-settings">Cache Key Settings</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-4-configure-distribution-settings">Step 4: Configure Distribution Settings</a>
-      <ul>
-        <li><a href="#price-class">Price Class</a></li>
-        <li><a href="#alternate-domain-names">Alternate Domain Names</a></li>
-        <li><a href="#default-root-object">Default Root Object</a></li>
-        <li><a href="#description-and-comments">Description and Comments</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-5-review-and-create">Step 5: Review and Create</a>
-      <ul>
-        <li><a href="#review-configuration">Review Configuration</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-6-monitor-distribution-deployment">Step 6: Monitor Distribution Deployment</a>
-      <ul>
-        <li><a href="#check-deployment-status">Check Deployment Status</a></li>
-        <li><a href="#note-distribution-domain">Note Distribution Domain</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-7-test-cloudfront-distribution">Step 7: Test CloudFront Distribution</a>
-      <ul>
-        <li><a href="#test-basic-connectivity">Test Basic Connectivity</a></li>
-        <li><a href="#test-application-endpoints">Test Application Endpoints</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-8-configure-cache-behaviors">Step 8: Configure Cache Behaviors</a>
-      <ul>
-        <li><a href="#create-api-cache-behavior">Create API Cache Behavior</a></li>
-        <li><a href="#api-cache-policy">API Cache Policy</a></li>
-        <li><a href="#create-stats-behavior">Create Stats Behavior</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-9-test-cache-performance">Step 9: Test Cache Performance</a>
-      <ul>
-        <li><a href="#test-cache-miss">Test Cache Miss</a></li>
-        <li><a href="#test-cache-hit">Test Cache Hit</a></li>
-        <li><a href="#check-response-headers">Check Response Headers</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-10-configure-cache-invalidation">Step 10: Configure Cache Invalidation</a>
-      <ul>
-        <li><a href="#create-invalidation">Create Invalidation</a></li>
-        <li><a href="#monitor-invalidation">Monitor Invalidation</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-11-monitor-cloudfront-performance">Step 11: Monitor CloudFront Performance</a>
-      <ul>
-        <li><a href="#cloudwatch-metrics">CloudWatch Metrics</a></li>
-        <li><a href="#real-time-logs-optional">Real-time Logs (Optional)</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-12-performance-comparison">Step 12: Performance Comparison</a>
-      <ul>
-        <li><a href="#test-performance-improvement">Test Performance Improvement</a></li>
-        <li><a href="#global-performance-test">Global Performance Test</a></li>
-      </ul>
-    </li>
-    <li><a href="#step-13-document-cloudfront-configuration">Step 13: Document CloudFront Configuration</a>
-      <ul>
-        <li><a href="#cloudfront-distribution-information">CloudFront Distribution Information</a></li>
-        <li><a href="#cache-behaviors">Cache Behaviors</a></li>
-        <li><a href="#performance-characteristics">Performance Characteristics</a></li>
-      </ul>
-    </li>
-    <li><a href="#troubleshooting-common-issues">Troubleshooting Common Issues</a>
-      <ul>
-        <li><a href="#issue-distribution-not-accessible">Issue: Distribution Not Accessible</a></li>
-        <li><a href="#issue-high-cache-miss-rate">Issue: High Cache Miss Rate</a></li>
-        <li><a href="#issue-origin-errors">Issue: Origin Errors</a></li>
-      </ul>
-    </li>
-    <li><a href="#security-best-practices">Security Best Practices</a>
-      <ul>
-        <li><a href="#origin-access-control">Origin Access Control</a></li>
-        <li><a href="#ssltls-configuration">SSL/TLS Configuration</a></li>
-      </ul>
-    </li>
-    <li><a href="#next-steps">Next Steps</a>
-      <ul>
-        <li><a href="#cloudfront-benefits-achieved">CloudFront Benefits Achieved:</a></li>
-      </ul>
-    </li>
-  </ul>
-</nav>
-    </div>
-</div>
-
-                
+            <div class="progress">
+              <div class="wrapper">
+                <nav id="TableOfContents">
+                  <ul>
+                    <li>
+                      <a href="#step-1-navigate-to-cloudfront-console"
+                        >Step 1: Navigate to CloudFront Console</a
+                      >
+                    </li>
+                    <li>
+                      <a href="#step-2-configure-origin-settings"
+                        >Step 2: Configure Origin Settings</a
+                      >
+                      <ul>
+                        <li><a href="#origin-domain">Origin Domain</a></li>
+                        <li><a href="#origin-path">Origin Path</a></li>
+                        <li>
+                          <a href="#additional-origin-settings"
+                            >Additional Origin Settings</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-3-configure-default-cache-behavior"
+                        >Step 3: Configure Default Cache Behavior</a
+                      >
+                      <ul>
+                        <li><a href="#path-pattern">Path Pattern</a></li>
+                        <li>
+                          <a href="#viewer-protocol-policy"
+                            >Viewer Protocol Policy</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#cache-key-and-origin-requests"
+                            >Cache Key and Origin Requests</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#create-custom-cache-policy"
+                            >Create Custom Cache Policy</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#cache-key-settings">Cache Key Settings</a>
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-4-configure-distribution-settings"
+                        >Step 4: Configure Distribution Settings</a
+                      >
+                      <ul>
+                        <li><a href="#price-class">Price Class</a></li>
+                        <li>
+                          <a href="#alternate-domain-names"
+                            >Alternate Domain Names</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#default-root-object">Default Root Object</a>
+                        </li>
+                        <li>
+                          <a href="#description-and-comments"
+                            >Description and Comments</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-5-review-and-create"
+                        >Step 5: Review and Create</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#review-configuration"
+                            >Review Configuration</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-6-monitor-distribution-deployment"
+                        >Step 6: Monitor Distribution Deployment</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#check-deployment-status"
+                            >Check Deployment Status</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#note-distribution-domain"
+                            >Note Distribution Domain</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-7-test-cloudfront-distribution"
+                        >Step 7: Test CloudFront Distribution</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#test-basic-connectivity"
+                            >Test Basic Connectivity</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#test-application-endpoints"
+                            >Test Application Endpoints</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-8-configure-cache-behaviors"
+                        >Step 8: Configure Cache Behaviors</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#create-api-cache-behavior"
+                            >Create API Cache Behavior</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#api-cache-policy">API Cache Policy</a>
+                        </li>
+                        <li>
+                          <a href="#create-stats-behavior"
+                            >Create Stats Behavior</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-9-test-cache-performance"
+                        >Step 9: Test Cache Performance</a
+                      >
+                      <ul>
+                        <li><a href="#test-cache-miss">Test Cache Miss</a></li>
+                        <li><a href="#test-cache-hit">Test Cache Hit</a></li>
+                        <li>
+                          <a href="#check-response-headers"
+                            >Check Response Headers</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-10-configure-cache-invalidation"
+                        >Step 10: Configure Cache Invalidation</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#create-invalidation">Create Invalidation</a>
+                        </li>
+                        <li>
+                          <a href="#monitor-invalidation"
+                            >Monitor Invalidation</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-11-monitor-cloudfront-performance"
+                        >Step 11: Monitor CloudFront Performance</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#cloudwatch-metrics">CloudWatch Metrics</a>
+                        </li>
+                        <li>
+                          <a href="#real-time-logs-optional"
+                            >Real-time Logs (Optional)</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-12-performance-comparison"
+                        >Step 12: Performance Comparison</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#test-performance-improvement"
+                            >Test Performance Improvement</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#global-performance-test"
+                            >Global Performance Test</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#step-13-document-cloudfront-configuration"
+                        >Step 13: Document CloudFront Configuration</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#cloudfront-distribution-information"
+                            >CloudFront Distribution Information</a
+                          >
+                        </li>
+                        <li><a href="#cache-behaviors">Cache Behaviors</a></li>
+                        <li>
+                          <a href="#performance-characteristics"
+                            >Performance Characteristics</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#troubleshooting-common-issues"
+                        >Troubleshooting Common Issues</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#issue-distribution-not-accessible"
+                            >Issue: Distribution Not Accessible</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#issue-high-cache-miss-rate"
+                            >Issue: High Cache Miss Rate</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#issue-origin-errors"
+                            >Issue: Origin Errors</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#security-best-practices"
+                        >Security Best Practices</a
+                      >
+                      <ul>
+                        <li>
+                          <a href="#origin-access-control"
+                            >Origin Access Control</a
+                          >
+                        </li>
+                        <li>
+                          <a href="#ssltls-configuration"
+                            >SSL/TLS Configuration</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#next-steps">Next Steps</a>
+                      <ul>
+                        <li>
+                          <a href="#cloudfront-benefits-achieved"
+                            >CloudFront Benefits Achieved:</a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </nav>
               </div>
             </div>
-            
-        <div id="head-tags">
-        
+          </div>
         </div>
-        
+
+        <div id="head-tags"></div>
+
         <div id="body-inner">
-          
-            <h1>
-              
-              
-                7. Setup CloudFront CDN
-              
-            </h1>
-          
+          <h1>7. Setup CloudFront CDN</h1>
 
-        
+          <p>
+            In this step, we&rsquo;ll create a CloudFront distribution to
+            provide global edge caching for our multi-layer caching application.
+          </p>
+          <h2 id="step-1-navigate-to-cloudfront-console">
+            Step 1: Navigate to CloudFront Console
+          </h2>
+          <ol>
+            <li>Open the <strong>AWS Management Console</strong></li>
+            <li>Navigate to the <strong>CloudFront service</strong></li>
+            <li>Click <strong>Create distribution</strong></li>
+          </ol>
+          <h2 id="step-2-configure-origin-settings">
+            Step 2: Configure Origin Settings
+          </h2>
+          <h3 id="origin-domain">Origin Domain</h3>
+          <ol>
+            <li>
+              <p>Configure the origin settings:</p>
+              <ul>
+                <li>
+                  <strong>Origin domain</strong>: Enter your ALB DNS name
+                  <pre
+                    tabindex="0"
+                  ><code>caching-app-alb-xxxxxxxxx.us-east-1.elb.amazonaws.com
+</code></pre>
+                </li>
+                <li><strong>Protocol</strong>: HTTP only (for workshop)</li>
+                <li><strong>HTTP port</strong>: 80</li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="origin-path">Origin Path</h3>
+          <ol start="2">
+            <li>
+              <p>Configure origin path (optional):</p>
+              <ul>
+                <li><strong>Origin path</strong>: Leave empty</li>
+                <li><strong>Name</strong>: Auto-generated based on domain</li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="additional-origin-settings">Additional Origin Settings</h3>
+          <ol start="3">
+            <li>
+              <p>Configure additional settings:</p>
+              <ul>
+                <li><strong>Add custom header</strong>: None</li>
+                <li>
+                  <strong>Enable Origin Shield</strong>: No (for workshop)
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <h2 id="step-3-configure-default-cache-behavior">
+            Step 3: Configure Default Cache Behavior
+          </h2>
+          <h3 id="path-pattern">Path Pattern</h3>
+          <ol>
+            <li>
+              <p>Configure cache behavior:</p>
+              <ul>
+                <li><strong>Path pattern</strong>: Default (*)</li>
+                <li><strong>Compress objects automatically</strong>: Yes</li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="viewer-protocol-policy">Viewer Protocol Policy</h3>
+          <ol start="2">
+            <li>
+              <p>Configure viewer protocol:</p>
+              <ul>
+                <li>
+                  <strong>Viewer protocol policy</strong>: Redirect HTTP to
+                  HTTPS
+                </li>
+                <li>
+                  <strong>Allowed HTTP methods</strong>: GET, HEAD, OPTIONS,
+                  PUT, POST, PATCH, DELETE
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="cache-key-and-origin-requests">
+            Cache Key and Origin Requests
+          </h3>
+          <ol start="3">
+            <li>
+              <p>Configure cache key settings:</p>
+              <ul>
+                <li>
+                  <strong>Cache policy</strong>: Create new policy or use
+                  existing
+                </li>
+                <li><strong>Origin request policy</strong>: None</li>
+                <li><strong>Response headers policy</strong>: None</li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="create-custom-cache-policy">Create Custom Cache Policy</h3>
+          <ol start="4">
+            <li>
+              <p>
+                Click <strong>Create policy</strong> to create a custom cache
+                policy:
+              </p>
+              <ul>
+                <li><strong>Name</strong>: <code>CachingAppPolicy</code></li>
+                <li>
+                  <strong>Description</strong>:
+                  <code>Cache policy for caching application</code>
+                </li>
+                <li><strong>Default TTL</strong>: 300 seconds (5 minutes)</li>
+                <li><strong>Maximum TTL</strong>: 3600 seconds (1 hour)</li>
+                <li><strong>Minimum TTL</strong>: 0 seconds</li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="cache-key-settings">Cache Key Settings</h3>
+          <ol start="5">
+            <li>
+              <p>Configure cache key settings:</p>
+              <ul>
+                <li><strong>Headers</strong>: None</li>
+                <li><strong>Query strings</strong>: All</li>
+                <li><strong>Cookies</strong>: None</li>
+              </ul>
+            </li>
+            <li>
+              <p>Click <strong>Create</strong></p>
+            </li>
+          </ol>
+          <h2 id="step-4-configure-distribution-settings">
+            Step 4: Configure Distribution Settings
+          </h2>
+          <h3 id="price-class">Price Class</h3>
+          <ol>
+            <li>
+              <p>Configure distribution settings:</p>
+              <ul>
+                <li>
+                  <strong>Price class</strong>: Use all edge locations (best
+                  performance)
+                </li>
+                <li><strong>AWS WAF web ACL</strong>: None</li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="alternate-domain-names">Alternate Domain Names</h3>
+          <ol start="2">
+            <li>
+              <p>Configure domain settings:</p>
+              <ul>
+                <li>
+                  <strong>Alternate domain names (CNAMEs)</strong>: Leave empty
+                  for workshop
+                </li>
+                <li>
+                  <strong>Custom SSL certificate</strong>: Default CloudFront
+                  certificate
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="default-root-object">Default Root Object</h3>
+          <ol start="3">
+            <li>
+              <p>Configure default root object:</p>
+              <ul>
+                <li><strong>Default root object</strong>: Leave empty</li>
+                <li><strong>Standard logging</strong>: Off (for workshop)</li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="description-and-comments">Description and Comments</h3>
+          <ol start="4">
+            <li>
+              <p>Add description:</p>
+              <ul>
+                <li>
+                  <strong>Description</strong>:
+                  <code
+                    >CloudFront distribution for multi-layer caching
+                    workshop</code
+                  >
+                </li>
+                <li><strong>Distribution state</strong>: Enabled</li>
+              </ul>
+            </li>
+          </ol>
+          <h2 id="step-5-review-and-create">Step 5: Review and Create</h2>
+          <h3 id="review-configuration">Review Configuration</h3>
+          <ol>
+            <li>Review all settings</li>
+            <li>Click <strong>Create distribution</strong></li>
+          </ol>
 
+          <div class="notices info">
+            <p>
+              CloudFront distribution deployment takes 15-20 minutes. The
+              distribution will show &ldquo;Deploying&rdquo; status during this
+              time.
+            </p>
+          </div>
 
-
-	<p>In this step, we&rsquo;ll create a CloudFront distribution to provide global edge caching for our multi-layer caching application.</p>
-<h2 id="step-1-navigate-to-cloudfront-console">Step 1: Navigate to CloudFront Console</h2>
-<ol>
-<li>Open the <strong>AWS Management Console</strong></li>
-<li>Navigate to the <strong>CloudFront service</strong></li>
-<li>Click <strong>Create distribution</strong></li>
-</ol>
-<h2 id="step-2-configure-origin-settings">Step 2: Configure Origin Settings</h2>
-<h3 id="origin-domain">Origin Domain</h3>
-<ol>
-<li>
-<p>Configure the origin settings:</p>
-<ul>
-<li><strong>Origin domain</strong>: Enter your ALB DNS name
-<pre tabindex="0"><code>caching-app-alb-xxxxxxxxx.us-east-1.elb.amazonaws.com
-</code></pre></li>
-<li><strong>Protocol</strong>: HTTP only (for workshop)</li>
-<li><strong>HTTP port</strong>: 80</li>
-</ul>
-</li>
-</ol>
-<h3 id="origin-path">Origin Path</h3>
-<ol start="2">
-<li>
-<p>Configure origin path (optional):</p>
-<ul>
-<li><strong>Origin path</strong>: Leave empty</li>
-<li><strong>Name</strong>: Auto-generated based on domain</li>
-</ul>
-</li>
-</ol>
-<h3 id="additional-origin-settings">Additional Origin Settings</h3>
-<ol start="3">
-<li>
-<p>Configure additional settings:</p>
-<ul>
-<li><strong>Add custom header</strong>: None</li>
-<li><strong>Enable Origin Shield</strong>: No (for workshop)</li>
-</ul>
-</li>
-</ol>
-<h2 id="step-3-configure-default-cache-behavior">Step 3: Configure Default Cache Behavior</h2>
-<h3 id="path-pattern">Path Pattern</h3>
-<ol>
-<li>
-<p>Configure cache behavior:</p>
-<ul>
-<li><strong>Path pattern</strong>: Default (*)</li>
-<li><strong>Compress objects automatically</strong>: Yes</li>
-</ul>
-</li>
-</ol>
-<h3 id="viewer-protocol-policy">Viewer Protocol Policy</h3>
-<ol start="2">
-<li>
-<p>Configure viewer protocol:</p>
-<ul>
-<li><strong>Viewer protocol policy</strong>: Redirect HTTP to HTTPS</li>
-<li><strong>Allowed HTTP methods</strong>: GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE</li>
-</ul>
-</li>
-</ol>
-<h3 id="cache-key-and-origin-requests">Cache Key and Origin Requests</h3>
-<ol start="3">
-<li>
-<p>Configure cache key settings:</p>
-<ul>
-<li><strong>Cache policy</strong>: Create new policy or use existing</li>
-<li><strong>Origin request policy</strong>: None</li>
-<li><strong>Response headers policy</strong>: None</li>
-</ul>
-</li>
-</ol>
-<h3 id="create-custom-cache-policy">Create Custom Cache Policy</h3>
-<ol start="4">
-<li>
-<p>Click <strong>Create policy</strong> to create a custom cache policy:</p>
-<ul>
-<li><strong>Name</strong>: <code>CachingAppPolicy</code></li>
-<li><strong>Description</strong>: <code>Cache policy for caching application</code></li>
-<li><strong>Default TTL</strong>: 300 seconds (5 minutes)</li>
-<li><strong>Maximum TTL</strong>: 3600 seconds (1 hour)</li>
-<li><strong>Minimum TTL</strong>: 0 seconds</li>
-</ul>
-</li>
-</ol>
-<h3 id="cache-key-settings">Cache Key Settings</h3>
-<ol start="5">
-<li>
-<p>Configure cache key settings:</p>
-<ul>
-<li><strong>Headers</strong>: None</li>
-<li><strong>Query strings</strong>: All</li>
-<li><strong>Cookies</strong>: None</li>
-</ul>
-</li>
-<li>
-<p>Click <strong>Create</strong></p>
-</li>
-</ol>
-<h2 id="step-4-configure-distribution-settings">Step 4: Configure Distribution Settings</h2>
-<h3 id="price-class">Price Class</h3>
-<ol>
-<li>
-<p>Configure distribution settings:</p>
-<ul>
-<li><strong>Price class</strong>: Use all edge locations (best performance)</li>
-<li><strong>AWS WAF web ACL</strong>: None</li>
-</ul>
-</li>
-</ol>
-<h3 id="alternate-domain-names">Alternate Domain Names</h3>
-<ol start="2">
-<li>
-<p>Configure domain settings:</p>
-<ul>
-<li><strong>Alternate domain names (CNAMEs)</strong>: Leave empty for workshop</li>
-<li><strong>Custom SSL certificate</strong>: Default CloudFront certificate</li>
-</ul>
-</li>
-</ol>
-<h3 id="default-root-object">Default Root Object</h3>
-<ol start="3">
-<li>
-<p>Configure default root object:</p>
-<ul>
-<li><strong>Default root object</strong>: Leave empty</li>
-<li><strong>Standard logging</strong>: Off (for workshop)</li>
-</ul>
-</li>
-</ol>
-<h3 id="description-and-comments">Description and Comments</h3>
-<ol start="4">
-<li>
-<p>Add description:</p>
-<ul>
-<li><strong>Description</strong>: <code>CloudFront distribution for multi-layer caching workshop</code></li>
-<li><strong>Distribution state</strong>: Enabled</li>
-</ul>
-</li>
-</ol>
-<h2 id="step-5-review-and-create">Step 5: Review and Create</h2>
-<h3 id="review-configuration">Review Configuration</h3>
-<ol>
-<li>Review all settings</li>
-<li>Click <strong>Create distribution</strong></li>
-</ol>
-
-<div class="notices info" ><p>CloudFront distribution deployment takes 15-20 minutes. The distribution will show &ldquo;Deploying&rdquo; status during this time.</p>
-</div>
-
-<h2 id="step-6-monitor-distribution-deployment">Step 6: Monitor Distribution Deployment</h2>
-<h3 id="check-deployment-status">Check Deployment Status</h3>
-<ol>
-<li>Monitor the distribution deployment</li>
-<li>The status will change from &ldquo;Deploying&rdquo; to &ldquo;Enabled&rdquo;</li>
-</ol>
-<h3 id="note-distribution-domain">Note Distribution Domain</h3>
-<ol start="3">
-<li>Once deployed, note the <strong>Distribution domain name</strong>:</li>
-</ol>
-<pre tabindex="0"><code>d1234567890123.cloudfront.net
-</code></pre><h2 id="step-7-test-cloudfront-distribution">Step 7: Test CloudFront Distribution</h2>
-<h3 id="test-basic-connectivity">Test Basic Connectivity</h3>
-<ol>
-<li>Test the CloudFront distribution:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test health endpoint through CloudFront</span>
+          <h2 id="step-6-monitor-distribution-deployment">
+            Step 6: Monitor Distribution Deployment
+          </h2>
+          <h3 id="check-deployment-status">Check Deployment Status</h3>
+          <ol>
+            <li>Monitor the distribution deployment</li>
+            <li>
+              The status will change from &ldquo;Deploying&rdquo; to
+              &ldquo;Enabled&rdquo;
+            </li>
+          </ol>
+          <h3 id="note-distribution-domain">Note Distribution Domain</h3>
+          <ol start="3">
+            <li>
+              Once deployed, note the <strong>Distribution domain name</strong>:
+            </li>
+          </ol>
+          <pre tabindex="0"><code>d1234567890123.cloudfront.net
+</code></pre>
+          <h2 id="step-7-test-cloudfront-distribution">
+            Step 7: Test CloudFront Distribution
+          </h2>
+          <h3 id="test-basic-connectivity">Test Basic Connectivity</h3>
+          <ol>
+            <li>Test the CloudFront distribution:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test health endpoint through CloudFront</span>
 </span></span><span style="display:flex;"><span>curl https://d1234567890123.cloudfront.net/health
-</span></span></code></pre></div><h3 id="test-application-endpoints">Test Application Endpoints</h3>
-<ol start="2">
-<li>Test all application endpoints:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test product endpoint</span>
+</span></span></code></pre>
+          </div>
+          <h3 id="test-application-endpoints">Test Application Endpoints</h3>
+          <ol start="2">
+            <li>Test all application endpoints:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Test product endpoint</span>
 </span></span><span style="display:flex;"><span>curl <span style="color:#e6db74">&#34;https://d1234567890123.cloudfront.net/product/PROD001?category=Electronics&#34;</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Test products list</span>
@@ -1083,588 +996,423 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Test cache statistics</span>
 </span></span><span style="display:flex;"><span>curl https://d1234567890123.cloudfront.net/stats
-</span></span></code></pre></div><h2 id="step-8-configure-cache-behaviors">Step 8: Configure Cache Behaviors</h2>
-<h3 id="create-api-cache-behavior">Create API Cache Behavior</h3>
-<ol>
-<li>
-<p>Go to the <strong>Behaviors</strong> tab and click <strong>Create behavior</strong></p>
-</li>
-<li>
-<p>Configure API-specific caching:</p>
-<ul>
-<li><strong>Path pattern</strong>: <code>/product/*</code></li>
-<li><strong>Origin</strong>: Your ALB origin</li>
-<li><strong>Cache policy</strong>: Create new policy for API</li>
-</ul>
-</li>
-</ol>
-<h3 id="api-cache-policy">API Cache Policy</h3>
-<ol start="3">
-<li>
-<p>Create API cache policy:</p>
-<ul>
-<li><strong>Name</strong>: <code>APIResponsePolicy</code></li>
-<li><strong>Default TTL</strong>: 300 seconds</li>
-<li><strong>Maximum TTL</strong>: 600 seconds</li>
-<li><strong>Query strings</strong>: All</li>
-<li><strong>Headers</strong>: Include <code>Authorization</code> if needed</li>
-</ul>
-</li>
-</ol>
-<h3 id="create-stats-behavior">Create Stats Behavior</h3>
-<ol start="4">
-<li>
-<p>Create behavior for stats endpoint:</p>
-<ul>
-<li><strong>Path pattern</strong>: <code>/stats</code></li>
-<li><strong>Cache policy</strong>: Create no-cache policy</li>
-<li><strong>TTL</strong>: 0 seconds (no caching)</li>
-</ul>
-</li>
-</ol>
-<h2 id="step-9-test-cache-performance">Step 9: Test Cache Performance</h2>
-<h3 id="test-cache-miss">Test Cache Miss</h3>
-<ol>
-<li>Clear any existing cache and test:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># First request (cache miss)</span>
+</span></span></code></pre>
+          </div>
+          <h2 id="step-8-configure-cache-behaviors">
+            Step 8: Configure Cache Behaviors
+          </h2>
+          <h3 id="create-api-cache-behavior">Create API Cache Behavior</h3>
+          <ol>
+            <li>
+              <p>
+                Go to the <strong>Behaviors</strong> tab and click
+                <strong>Create behavior</strong>
+              </p>
+            </li>
+            <li>
+              <p>Configure API-specific caching:</p>
+              <ul>
+                <li><strong>Path pattern</strong>: <code>/product/*</code></li>
+                <li><strong>Origin</strong>: Your ALB origin</li>
+                <li>
+                  <strong>Cache policy</strong>: Create new policy for API
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="api-cache-policy">API Cache Policy</h3>
+          <ol start="3">
+            <li>
+              <p>Create API cache policy:</p>
+              <ul>
+                <li><strong>Name</strong>: <code>APIResponsePolicy</code></li>
+                <li><strong>Default TTL</strong>: 300 seconds</li>
+                <li><strong>Maximum TTL</strong>: 600 seconds</li>
+                <li><strong>Query strings</strong>: All</li>
+                <li>
+                  <strong>Headers</strong>: Include
+                  <code>Authorization</code> if needed
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <h3 id="create-stats-behavior">Create Stats Behavior</h3>
+          <ol start="4">
+            <li>
+              <p>Create behavior for stats endpoint:</p>
+              <ul>
+                <li><strong>Path pattern</strong>: <code>/stats</code></li>
+                <li><strong>Cache policy</strong>: Create no-cache policy</li>
+                <li><strong>TTL</strong>: 0 seconds (no caching)</li>
+              </ul>
+            </li>
+          </ol>
+          <h2 id="step-9-test-cache-performance">
+            Step 9: Test Cache Performance
+          </h2>
+          <h3 id="test-cache-miss">Test Cache Miss</h3>
+          <ol>
+            <li>Clear any existing cache and test:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># First request (cache miss)</span>
 </span></span><span style="display:flex;"><span>time curl <span style="color:#e6db74">&#34;https://d1234567890123.cloudfront.net/product/PROD001?category=Electronics&#34;</span>
-</span></span></code></pre></div><h3 id="test-cache-hit">Test Cache Hit</h3>
-<ol start="2">
-<li>Make the same request again:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Second request (cache hit)</span>
+</span></span></code></pre>
+          </div>
+          <h3 id="test-cache-hit">Test Cache Hit</h3>
+          <ol start="2">
+            <li>Make the same request again:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Second request (cache hit)</span>
 </span></span><span style="display:flex;"><span>time curl <span style="color:#e6db74">&#34;https://d1234567890123.cloudfront.net/product/PROD001?category=Electronics&#34;</span>
-</span></span></code></pre></div><h3 id="check-response-headers">Check Response Headers</h3>
-<ol start="3">
-<li>Check CloudFront cache headers:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Check cache headers</span>
+</span></span></code></pre>
+          </div>
+          <h3 id="check-response-headers">Check Response Headers</h3>
+          <ol start="3">
+            <li>Check CloudFront cache headers:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Check cache headers</span>
 </span></span><span style="display:flex;"><span>curl -I <span style="color:#e6db74">&#34;https://d1234567890123.cloudfront.net/product/PROD001?category=Electronics&#34;</span>
-</span></span></code></pre></div><p>Look for headers like:</p>
-<ul>
-<li><code>X-Cache: Hit from cloudfront</code> (cache hit)</li>
-<li><code>X-Cache: Miss from cloudfront</code> (cache miss)</li>
-<li><code>Age: 120</code> (time since cached)</li>
-</ul>
-<h2 id="step-10-configure-cache-invalidation">Step 10: Configure Cache Invalidation</h2>
-<h3 id="create-invalidation">Create Invalidation</h3>
-<ol>
-<li>
-<p>Go to the <strong>Invalidations</strong> tab and click <strong>Create invalidation</strong></p>
-</li>
-<li>
-<p>Configure invalidation paths:</p>
-<ul>
-<li><strong>Object paths</strong>:
-<pre tabindex="0"><code>/product/*
+</span></span></code></pre>
+          </div>
+          <p>Look for headers like:</p>
+          <ul>
+            <li><code>X-Cache: Hit from cloudfront</code> (cache hit)</li>
+            <li><code>X-Cache: Miss from cloudfront</code> (cache miss)</li>
+            <li><code>Age: 120</code> (time since cached)</li>
+          </ul>
+          <h2 id="step-10-configure-cache-invalidation">
+            Step 10: Configure Cache Invalidation
+          </h2>
+          <h3 id="create-invalidation">Create Invalidation</h3>
+          <ol>
+            <li>
+              <p>
+                Go to the <strong>Invalidations</strong> tab and click
+                <strong>Create invalidation</strong>
+              </p>
+            </li>
+            <li>
+              <p>Configure invalidation paths:</p>
+              <ul>
+                <li>
+                  <strong>Object paths</strong>:
+                  <pre tabindex="0"><code>/product/*
 /products
 /stats
-</code></pre></li>
-</ul>
-</li>
-<li>
-<p>Click <strong>Create invalidation</strong></p>
-</li>
-</ol>
-<h3 id="monitor-invalidation">Monitor Invalidation</h3>
-<ol start="4">
-<li>Monitor invalidation progress</li>
-</ol>
+</code></pre>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <p>Click <strong>Create invalidation</strong></p>
+            </li>
+          </ol>
+          <h3 id="monitor-invalidation">Monitor Invalidation</h3>
+          <ol start="4">
+            <li>Monitor invalidation progress</li>
+          </ol>
 
-<div class="notices info" ><p>Invalidations take 5-15 minutes to complete across all edge locations.</p>
-</div>
+          <div class="notices info">
+            <p>
+              Invalidations take 5-15 minutes to complete across all edge
+              locations.
+            </p>
+          </div>
 
-<h2 id="step-11-monitor-cloudfront-performance">Step 11: Monitor CloudFront Performance</h2>
-<h3 id="cloudwatch-metrics">CloudWatch Metrics</h3>
-<ol>
-<li>Go to the <strong>Monitoring</strong> tab to view metrics</li>
-</ol>
-<p>Key metrics to monitor:</p>
-<ul>
-<li><strong>Requests</strong>: Number of requests to CloudFront</li>
-<li><strong>BytesDownloaded</strong>: Data transferred to viewers</li>
-<li><strong>CacheHitRate</strong>: Percentage of requests served from cache</li>
-<li><strong>OriginLatency</strong>: Response time from origin</li>
-<li><strong>4xxErrorRate</strong>: Client error rate</li>
-<li><strong>5xxErrorRate</strong>: Server error rate</li>
-</ul>
-<h3 id="real-time-logs-optional">Real-time Logs (Optional)</h3>
-<ol start="2">
-<li>Enable real-time logs for detailed monitoring</li>
-</ol>
-<h2 id="step-12-performance-comparison">Step 12: Performance Comparison</h2>
-<h3 id="test-performance-improvement">Test Performance Improvement</h3>
-<ol>
-<li>Compare response times:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Direct ALB access</span>
+          <h2 id="step-11-monitor-cloudfront-performance">
+            Step 11: Monitor CloudFront Performance
+          </h2>
+          <h3 id="cloudwatch-metrics">CloudWatch Metrics</h3>
+          <ol>
+            <li>Go to the <strong>Monitoring</strong> tab to view metrics</li>
+          </ol>
+          <p>Key metrics to monitor:</p>
+          <ul>
+            <li><strong>Requests</strong>: Number of requests to CloudFront</li>
+            <li>
+              <strong>BytesDownloaded</strong>: Data transferred to viewers
+            </li>
+            <li>
+              <strong>CacheHitRate</strong>: Percentage of requests served from
+              cache
+            </li>
+            <li><strong>OriginLatency</strong>: Response time from origin</li>
+            <li><strong>4xxErrorRate</strong>: Client error rate</li>
+            <li><strong>5xxErrorRate</strong>: Server error rate</li>
+          </ul>
+          <h3 id="real-time-logs-optional">Real-time Logs (Optional)</h3>
+          <ol start="2">
+            <li>Enable real-time logs for detailed monitoring</li>
+          </ol>
+          <h2 id="step-12-performance-comparison">
+            Step 12: Performance Comparison
+          </h2>
+          <h3 id="test-performance-improvement">
+            Test Performance Improvement
+          </h3>
+          <ol>
+            <li>Compare response times:</li>
+          </ol>
+          <div class="highlight">
+            <pre
+              tabindex="0"
+              style="
+                color: #f8f8f2;
+                background-color: #272822;
+                -moz-tab-size: 4;
+                -o-tab-size: 4;
+                tab-size: 4;
+              "
+            ><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Direct ALB access</span>
 </span></span><span style="display:flex;"><span>time curl <span style="color:#e6db74">&#34;http://caching-app-alb-xxxxxxxxx.us-east-1.elb.amazonaws.com/product/PROD001?category=Electronics&#34;</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># CloudFront access (after cache warm-up)</span>
 </span></span><span style="display:flex;"><span>time curl <span style="color:#e6db74">&#34;https://d1234567890123.cloudfront.net/product/PROD001?category=Electronics&#34;</span>
-</span></span></code></pre></div><h3 id="global-performance-test">Global Performance Test</h3>
-<ol start="2">
-<li>Test from different locations using online tools:</li>
-</ol>
-<ul>
-<li><strong>GTmetrix</strong>: Test from multiple global locations</li>
-<li><strong>Pingdom</strong>: Global performance monitoring</li>
-<li><strong>WebPageTest</strong>: Detailed performance analysis</li>
-</ul>
-<h2 id="step-13-document-cloudfront-configuration">Step 13: Document CloudFront Configuration</h2>
-<p>Record the following information:</p>
-<h3 id="cloudfront-distribution-information">CloudFront Distribution Information</h3>
-<ul>
-<li><strong>Distribution ID</strong>: <code>E1234567890123</code></li>
-<li><strong>Domain Name</strong>: <code>d1234567890123.cloudfront.net</code></li>
-<li><strong>Origin</strong>: ALB DNS name</li>
-<li><strong>Status</strong>: Enabled</li>
-<li><strong>Price Class</strong>: All edge locations</li>
-</ul>
-<h3 id="cache-behaviors">Cache Behaviors</h3>
-<ul>
-<li><strong>Default</strong>: 5-minute TTL, all query strings</li>
-<li><strong>API Endpoints</strong>: 5-minute TTL, optimized for API responses</li>
-<li><strong>Stats Endpoint</strong>: No caching for real-time data</li>
-</ul>
-<h3 id="performance-characteristics">Performance Characteristics</h3>
-<ul>
-<li><strong>Global latency</strong>: 10-50ms (depending on edge location)</li>
-<li><strong>Cache hit ratio target</strong>: 80%+</li>
-<li><strong>Origin offload</strong>: 70%+ reduction in origin requests</li>
-</ul>
-<h2 id="troubleshooting-common-issues">Troubleshooting Common Issues</h2>
-<h3 id="issue-distribution-not-accessible">Issue: Distribution Not Accessible</h3>
-<p><strong>Possible Causes:</strong></p>
-<ul>
-<li>Distribution still deploying</li>
-<li>Origin not accessible</li>
-<li>DNS propagation delay</li>
-</ul>
-<p><strong>Solutions:</strong></p>
-<ul>
-<li>Wait for deployment to complete (15-20 minutes)</li>
-<li>Test origin directly first</li>
-<li>Use distribution domain name, not custom domain</li>
-</ul>
-<h3 id="issue-high-cache-miss-rate">Issue: High Cache Miss Rate</h3>
-<p><strong>Possible Causes:</strong></p>
-<ul>
-<li>Query strings not configured properly</li>
-<li>Headers affecting cache key</li>
-<li>TTL too short</li>
-</ul>
-<p><strong>Solutions:</strong></p>
-<ul>
-<li>Review cache policy configuration</li>
-<li>Check query string and header settings</li>
-<li>Increase TTL for stable content</li>
-</ul>
-<h3 id="issue-origin-errors">Issue: Origin Errors</h3>
-<p><strong>Possible Causes:</strong></p>
-<ul>
-<li>ALB or application issues</li>
-<li>Security group blocking CloudFront</li>
-<li>Origin timeout</li>
-</ul>
-<p><strong>Solutions:</strong></p>
-<ul>
-<li>Check ALB and application health</li>
-<li>Verify security groups allow CloudFront IPs</li>
-<li>Increase origin timeout settings</li>
-</ul>
-<h2 id="security-best-practices">Security Best Practices</h2>
-<h3 id="origin-access-control">Origin Access Control</h3>
-<ul>
-<li><strong>Restrict origin access</strong>: Only allow CloudFront to access ALB</li>
-<li><strong>Security groups</strong>: Update ALB security group to only allow CloudFront</li>
-</ul>
-<h3 id="ssltls-configuration">SSL/TLS Configuration</h3>
-<ul>
-<li><strong>Viewer protocol</strong>: Redirect HTTP to HTTPS</li>
-<li><strong>Origin protocol</strong>: Use HTTPS when possible</li>
-<li><strong>Security headers</strong>: Add security headers via response headers policy</li>
-</ul>
-<h2 id="next-steps">Next Steps</h2>
-<p>Your CloudFront distribution is now configured and optimized! You have:</p>
-<p>✅ <strong>Global CDN</strong> with edge locations worldwide<br>
-✅ <strong>Edge caching</strong> reducing origin load<br>
-✅ <strong>Custom cache behaviors</strong> for different content types<br>
-✅ <strong>Cache invalidation</strong> for content updates<br>
-✅ <strong>Performance monitoring</strong> with CloudWatch metrics<br>
-✅ <strong>SSL/TLS termination</strong> for secure connections</p>
-<h3 id="cloudfront-benefits-achieved">CloudFront Benefits Achieved:</h3>
-<ul>
-<li><strong>Global performance</strong>: Low latency from edge locations worldwide</li>
-<li><strong>Origin protection</strong>: Reduced load on ALB and application servers</li>
-<li><strong>DDoS protection</strong>: Built-in AWS Shield protection</li>
-<li><strong>Cost optimization</strong>: Reduced data transfer costs from origin</li>
-</ul>
+</span></span></code></pre>
+          </div>
+          <h3 id="global-performance-test">Global Performance Test</h3>
+          <ol start="2">
+            <li>Test from different locations using online tools:</li>
+          </ol>
+          <ul>
+            <li>
+              <strong>GTmetrix</strong>: Test from multiple global locations
+            </li>
+            <li><strong>Pingdom</strong>: Global performance monitoring</li>
+            <li><strong>WebPageTest</strong>: Detailed performance analysis</li>
+          </ul>
+          <h2 id="step-13-document-cloudfront-configuration">
+            Step 13: Document CloudFront Configuration
+          </h2>
+          <p>Record the following information:</p>
+          <h3 id="cloudfront-distribution-information">
+            CloudFront Distribution Information
+          </h3>
+          <ul>
+            <li>
+              <strong>Distribution ID</strong>: <code>E1234567890123</code>
+            </li>
+            <li>
+              <strong>Domain Name</strong>:
+              <code>d1234567890123.cloudfront.net</code>
+            </li>
+            <li><strong>Origin</strong>: ALB DNS name</li>
+            <li><strong>Status</strong>: Enabled</li>
+            <li><strong>Price Class</strong>: All edge locations</li>
+          </ul>
+          <h3 id="cache-behaviors">Cache Behaviors</h3>
+          <ul>
+            <li><strong>Default</strong>: 5-minute TTL, all query strings</li>
+            <li>
+              <strong>API Endpoints</strong>: 5-minute TTL, optimized for API
+              responses
+            </li>
+            <li>
+              <strong>Stats Endpoint</strong>: No caching for real-time data
+            </li>
+          </ul>
+          <h3 id="performance-characteristics">Performance Characteristics</h3>
+          <ul>
+            <li>
+              <strong>Global latency</strong>: 10-50ms (depending on edge
+              location)
+            </li>
+            <li><strong>Cache hit ratio target</strong>: 80%+</li>
+            <li>
+              <strong>Origin offload</strong>: 70%+ reduction in origin requests
+            </li>
+          </ul>
+          <h2 id="troubleshooting-common-issues">
+            Troubleshooting Common Issues
+          </h2>
+          <h3 id="issue-distribution-not-accessible">
+            Issue: Distribution Not Accessible
+          </h3>
+          <p><strong>Possible Causes:</strong></p>
+          <ul>
+            <li>Distribution still deploying</li>
+            <li>Origin not accessible</li>
+            <li>DNS propagation delay</li>
+          </ul>
+          <p><strong>Solutions:</strong></p>
+          <ul>
+            <li>Wait for deployment to complete (15-20 minutes)</li>
+            <li>Test origin directly first</li>
+            <li>Use distribution domain name, not custom domain</li>
+          </ul>
+          <h3 id="issue-high-cache-miss-rate">Issue: High Cache Miss Rate</h3>
+          <p><strong>Possible Causes:</strong></p>
+          <ul>
+            <li>Query strings not configured properly</li>
+            <li>Headers affecting cache key</li>
+            <li>TTL too short</li>
+          </ul>
+          <p><strong>Solutions:</strong></p>
+          <ul>
+            <li>Review cache policy configuration</li>
+            <li>Check query string and header settings</li>
+            <li>Increase TTL for stable content</li>
+          </ul>
+          <h3 id="issue-origin-errors">Issue: Origin Errors</h3>
+          <p><strong>Possible Causes:</strong></p>
+          <ul>
+            <li>ALB or application issues</li>
+            <li>Security group blocking CloudFront</li>
+            <li>Origin timeout</li>
+          </ul>
+          <p><strong>Solutions:</strong></p>
+          <ul>
+            <li>Check ALB and application health</li>
+            <li>Verify security groups allow CloudFront IPs</li>
+            <li>Increase origin timeout settings</li>
+          </ul>
+          <h2 id="security-best-practices">Security Best Practices</h2>
+          <h3 id="origin-access-control">Origin Access Control</h3>
+          <ul>
+            <li>
+              <strong>Restrict origin access</strong>: Only allow CloudFront to
+              access ALB
+            </li>
+            <li>
+              <strong>Security groups</strong>: Update ALB security group to
+              only allow CloudFront
+            </li>
+          </ul>
+          <h3 id="ssltls-configuration">SSL/TLS Configuration</h3>
+          <ul>
+            <li><strong>Viewer protocol</strong>: Redirect HTTP to HTTPS</li>
+            <li><strong>Origin protocol</strong>: Use HTTPS when possible</li>
+            <li>
+              <strong>Security headers</strong>: Add security headers via
+              response headers policy
+            </li>
+          </ul>
+          <h2 id="next-steps">Next Steps</h2>
+          <p>
+            Your CloudFront distribution is now configured and optimized! You
+            have:
+          </p>
+          <p>
+            ✅ <strong>Global CDN</strong> with edge locations worldwide<br />
+            ✅ <strong>Edge caching</strong> reducing origin load<br />
+            ✅ <strong>Custom cache behaviors</strong> for different content
+            types<br />
+            ✅ <strong>Cache invalidation</strong> for content updates<br />
+            ✅ <strong>Performance monitoring</strong> with CloudWatch
+            metrics<br />
+            ✅ <strong>SSL/TLS termination</strong> for secure connections
+          </p>
+          <h3 id="cloudfront-benefits-achieved">
+            CloudFront Benefits Achieved:
+          </h3>
+          <ul>
+            <li>
+              <strong>Global performance</strong>: Low latency from edge
+              locations worldwide
+            </li>
+            <li>
+              <strong>Origin protection</strong>: Reduced load on ALB and
+              application servers
+            </li>
+            <li>
+              <strong>DDoS protection</strong>: Built-in AWS Shield protection
+            </li>
+            <li>
+              <strong>Cost optimization</strong>: Reduced data transfer costs
+              from origin
+            </li>
+          </ul>
 
-<div class="notices tip" ><p>CloudFront cache hit rates typically improve over time as more content gets cached at edge locations. Monitor the cache hit rate and adjust TTL settings as needed.</p>
-</div>
+          <div class="notices tip">
+            <p>
+              CloudFront cache hit rates typically improve over time as more
+              content gets cached at edge locations. Monitor the cache hit rate
+              and adjust TTL settings as needed.
+            </p>
+          </div>
 
-<p>Next, we&rsquo;ll perform comprehensive performance testing to measure the improvements from our multi-layer caching architecture.</p>
+          <p>
+            Next, we&rsquo;ll perform comprehensive performance testing to
+            measure the improvements from our multi-layer caching architecture.
+          </p>
 
-
-
-
-
-<footer class=" footline" >
-	
-</footer>
-
-        
+          <footer class="footline"></footer>
         </div>
-        
-
       </div>
 
-    <div id="navigation">
-        
-        
+      <div id="navigation">
+        <a
+          class="nav nav-prev"
+          href="/6-setup-loadbalancer/"
+          title="6. Setup Application Load Balancer"
+        >
+          <i class="fa fa-chevron-left"></i
+        ></a>
 
-        
-            
-            
-                
-                    
-                    
-                
-                
-
-                    
-                    
-                        
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                        
-                        
-                    
-                
-                
-
-                    
-                    
-                        
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                        
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                        
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                        
-                    
-                    
-
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                        
-                        
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-                        
-            
-            
-                
-                    
-                
-                
-
-                    
-                    
-                    
-
-                    
-            
-        
-                    
-            
-        
-
-        
-
-
-	 
-	 
-		
-			<a class="nav nav-prev" href="/6-setup-loadbalancer/" title="6. Setup Application Load Balancer"> <i class="fa fa-chevron-left"></i></a>
-		
-		
-			<a class="nav nav-next" href="/8-performance-testing/" title="8. Performance Testing" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
-		
-	
-    </div>
-
+        <a
+          class="nav nav-next"
+          href="/8-performance-testing/"
+          title="8. Performance Testing"
+          style="margin-right: 0px"
+          ><i class="fa fa-chevron-right"></i
+        ></a>
+      </div>
     </section>
 
-    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
-      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
+    <div
+      style="
+        left: -1000px;
+        overflow: scroll;
+        position: absolute;
+        top: -1000px;
+        border: none;
+        box-sizing: content-box;
+        height: 200px;
+        margin: 0px;
+        padding: 0px;
+        width: 200px;
+      "
+    >
+      <div
+        style="
+          border: none;
+          box-sizing: content-box;
+          height: 200px;
+          margin: 0px;
+          padding: 0px;
+          width: 200px;
+        "
+      ></div>
     </div>
     <script src="/js/clipboard.min.js?1754898926"></script>
     <script src="/js/perfect-scrollbar.min.js?1754898926"></script>
@@ -1672,21 +1420,19 @@
     <script src="/js/jquery.sticky.js?1754898926"></script>
     <script src="/js/featherlight.min.js?1754898926"></script>
     <script src="/js/highlight.pack.js?1754898926"></script>
-    <script>hljs.initHighlightingOnLoad();</script>
+    <script>
+      hljs.initHighlightingOnLoad();
+    </script>
     <script src="/js/modernizr.custom-3.6.0.js?1754898926"></script>
     <script src="/js/learn.js?1754898926"></script>
     <script src="/js/hugo-learn.js?1754898926"></script>
     <script src="/js/language-switcher.js?1754898926"></script>
     <script src="/js/multilingual.js?1754898926"></script>
-    
-        
-            <script src="/mermaid/mermaid.js?1754898926"></script>
-        
-        <script>
-            mermaid.initialize({ startOnLoad: true });
-        </script>
-    
-    
 
+    <script src="/mermaid/mermaid.js?1754898926"></script>
+
+    <script>
+      mermaid.initialize({ startOnLoad: true });
+    </script>
   </body>
 </html>
